@@ -404,6 +404,32 @@ public class FlightsServiceImpl implements FlightsService {
     }
 
     @Override
+    public StatusChangedResponse requestLanding(Long flightId)
+            throws FlightsNotFoundException,
+            InvalidIdException,
+            StatusChangeException
+    {
+        FlightsEntity flightsEntity = this.getFlightEntityByFlightId(flightId);
+        if(!flightsEntity.getStatus().equals(FlightStatus.FLIGHT_FOOD_DISTRIBUTED)) {
+            throw new StatusChangeException(
+                    "Для запроса посадки раздача еды должна закончиться и все клиенты должны занять свои места!"
+            );
+        }
+
+        flightsEntity.setStatus(FlightStatus.LANDING_REQUESTED);
+        flightsEntity = this.flightsEntityRepository.save(flightsEntity);
+
+        return new StatusChangedResponse()
+                .setHttpStatus(HttpStatus.OK)
+                .setMessage(
+                        String.format(
+                                "Посадка запрошена! Текущий статус рейса: [%s]",
+                                flightsEntity.getStatus().toString()
+                        )
+                );
+    }
+
+    @Override
     public List<FlightResponseDto> getAllFLights(
             LocalDateTime registeredAfter,
             LocalDateTime registeredBefore,
