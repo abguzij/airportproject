@@ -39,7 +39,6 @@ public class FlightsEntity {
 
     @PrePersist
     private void prePersist() {
-        this.status = FlightStatus.REGISTERED;
         this.registeredAt = LocalDateTime.now();
     }
 

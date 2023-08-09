@@ -148,6 +148,18 @@ public class FlightsController {
         return this.flightsService.confirmFlightRegistration(flightId);
     }
 
+    @PreAuthorize(value = "hasRole('PILOT')")
+    @PutMapping(value = "/request-landing")
+    public StatusChangedResponse requestLanding(
+            @RequestParam Long flightId
+    )
+            throws StatusChangeException,
+            FlightsNotFoundException,
+            InvalidIdException
+    {
+        return this.flightsService.requestLanding(flightId);
+    }
+
     @PreAuthorize(value = "hasRole('DISPATCHER')")
     @PostMapping(value = "/register")
     public FlightResponseDto registerNewFlight(
