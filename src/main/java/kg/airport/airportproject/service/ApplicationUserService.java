@@ -51,7 +51,11 @@ public interface ApplicationUserService {
 
     List<ApplicationUserResponseDto> getAllFreeEngineers() throws ApplicationUserNotFoundException;
 
-    List<ApplicationUsersEntity> getUserEntitiesByIdList(List<Long> userIdList) throws ApplicationUserNotFoundException, InvalidIdException;
+    List<ApplicationUsersEntity> getUserEntitiesByIdList(List<Long> userIdList)
+            throws ApplicationUserNotFoundException,
+            InvalidIdException;
 
-    ApplicationUsersEntity getEngineerEntityById(Long engineerId) throws InvalidIdException, ApplicationUserNotFoundException;
+    ApplicationUsersEntity getEngineerEntityById(Long engineerId)
+            throws InvalidIdException,
+            ApplicationUserNotFoundException;
 }
