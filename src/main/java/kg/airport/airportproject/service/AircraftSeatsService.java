@@ -18,7 +18,10 @@ public interface AircraftSeatsService {
             SeatReservationException;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    AircraftSeatsEntity cancelSeatReservation(Long seatId) throws InvalidIdException, AircraftSeatNotFoundException, SeatReservationException;
+    AircraftSeatsEntity cancelSeatReservation(Long seatId)
+            throws InvalidIdException,
+            AircraftSeatNotFoundException,
+            SeatReservationException;
 
     List<AircraftSeatsEntity> generateAircraftSeats(Integer rowsNumber, Integer numberOfSeatsInRow);
 
