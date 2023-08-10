@@ -7,7 +7,7 @@ import kg.airport.airportproject.entity.FlightsEntity;
 import kg.airport.airportproject.entity.attributes.FlightStatus;
 import kg.airport.airportproject.exception.*;
 import kg.airport.airportproject.response.StatusChangedResponse;
-import kg.airport.airportproject.service.AircaftSeatsService;
+import kg.airport.airportproject.service.AircraftSeatsService;
 import kg.airport.airportproject.service.FlightsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,15 +20,15 @@ import java.util.List;
 @RequestMapping(value = "/v1/flights")
 public class FlightsController {
     private final FlightsService flightsService;
-    private final AircaftSeatsService aircaftSeatsService;
+    private final AircraftSeatsService aircraftSeatsService;
 
     @Autowired
     public FlightsController(
             FlightsService flightsService,
-            AircaftSeatsService aircaftSeatsService
+            AircraftSeatsService aircraftSeatsService
     ) {
         this.flightsService = flightsService;
-        this.aircaftSeatsService = aircaftSeatsService;
+        this.aircraftSeatsService = aircraftSeatsService;
     }
 
     @PreAuthorize(value = "hasRole('CHIEF_STEWARD')")
@@ -245,6 +245,6 @@ public class FlightsController {
             AircraftSeatNotFoundException
     {
         FlightsEntity flight = this.flightsService.getFlightEntityByFlightId(flightId);
-        return this.aircaftSeatsService.getAllAircraftSeats(flight.getAircraftsEntity().getId(), isReserved);
+        return this.aircraftSeatsService.getAllAircraftSeats(flight.getAircraftsEntity().getId(), isReserved);
     }
 }

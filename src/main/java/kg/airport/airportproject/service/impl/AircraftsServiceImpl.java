@@ -28,7 +28,7 @@ import java.util.stream.StreamSupport;
 
 @Service
 public class AircraftsServiceImpl implements AircraftsService {
-    private final AircaftSeatsService aircaftSeatsService;
+    private final AircraftSeatsService aircraftSeatsService;
     private final PartsService partsService;
     private final ApplicationUserService applicationUserService;
     private final PartInspectionService partInspectionService;
@@ -36,13 +36,13 @@ public class AircraftsServiceImpl implements AircraftsService {
 
     @Autowired
     public AircraftsServiceImpl(
-            AircaftSeatsService aircaftSeatsService,
+            AircraftSeatsService aircraftSeatsService,
             PartsService partsService,
             ApplicationUserService applicationUserService,
             PartInspectionService partInspectionService,
             AircraftsEntityRepository aircraftsEntityRepository
     ) {
-        this.aircaftSeatsService = aircaftSeatsService;
+        this.aircraftSeatsService = aircraftSeatsService;
         this.partsService = partsService;
         this.applicationUserService = applicationUserService;
         this.partInspectionService = partInspectionService;
@@ -61,7 +61,7 @@ public class AircraftsServiceImpl implements AircraftsService {
         AircraftsEntity aircraft = AircraftsMapper.mapAircraftRequestDtoToEntity(requestDto);
 
         List<AircraftSeatsEntity> aircraftSeatsEntities =
-                this.aircaftSeatsService.generateAircraftSeats(
+                this.aircraftSeatsService.generateAircraftSeats(
                         requestDto.getNumberOfRows(),
                         requestDto.getNumberOfSeatsInRow()
                 );

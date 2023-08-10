@@ -28,17 +28,17 @@ import java.util.stream.StreamSupport;
 public class FlightsServiceImpl implements FlightsService {
     private final FlightsEntityRepository flightsEntityRepository;
     private final AircraftsService aircraftsService;
-    private final AircaftSeatsService aircaftSeatsService;
+    private final AircraftSeatsService aircraftSeatsService;
 
     @Autowired
     public FlightsServiceImpl(
             FlightsEntityRepository flightsEntityRepository,
             AircraftsService aircraftsService,
-            AircaftSeatsService aircaftSeatsService
+            AircraftSeatsService aircraftSeatsService
     ) {
         this.flightsEntityRepository = flightsEntityRepository;
         this.aircraftsService = aircraftsService;
-        this.aircaftSeatsService = aircaftSeatsService;
+        this.aircraftSeatsService = aircraftSeatsService;
     }
 
     @Override
@@ -61,7 +61,7 @@ public class FlightsServiceImpl implements FlightsService {
         }
         flightsEntity.setAircraftsEntity(aircraft);
 
-        Integer aircraftSeatsNumber = this.aircaftSeatsService.getNumberOfFreeSeatsByAircraftId(aircraft.getId());
+        Integer aircraftSeatsNumber = this.aircraftSeatsService.getNumberOfFreeSeatsByAircraftId(aircraft.getId());
         flightsEntity.setTicketsLeft(aircraftSeatsNumber);
 
         flightsEntity = this.flightsEntityRepository.save(flightsEntity);
@@ -75,7 +75,7 @@ public class FlightsServiceImpl implements FlightsService {
     {
         FlightsEntity flight = this.getFlightEntityByFlightId(flightId);
 
-        Integer freeSeats = this.aircaftSeatsService.getNumberOfFreeSeatsByAircraftId(flight.getId());
+        Integer freeSeats = this.aircraftSeatsService.getNumberOfFreeSeatsByAircraftId(flight.getId());
         if(freeSeats.equals(0)) {
             flight.setStatus(FlightStatus.SOLD_OUT);
         }

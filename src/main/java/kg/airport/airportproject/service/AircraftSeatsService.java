@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-public interface AircaftSeatsService {
+public interface AircraftSeatsService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     AircraftSeatsEntity reserveSeat(Long seatId)
             throws InvalidIdException,

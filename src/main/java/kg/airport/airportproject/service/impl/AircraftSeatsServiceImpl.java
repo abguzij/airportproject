@@ -9,7 +9,7 @@ import kg.airport.airportproject.exception.InvalidIdException;
 import kg.airport.airportproject.exception.SeatReservationException;
 import kg.airport.airportproject.mapper.AircraftsMapper;
 import kg.airport.airportproject.repository.AircraftSeatsEntityRepository;
-import kg.airport.airportproject.service.AircaftSeatsService;
+import kg.airport.airportproject.service.AircraftSeatsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,11 +21,11 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 @Service
-public class AircaftSeatsServiceImpl implements AircaftSeatsService {
+public class AircraftSeatsServiceImpl implements AircraftSeatsService {
     private final AircraftSeatsEntityRepository aircraftSeatsEntityRepository;
 
     @Autowired
-    public AircaftSeatsServiceImpl(
+    public AircraftSeatsServiceImpl(
             AircraftSeatsEntityRepository aircraftSeatsEntityRepository
     ) {
         this.aircraftSeatsEntityRepository = aircraftSeatsEntityRepository;
