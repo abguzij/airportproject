@@ -4,9 +4,12 @@ import kg.airport.airportproject.configuration.SecurityConfigurationTest;
 import kg.airport.airportproject.dto.ApplicationUserRequestDto;
 import kg.airport.airportproject.dto.ApplicationUserResponseDto;
 import kg.airport.airportproject.entity.ApplicationUsersEntity;
+import kg.airport.airportproject.entity.UserFlightsEntity;
 import kg.airport.airportproject.entity.UserPositionsEntity;
 import kg.airport.airportproject.entity.UserRolesEntity;
+import kg.airport.airportproject.entity.attributes.UserFlightsStatus;
 import kg.airport.airportproject.repository.ApplicationUsersEntityRepository;
+import kg.airport.airportproject.repository.UserFlightsEntityRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,6 +33,8 @@ public class ApplicationUserServiceTest {
     private static final DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
     @Autowired
     private ApplicationUsersEntityRepository applicationUsersEntityRepository;
+    @Autowired
+    private UserFlightsEntityRepository userFlightsEntityRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
     @Autowired
@@ -238,6 +243,83 @@ public class ApplicationUserServiceTest {
             Assertions.fail(e.getMessage());
         }
     }
+
+    @Test
+    public void testGetAllFreeCrewMembers_OK() {
+        ApplicationUsersEntity pilot1 = this.createPilotEntityByParameters(
+                "pilot_1",
+                "pilot_1"
+        );
+        pilot1 = this.applicationUsersEntityRepository.save(pilot1);
+
+        ApplicationUsersEntity pilot2 = this.createPilotEntityByParameters(
+                "pilot_2",
+                "pilot_2"
+        );
+        pilot2 = this.applicationUsersEntityRepository.save(pilot2);
+
+        ApplicationUsersEntity steward1 = this.createStewardEntityByParameters(
+                "steward_1",
+                "steward_1"
+        );
+        steward1 = this.applicationUsersEntityRepository.save(steward1);
+
+        ApplicationUsersEntity steward2 = this.createStewardEntityByParameters(
+                "steward_2",
+                "steward_2"
+        );
+        steward2 = this.applicationUsersEntityRepository.save(steward2);
+
+        ApplicationUsersEntity chiefSteward1 = this.createChiefStewardEntityByParameters(
+                "chief_steward_1",
+                "chief_steward_1"
+        );
+        chiefSteward1 = this.applicationUsersEntityRepository.save(chiefSteward1);
+
+        ApplicationUsersEntity client = this.createClientEntityByParameters(
+                "client",
+                "client"
+        );
+        client = this.applicationUsersEntityRepository.save(client);
+
+        List<UserFlightsEntity> userFlightsEntities = new ArrayList<>();
+        userFlightsEntities.add(
+                new UserFlightsEntity()
+                        .setUserStatus(UserFlightsStatus.ARRIVED)
+                        .setApplicationUsersEntity(pilot1)
+        );
+        userFlightsEntities.add(
+                new UserFlightsEntity()
+                        .setUserStatus(UserFlightsStatus.CREW_MEMBER_READY)
+                        .setApplicationUsersEntity(pilot2)
+        );
+        userFlightsEntities.add(
+                new UserFlightsEntity()
+                        .setUserStatus(UserFlightsStatus.CREW_MEMBER_REGISTERED_FOR_FLIGHT)
+                        .setApplicationUsersEntity(steward2)
+        );
+        userFlightsEntities.add(
+                new UserFlightsEntity()
+                        .setUserStatus(UserFlightsStatus.ARRIVED)
+                        .setApplicationUsersEntity(client)
+        );
+
+        this.userFlightsEntityRepository.saveAll(userFlightsEntities);
+
+        try {
+            List<ApplicationUserResponseDto> applicationUserResponseDtoList =
+                    this.applicationUserService.getAllFreeCrewMembers();
+            Assertions.assertEquals(3, applicationUserResponseDtoList.size());
+
+            Assertions.assertEquals("PILOT", applicationUserResponseDtoList.get(0).getPositionTitle());
+            Assertions.assertEquals("STEWARD", applicationUserResponseDtoList.get(1).getPositionTitle());
+            Assertions.assertEquals("CHIEF_STEWARD", applicationUserResponseDtoList.get(2).getPositionTitle());
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+    }
+
+
 
     private ApplicationUsersEntity createDefaultClientEntity() {
         ApplicationUsersEntity applicationUsersEntity = new ApplicationUsersEntity()

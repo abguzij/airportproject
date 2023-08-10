@@ -225,11 +225,11 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
                         .userFlightsRegistartionsList.any().userStatus.eq(UserFlightsStatus.ARRIVED)
                         .or(root.userFlightsRegistartionsList.isEmpty())
         );
-        booleanBuilder.and(
-                root
-                        .userFlightsRegistartionsList.any().flightsEntity.status.eq(FlightStatus.ARRIVED)
-                        .or(root.userFlightsRegistartionsList.isEmpty())
-        );
+//        booleanBuilder.and(
+//                root
+//                        .userFlightsRegistartionsList.any().flightsEntity.status.eq(FlightStatus.ARRIVED)
+//                        .or(root.userFlightsRegistartionsList.isEmpty())
+//        );
 
         Iterable<ApplicationUsersEntity> applicationUsersEntityIterable =
                 this.applicationUsersEntityRepository.findAll(booleanBuilder.getValue());
