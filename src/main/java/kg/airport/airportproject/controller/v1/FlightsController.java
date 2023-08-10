@@ -161,6 +161,30 @@ public class FlightsController {
     }
 
     @PreAuthorize(value = "hasRole('DISPATCHER')")
+    @PutMapping(value = "/assign-landing")
+    public StatusChangedResponse assignLanding(
+            @RequestParam Long flightId
+    )
+            throws StatusChangeException,
+            FlightsNotFoundException,
+            InvalidIdException
+    {
+        return this.flightsService.assignLanding(flightId);
+    }
+
+    @PreAuthorize(value = "hasRole('CHIEF_DISPATCHER')")
+    @PutMapping(value = "/confirm-landing")
+    public StatusChangedResponse confirmLanding(
+            @RequestParam Long flightId
+    )
+            throws StatusChangeException,
+            FlightsNotFoundException,
+            InvalidIdException
+    {
+        return this.flightsService.confirmLanding(flightId);
+    }
+
+    @PreAuthorize(value = "hasRole('DISPATCHER')")
     @PostMapping(value = "/register")
     public FlightResponseDto registerNewFlight(
             @RequestBody FlightRequestDto flightRequestDto

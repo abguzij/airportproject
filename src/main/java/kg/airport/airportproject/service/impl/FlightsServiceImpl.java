@@ -430,6 +430,58 @@ public class FlightsServiceImpl implements FlightsService {
     }
 
     @Override
+    public StatusChangedResponse assignLanding(Long flightId)
+            throws FlightsNotFoundException,
+            InvalidIdException,
+            StatusChangeException
+    {
+        FlightsEntity flightsEntity = this.getFlightEntityByFlightId(flightId);
+        if(!flightsEntity.getStatus().equals(FlightStatus.LANDING_REQUESTED)) {
+            throw new StatusChangeException(
+                    "Для назначения посадки она должна быть запрошема пилотом!!"
+            );
+        }
+
+        flightsEntity.setStatus(FlightStatus.LANDING_PENDING_CONFIRMATION);
+        flightsEntity = this.flightsEntityRepository.save(flightsEntity);
+
+        return new StatusChangedResponse()
+                .setHttpStatus(HttpStatus.OK)
+                .setMessage(
+                        String.format(
+                                "Посадка назначена! Текущий статус рейса: [%s]",
+                                flightsEntity.getStatus().toString()
+                        )
+                );
+    }
+
+    @Override
+    public StatusChangedResponse confirmLanding(Long flightId)
+            throws FlightsNotFoundException,
+            InvalidIdException,
+            StatusChangeException
+    {
+        FlightsEntity flightsEntity = this.getFlightEntityByFlightId(flightId);
+        if(!flightsEntity.getStatus().equals(FlightStatus.LANDING_PENDING_CONFIRMATION)) {
+            throw new StatusChangeException(
+                    "Для подтверждения разрешения посадки она должна быть назначена диспетчером!"
+            );
+        }
+
+        flightsEntity.setStatus(FlightStatus.LANDING_CONFIRMED);
+        flightsEntity = this.flightsEntityRepository.save(flightsEntity);
+
+        return new StatusChangedResponse()
+                .setHttpStatus(HttpStatus.OK)
+                .setMessage(
+                        String.format(
+                                "Посадка разрешена! Текущий статус рейса: [%s]",
+                                flightsEntity.getStatus().toString()
+                        )
+                );
+    }
+
+    @Override
     public List<FlightResponseDto> getAllFLights(
             LocalDateTime registeredAfter,
             LocalDateTime registeredBefore,
