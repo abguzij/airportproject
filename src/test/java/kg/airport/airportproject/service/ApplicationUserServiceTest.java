@@ -374,6 +374,24 @@ public class ApplicationUserServiceTest {
         }
     }
 
+    @Test
+    public void testGetEngineersEntityById() {
+        ApplicationUsersEntity engineer =
+                this.createEngineersEntityByParameters("engineer_1", "engineer_1");
+
+        engineer = this.applicationUsersEntityRepository.save(engineer);
+
+        try {
+            ApplicationUsersEntity result = this.applicationUserService.getEngineerEntityById(1L);
+
+            Assertions.assertEquals(1L, result.getId());
+            Assertions.assertEquals("engineer_1", result.getUsername());
+            Assertions.assertEquals("engineer_1", result.getFullName());
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+    }
+
     private ApplicationUsersEntity createDefaultClientEntity() {
         ApplicationUsersEntity applicationUsersEntity = new ApplicationUsersEntity()
                 .setUsername("test")
