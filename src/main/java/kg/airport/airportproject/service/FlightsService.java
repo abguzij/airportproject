@@ -110,6 +110,15 @@ public interface FlightsService {
             InvalidIdException,
             StatusChangeException;
 
+    @Transactional
+    StatusChangedResponse assignLanding(Long flightId)
+            throws FlightsNotFoundException,
+            InvalidIdException,
+            StatusChangeException;
+
+    @Transactional
+    StatusChangedResponse confirmLanding(Long flightId) throws FlightsNotFoundException, InvalidIdException, StatusChangeException;
+
     List<FlightResponseDto> getAllFLights(
             LocalDateTime registeredAfter,
             LocalDateTime registeredBefore,
