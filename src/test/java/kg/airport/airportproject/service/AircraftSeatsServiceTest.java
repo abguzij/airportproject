@@ -13,6 +13,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
+import java.util.List;
+
 @SpringBootTest
 @ContextConfiguration(classes = SecurityConfigurationTest.class)
 @TestPropertySource(value = "classpath:test.properties")
@@ -60,5 +62,36 @@ public class AircraftSeatsServiceTest {
         } catch (Exception e) {
             Assertions.fail(e.getMessage());
         }
+    }
+
+    @Test
+    public void testGenerateAircraftSeats_OK() {
+        List<AircraftSeatsEntity> aircraftSeatsEntities =
+                this.aircraftSeatsService.generateAircraftSeats(2, 3);
+
+        Assertions.assertAll(
+                () -> Assertions.assertEquals(1, aircraftSeatsEntities.get(0).getRowNumber()),
+                () -> Assertions.assertEquals(1, aircraftSeatsEntities.get(0).getNumberInRow())
+        );
+        Assertions.assertAll(
+                () -> Assertions.assertEquals(1, aircraftSeatsEntities.get(1).getRowNumber()),
+                () -> Assertions.assertEquals(2, aircraftSeatsEntities.get(1).getNumberInRow())
+        );
+        Assertions.assertAll(
+                () -> Assertions.assertEquals(1, aircraftSeatsEntities.get(2).getRowNumber()),
+                () -> Assertions.assertEquals(3, aircraftSeatsEntities.get(2).getNumberInRow())
+        );
+        Assertions.assertAll(
+                () -> Assertions.assertEquals(2, aircraftSeatsEntities.get(3).getRowNumber()),
+                () -> Assertions.assertEquals(1, aircraftSeatsEntities.get(3).getNumberInRow())
+        );
+        Assertions.assertAll(
+                () -> Assertions.assertEquals(2, aircraftSeatsEntities.get(4).getRowNumber()),
+                () -> Assertions.assertEquals(2, aircraftSeatsEntities.get(4).getNumberInRow())
+        );
+        Assertions.assertAll(
+                () -> Assertions.assertEquals(2, aircraftSeatsEntities.get(5).getRowNumber()),
+                () -> Assertions.assertEquals(3, aircraftSeatsEntities.get(5).getNumberInRow())
+        );
     }
 }

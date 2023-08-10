@@ -84,6 +84,7 @@ public class AircraftSeatsServiceImpl implements AircraftSeatsService {
                         new AircraftSeatsEntity()
                                 .setRowNumber(rowNumber)
                                 .setNumberInRow(numberInRow)
+                                .setReserved(Boolean.FALSE)
                 );
             }
         }
