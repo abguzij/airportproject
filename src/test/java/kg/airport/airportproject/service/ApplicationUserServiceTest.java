@@ -355,6 +355,25 @@ public class ApplicationUserServiceTest {
         }
     }
 
+    @Test
+    public void testGetUserEntitiesByIdList_OK() {
+        List<ApplicationUsersEntity> applicationUsersEntityList = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            applicationUsersEntityList.add(this.createDefaultClientEntity());
+        }
+        this.applicationUsersEntityRepository.saveAll(applicationUsersEntityList);
+
+        try {
+            List<ApplicationUsersEntity> applicationUsersEntities =
+                    this.applicationUserService.getUserEntitiesByIdList(List.of(1L, 3L));
+
+            Assertions.assertEquals(1L, applicationUsersEntities.get(0).getId());
+            Assertions.assertEquals(3L, applicationUsersEntities.get(1).getId());
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+    }
+
     private ApplicationUsersEntity createDefaultClientEntity() {
         ApplicationUsersEntity applicationUsersEntity = new ApplicationUsersEntity()
                 .setUsername("test")
