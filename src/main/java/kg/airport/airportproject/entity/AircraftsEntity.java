@@ -26,7 +26,7 @@ public class AircraftsEntity {
     @Column(name = "registered_at")
     private LocalDateTime registeredAt;
 
-    @OneToOne(cascade = { CascadeType.MERGE, CascadeType.PERSIST })
+    @OneToOne
     @JoinColumn(name = "serviced_by", referencedColumnName = "id")
     private ApplicationUsersEntity servicedBy;
     @OneToMany(mappedBy = "aircraftsEntity", cascade = { CascadeType.MERGE, CascadeType.PERSIST })

@@ -3,11 +3,11 @@ package kg.airport.airportproject.service;
 import kg.airport.airportproject.configuration.SecurityConfigurationTest;
 import kg.airport.airportproject.dto.ApplicationUserRequestDto;
 import kg.airport.airportproject.dto.ApplicationUserResponseDto;
-import kg.airport.airportproject.entity.ApplicationUsersEntity;
-import kg.airport.airportproject.entity.UserFlightsEntity;
-import kg.airport.airportproject.entity.UserPositionsEntity;
-import kg.airport.airportproject.entity.UserRolesEntity;
+import kg.airport.airportproject.entity.*;
+import kg.airport.airportproject.entity.attributes.AircraftStatus;
+import kg.airport.airportproject.entity.attributes.AircraftType;
 import kg.airport.airportproject.entity.attributes.UserFlightsStatus;
+import kg.airport.airportproject.repository.AircraftsEntityRepository;
 import kg.airport.airportproject.repository.ApplicationUsersEntityRepository;
 import kg.airport.airportproject.repository.UserFlightsEntityRepository;
 import org.junit.jupiter.api.Assertions;
@@ -35,6 +35,8 @@ public class ApplicationUserServiceTest {
     private ApplicationUsersEntityRepository applicationUsersEntityRepository;
     @Autowired
     private UserFlightsEntityRepository userFlightsEntityRepository;
+    @Autowired
+    private AircraftsEntityRepository aircraftsEntityRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
     @Autowired
@@ -319,7 +321,39 @@ public class ApplicationUserServiceTest {
         }
     }
 
+    @Test
+    public void testGetAllFreeEngineers_OK() {
+        ApplicationUsersEntity engineer1 =
+                this.createEngineersEntityByParameters("engineer_1", "engineer_1");
+        engineer1 = this.applicationUsersEntityRepository.save(engineer1);
 
+        ApplicationUsersEntity engineer2 =
+                this.createEngineersEntityByParameters("engineer_2", "engineer_2");
+        engineer2 = this.applicationUsersEntityRepository.save(engineer2);
+
+        AircraftsEntity aircraft = new AircraftsEntity();
+        aircraft
+                .setTitle("test")
+                .setAircraftType(AircraftType.PLANE)
+                .setStatus(AircraftStatus.NEEDS_INSPECTION);
+        aircraft = this.aircraftsEntityRepository.save(aircraft);
+
+        engineer2.setServicedAircraft(aircraft);
+        engineer2 = this.applicationUsersEntityRepository.save(engineer2);
+
+        aircraft.setServicedBy(engineer2);
+        aircraft = this.aircraftsEntityRepository.save(aircraft);
+
+        try {
+            List<ApplicationUserResponseDto> applicationUserResponseDtoList =
+                    this.applicationUserService.getAllFreeEngineers();
+
+            Assertions.assertEquals(1, applicationUserResponseDtoList.size());
+            Assertions.assertEquals(engineer1.getUsername(), applicationUserResponseDtoList.get(0).getUsername());
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+    }
 
     private ApplicationUsersEntity createDefaultClientEntity() {
         ApplicationUsersEntity applicationUsersEntity = new ApplicationUsersEntity()
@@ -392,6 +426,21 @@ public class ApplicationUserServiceTest {
                 .setUserPosition(new UserPositionsEntity().setId(7L).setPositionTitle("PILOT"));
 
         applicationUsersEntity.getUserRolesEntityList().add(new UserRolesEntity().setId(8L).setRoleTitle("PILOT"));
+
+        return applicationUsersEntity;
+    }
+
+    private ApplicationUsersEntity createEngineersEntityByParameters(
+            String username,
+            String fullName
+    ) {
+        ApplicationUsersEntity applicationUsersEntity = new ApplicationUsersEntity()
+                .setUsername(username)
+                .setFullName(fullName)
+                .setPassword(this.passwordEncoder.encode("test"))
+                .setUserPosition(new UserPositionsEntity().setId(6L).setPositionTitle("ENGINEER"));
+
+        applicationUsersEntity.getUserRolesEntityList().add(new UserRolesEntity().setId(7L).setRoleTitle("ENGINEER"));
 
         return applicationUsersEntity;
     }

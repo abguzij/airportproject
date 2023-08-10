@@ -253,27 +253,30 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
     {
         BooleanBuilder booleanBuilder = new BooleanBuilder();
         QApplicationUsersEntity root = QApplicationUsersEntity.applicationUsersEntity;
-        QAircraftsEntity aircraftsRoot = QAircraftsEntity.aircraftsEntity;
 
         booleanBuilder.and(
                 this.buildInUserRolesSearchPredicate(List.of("ENGINEER"))
         );
-        booleanBuilder.and(root.servicedAircraft.isNull());
 
         Iterable<ApplicationUsersEntity> applicationUsersEntityIterable =
                 this.applicationUsersEntityRepository.findAll(booleanBuilder.getValue());
-        List<ApplicationUserResponseDto> applicationUserResponseDtoList =
+
+        List<ApplicationUsersEntity> applicationUsersEntityList =
                 StreamSupport
                         .stream(applicationUsersEntityIterable.spliterator(), false)
-                        .map(ApplicationUsersMapper::mapToApplicationUserResponseDto)
                         .collect(Collectors.toList());
 
-        if(applicationUserResponseDtoList.isEmpty()) {
+        applicationUsersEntityList.removeIf(user -> Objects.nonNull(user.getServicedAircraft()));
+
+        if(applicationUsersEntityList.isEmpty()) {
             throw new ApplicationUserNotFoundException(
                     "Свободных инженеров не найдено!"
             );
         }
-        return applicationUserResponseDtoList;
+        return applicationUsersEntityList
+                .stream()
+                .map(ApplicationUsersMapper::mapToApplicationUserResponseDto)
+                .collect(Collectors.toList());
     }
 
     @Override
