@@ -24,10 +24,10 @@ public class FlightsEntity {
     @Column(name = "registered_at")
     private LocalDateTime registeredAt;
 
-    @ManyToOne(cascade = CascadeType.MERGE)
+    @ManyToOne(cascade = { CascadeType.MERGE })
     @JoinColumn(name = "aircraft_id", referencedColumnName = "id")
     private AircraftsEntity aircraftsEntity;
-    @OneToMany(mappedBy = "flightsEntity")
+    @OneToMany(mappedBy = "flightsEntity", cascade = { CascadeType.MERGE, CascadeType.PERSIST })
     private List<UserFlightsEntity> userFlightsEntities;
     @OneToMany(mappedBy = "flightsEntity")
     private List<ClientFeedbacksEntity> clientFeedbacksEntities;

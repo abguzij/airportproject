@@ -7,6 +7,7 @@ import kg.airport.airportproject.dto.FlightResponseDto;
 import kg.airport.airportproject.entity.*;
 import kg.airport.airportproject.entity.attributes.AircraftStatus;
 import kg.airport.airportproject.entity.attributes.FlightStatus;
+import kg.airport.airportproject.entity.attributes.UserFlightsStatus;
 import kg.airport.airportproject.exception.*;
 import kg.airport.airportproject.mapper.FlightsMapper;
 import kg.airport.airportproject.repository.FlightsEntityRepository;
@@ -476,6 +477,40 @@ public class FlightsServiceImpl implements FlightsService {
                 .setMessage(
                         String.format(
                                 "Посадка разрешена! Текущий статус рейса: [%s]",
+                                flightsEntity.getStatus().toString()
+                        )
+                );
+    }
+
+    @Override
+    public StatusChangedResponse endFlight(Long flightId)
+            throws FlightsNotFoundException,
+            InvalidIdException,
+            StatusChangeException
+    {
+        FlightsEntity flightsEntity = this.getFlightEntityByFlightId(flightId);
+        if(!flightsEntity.getStatus().equals(FlightStatus.LANDING_CONFIRMED)) {
+            throw new StatusChangeException(
+                    "Для посадки самолета она должна быть подтверждена главным диспетчером!"
+            );
+        }
+
+        flightsEntity.setStatus(FlightStatus.ARRIVED);
+        flightsEntity.getAircraftsEntity().setStatus(AircraftStatus.NEEDS_INSPECTION);
+        for (UserFlightsEntity userFLightsEntity : flightsEntity.getUserFlightsEntities()) {
+            userFLightsEntity.setUserStatus(UserFlightsStatus.ARRIVED);
+            if(userFLightsEntity.getApplicationUsersEntity().getUserPosition().getPositionTitle().equals("CLIENT")) {
+                userFLightsEntity.getAircraftSeatsEntity().setReserved(Boolean.FALSE);
+            }
+        }
+
+        flightsEntity = this.flightsEntityRepository.save(flightsEntity);
+
+        return new StatusChangedResponse()
+                .setHttpStatus(HttpStatus.OK)
+                .setMessage(
+                        String.format(
+                                "Рейс окончен! Текущий статус рейса: [%s]",
                                 flightsEntity.getStatus().toString()
                         )
                 );

@@ -1,10 +1,13 @@
 package kg.airport.airportproject.service;
 
 import kg.airport.airportproject.configuration.SecurityConfigurationTest;
-import kg.airport.airportproject.entity.FlightsEntity;
+import kg.airport.airportproject.entity.*;
+import kg.airport.airportproject.entity.attributes.AircraftStatus;
+import kg.airport.airportproject.entity.attributes.AircraftType;
 import kg.airport.airportproject.entity.attributes.FlightStatus;
+import kg.airport.airportproject.entity.attributes.UserFlightsStatus;
 import kg.airport.airportproject.exception.StatusChangeException;
-import kg.airport.airportproject.repository.FlightsEntityRepository;
+import kg.airport.airportproject.repository.*;
 import kg.airport.airportproject.response.StatusChangedResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -15,6 +18,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
+import javax.persistence.Table;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(properties = "spring.main.allow-bean-definition-overriding=true")
@@ -22,9 +30,18 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestPropertySource(value = "classpath:test.properties")
 public class FlightsServiceTest {
     @Autowired
+    private ApplicationUsersEntityRepository applicationUsersEntityRepository;
+    @Autowired
     private FlightsEntityRepository flightsEntityRepository;
     @Autowired
+    private AircraftSeatsEntityRepository aircraftSeatsEntityRepository;
+    @Autowired
+    private UserFlightsEntityRepository userFlightsEntityRepository;
+    @Autowired
+    private AircraftsEntityRepository aircraftsEntityRepository;
+    @Autowired
     private FlightsService flightsService;
+
 
     @Test
     public void testRequestLanding_OK() {
@@ -124,5 +141,87 @@ public class FlightsServiceTest {
                 "Для подтверждения разрешения посадки она должна быть назначена диспетчером!",
                 exception.getMessage()
         );
+    }
+
+    @Test
+    public void testEndFlight_OK() {
+        AircraftsEntity aircraft = new AircraftsEntity();
+        aircraft
+                .setStatus(AircraftStatus.IN_AIR)
+                .setTitle("test")
+                .setAircraftType(AircraftType.PLANE);
+        aircraft = this.aircraftsEntityRepository.save(aircraft);
+
+        AircraftSeatsEntity aircraftSeat = new AircraftSeatsEntity()
+                .setReserved(Boolean.TRUE)
+                .setNumberInRow(1)
+                .setRowNumber(1)
+                .setAircraftsEntity(aircraft);
+        aircraftSeat = this.aircraftSeatsEntityRepository.save(aircraftSeat);
+
+        List<AircraftSeatsEntity> aircraftSeatsEntities = new ArrayList<>();
+        aircraftSeatsEntities.add(aircraftSeat);
+
+        aircraft.setAircraftSeatsEntityList(aircraftSeatsEntities);
+
+        FlightsEntity flight = new FlightsEntity();
+        flight
+                .setTicketsLeft(0)
+                .setDestination("test")
+                .setAircraftsEntity(aircraft)
+                .setStatus(FlightStatus.LANDING_CONFIRMED);
+        aircraft.getFlightsEntities().add(flight);
+        flight = this.flightsEntityRepository.save(flight);
+
+        ApplicationUsersEntity client = new ApplicationUsersEntity();
+        client
+                .setEnabled(Boolean.TRUE)
+                .setUsername("test")
+                .setPassword("test")
+                .setFullName("test")
+                .setUserPosition(new UserPositionsEntity().setId(10L).setPositionTitle("CLIENT"));
+        client = this.applicationUsersEntityRepository.save(client);
+
+        ApplicationUsersEntity steward = new ApplicationUsersEntity();
+        steward
+                .setEnabled(Boolean.TRUE)
+                .setUsername("test")
+                .setPassword("test")
+                .setFullName("test")
+                .setUserPosition(new UserPositionsEntity().setId(9L).setPositionTitle("STEWARD"));
+        steward = this.applicationUsersEntityRepository.save(steward);
+
+        List<UserFlightsEntity> userFlightsEntities = new ArrayList<>();
+        userFlightsEntities.add(
+                new UserFlightsEntity()
+                        .setUserStatus(UserFlightsStatus.CLIENT_FOOD_DISTRIBUTED)
+                        .setFlightsEntity(flight)
+                        .setAircraftSeatsEntity(aircraftSeat)
+                        .setApplicationUsersEntity(client)
+        );
+        userFlightsEntities.add(
+                new UserFlightsEntity()
+                        .setUserStatus(UserFlightsStatus.CREW_MEMBER_READY)
+                        .setFlightsEntity(flight)
+                        .setApplicationUsersEntity(steward)
+        );
+        userFlightsEntities = this.userFlightsEntityRepository.saveAll(userFlightsEntities);
+
+        flight.setUserFlightsEntities(userFlightsEntities);
+        flight = this.flightsEntityRepository.save(flight);
+
+        try {
+            StatusChangedResponse statusChangedResponse = this.flightsService.endFlight(flight.getId());
+            Assertions.assertTrue(statusChangedResponse.getMessage().endsWith("[ARRIVED]"));
+
+            flight = this.flightsService.getFlightEntityByFlightId(flight.getId());
+            Assertions.assertEquals(
+                    AircraftStatus.NEEDS_INSPECTION,
+                    flight.getAircraftsEntity().getStatus()
+            );
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+        System.out.println(flight);
     }
 }

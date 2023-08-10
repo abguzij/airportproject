@@ -21,7 +21,7 @@ public class UserFlightsEntity {
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private ApplicationUsersEntity applicationUsersEntity;
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "seat_id", referencedColumnName = "id")
     private AircraftSeatsEntity aircraftSeatsEntity;
     @ManyToOne(cascade = { CascadeType.MERGE })

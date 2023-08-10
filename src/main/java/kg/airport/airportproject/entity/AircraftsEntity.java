@@ -53,7 +53,6 @@ public class AircraftsEntity {
 
     @PrePersist
     private void prePersist() {
-        this.status = AircraftStatus.NEEDS_INSPECTION;
         this.registeredAt = LocalDateTime.now();
     }
 
