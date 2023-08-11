@@ -25,7 +25,9 @@ public interface AircraftSeatsService {
 
     List<AircraftSeatsEntity> generateAircraftSeats(Integer rowsNumber, Integer numberOfSeatsInRow);
 
-    List<AircraftSeatResponseDto> getAllAircraftSeats(Long aircraftId, Boolean isReserved) throws InvalidIdException, AircraftSeatNotFoundException;
+    List<AircraftSeatResponseDto> getAllAircraftSeats(Long aircraftId, Boolean isReserved)
+            throws InvalidIdException,
+            AircraftSeatNotFoundException;
 
     AircraftSeatsEntity getAircraftSeatEntityById(Long seatId) throws InvalidIdException, AircraftSeatNotFoundException;
 
