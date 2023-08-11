@@ -6,6 +6,7 @@ import kg.airport.airportproject.dto.AircraftResponseDto;
 import kg.airport.airportproject.entity.*;
 import kg.airport.airportproject.entity.attributes.AircraftStatus;
 import kg.airport.airportproject.entity.attributes.AircraftType;
+import kg.airport.airportproject.entity.attributes.PartState;
 import kg.airport.airportproject.entity.attributes.PartType;
 import kg.airport.airportproject.repository.AircraftsEntityRepository;
 import kg.airport.airportproject.repository.ApplicationUsersEntityRepository;
@@ -13,8 +14,10 @@ import kg.airport.airportproject.repository.PartsEntityRepository;
 import kg.airport.airportproject.response.StatusChangedResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
@@ -38,6 +41,10 @@ public class AircraftsServiceTest {
     private ApplicationUsersEntityRepository applicationUsersEntityRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @MockBean
+    private PartInspectionService partInspectionService;
+
     @Test
     public void testRegisterNewAircraft_OK() {
         List<PartsEntity> partsEntities = this.createTestAircraftParts();
@@ -82,6 +89,25 @@ public class AircraftsServiceTest {
 
             AircraftsEntity resultEntity = this.aircraftsService.findAircraftsEntityById(aircraft.getId());
             Assertions.assertEquals(engineer.getId(), resultEntity.getServicedBy().getId());
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testConfirmAircraftServiceability_OK() {
+        AircraftsEntity aircraft = this.createAircraftsEntity(AircraftStatus.INSPECTED);
+        aircraft = this.aircraftsEntityRepository.save(aircraft);
+
+        try {
+            Mockito
+                    .when(this.partInspectionService.getLastAircraftInspectionResult(aircraft.getId()))
+                    .thenReturn(PartState.CORRECT);
+
+            StatusChangedResponse result = this.aircraftsService.confirmAircraftServiceability(aircraft.getId());
+            Assertions.assertTrue(
+                    result.getMessage().endsWith(String.format("[%s]", AircraftStatus.SERVICEABLE.toString()))
+            );
         } catch (Exception e) {
             Assertions.fail(e.getMessage());
         }
