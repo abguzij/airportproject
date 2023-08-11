@@ -185,4 +185,53 @@ public class AircraftSeatsServiceTest {
             Assertions.fail(e.getMessage());
         }
     }
+
+    @Test
+    public void testGetNumberOfFreeSeatsByAircraftId_OK() {
+        AircraftsEntity aircraft1 = new AircraftsEntity();
+        aircraft1
+                .setTitle("test_1")
+                .setStatus(AircraftStatus.AVAILABLE)
+                .setAircraftType(AircraftType.PLANE);
+        aircraft1 = this.aircraftsEntityRepository.save(aircraft1);
+
+
+        List<AircraftSeatsEntity> aircraftSeatsEntities = new ArrayList<>();
+        aircraftSeatsEntities.add(
+                new AircraftSeatsEntity()
+                        .setNumberInRow(1)
+                        .setRowNumber(1)
+                        .setReserved(Boolean.TRUE)
+                        .setAircraftsEntity(aircraft1)
+        );
+        aircraft1.getAircraftSeatsEntityList().add(aircraftSeatsEntities.get(0));
+
+        aircraftSeatsEntities.add(
+                new AircraftSeatsEntity()
+                        .setNumberInRow(2)
+                        .setRowNumber(1)
+                        .setReserved(Boolean.FALSE)
+                        .setAircraftsEntity(aircraft1)
+        );
+        aircraft1.getAircraftSeatsEntityList().add(aircraftSeatsEntities.get(1));
+
+        aircraftSeatsEntities.add(
+                new AircraftSeatsEntity()
+                        .setNumberInRow(3)
+                        .setRowNumber(1)
+                        .setReserved(Boolean.FALSE)
+                        .setAircraftsEntity(aircraft1)
+        );
+        aircraft1.getAircraftSeatsEntityList().add(aircraftSeatsEntities.get(2));
+
+        this.aircraftSeatsEntityRepository.saveAll(aircraftSeatsEntities);
+        aircraft1 = this.aircraftsEntityRepository.save(aircraft1);
+
+        try {
+            Integer result = this.aircraftSeatsService.getNumberOfFreeSeatsByAircraftId(aircraft1.getId());
+            Assertions.assertEquals(2, result);
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+    }
 }
