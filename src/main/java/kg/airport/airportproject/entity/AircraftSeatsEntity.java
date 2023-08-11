@@ -30,11 +30,6 @@ public class AircraftSeatsEntity {
         this.rowNumber = null;
     }
 
-    @PrePersist
-    private void prePersist() {
-        this.isReserved = Boolean.FALSE;
-    }
-
     public Long getId() {
         return id;
     }

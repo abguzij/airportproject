@@ -9,7 +9,7 @@ import kg.airport.airportproject.entity.attributes.UserFlightsStatus;
 import kg.airport.airportproject.exception.*;
 import kg.airport.airportproject.mapper.FlightsMapper;
 import kg.airport.airportproject.repository.UserFlightsEntityRepository;
-import kg.airport.airportproject.service.AircaftSeatsService;
+import kg.airport.airportproject.service.AircraftSeatsService;
 import kg.airport.airportproject.service.ApplicationUserService;
 import kg.airport.airportproject.service.FlightsService;
 import kg.airport.airportproject.service.UserFlightsService;
@@ -28,19 +28,19 @@ import java.util.stream.StreamSupport;
 @Service
 public class UserFlightsServiceImpl implements UserFlightsService {
     private final UserFlightsEntityRepository userFlightsEntityRepository;
-    private final AircaftSeatsService aircaftSeatsService;
+    private final AircraftSeatsService aircraftSeatsService;
     private final ApplicationUserService applicationUserService;
     private final FlightsService flightsService;
 
     @Autowired
     public UserFlightsServiceImpl(
             UserFlightsEntityRepository userFlightsEntityRepository,
-            AircaftSeatsService aircaftSeatsService,
+            AircraftSeatsService aircraftSeatsService,
             ApplicationUserService applicationUserService,
             FlightsService flightsService
     ) {
         this.userFlightsEntityRepository = userFlightsEntityRepository;
-        this.aircaftSeatsService = aircaftSeatsService;
+        this.aircraftSeatsService = aircraftSeatsService;
         this.applicationUserService = applicationUserService;
         this.flightsService = flightsService;
     }
@@ -175,7 +175,7 @@ public class UserFlightsServiceImpl implements UserFlightsService {
         }
 
         AircraftSeatsEntity aircraftSeatsEntity =
-                this.aircaftSeatsService.reserveSeat(requestDto.getAircraftSeatId());
+                this.aircraftSeatsService.reserveSeat(requestDto.getAircraftSeatId());
         flight = this.flightsService.updateNumberOfRemainingTickets(flight.getId());
 
         UserFlightsEntity userFlightsEntity = new UserFlightsEntity();
@@ -208,7 +208,7 @@ public class UserFlightsServiceImpl implements UserFlightsService {
             );
         }
 
-        this.aircaftSeatsService.cancelSeatReservation(clientRegistration.getAircraftSeatsEntity().getId());
+        this.aircraftSeatsService.cancelSeatReservation(clientRegistration.getAircraftSeatsEntity().getId());
         this.flightsService.updateNumberOfRemainingTickets(clientRegistration.getFlightsEntity().getId());
 
         clientRegistration.setUserStatus(UserFlightsStatus.CLIENT_REGISTRATION_DECLINED);

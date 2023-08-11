@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-public interface AircaftSeatsService {
+public interface AircraftSeatsService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     AircraftSeatsEntity reserveSeat(Long seatId)
             throws InvalidIdException,
@@ -18,11 +18,16 @@ public interface AircaftSeatsService {
             SeatReservationException;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    AircraftSeatsEntity cancelSeatReservation(Long seatId) throws InvalidIdException, AircraftSeatNotFoundException, SeatReservationException;
+    AircraftSeatsEntity cancelSeatReservation(Long seatId)
+            throws InvalidIdException,
+            AircraftSeatNotFoundException,
+            SeatReservationException;
 
     List<AircraftSeatsEntity> generateAircraftSeats(Integer rowsNumber, Integer numberOfSeatsInRow);
 
-    List<AircraftSeatResponseDto> getAllAircraftSeats(Long aircraftId, Boolean isReserved) throws InvalidIdException, AircraftSeatNotFoundException;
+    List<AircraftSeatResponseDto> getAllAircraftSeats(Long aircraftId, Boolean isReserved)
+            throws InvalidIdException,
+            AircraftSeatNotFoundException;
 
     AircraftSeatsEntity getAircraftSeatEntityById(Long seatId) throws InvalidIdException, AircraftSeatNotFoundException;
 
