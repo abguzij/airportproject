@@ -79,6 +79,8 @@ public class AircraftsServiceImpl implements AircraftsService {
             part.getAircraftsEntities().add(aircraft);
         }
 
+        aircraft.setStatus(AircraftStatus.NEEDS_INSPECTION);
+
         aircraft = this.aircraftsEntityRepository.save(aircraft);
         return AircraftsMapper.mapToAircraftResponseDto(aircraft);
     }
