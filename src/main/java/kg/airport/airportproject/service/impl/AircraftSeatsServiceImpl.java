@@ -55,7 +55,7 @@ public class AircraftSeatsServiceImpl implements AircraftSeatsService {
             SeatReservationException
     {
         AircraftSeatsEntity aircraftSeatsEntity = this.getAircraftSeatEntityById(seatId);
-        if(aircraftSeatsEntity.getReserved()) {
+        if(!aircraftSeatsEntity.getReserved()) {
             throw new SeatReservationException(
                     String.format("Ошибка! Место с ID [%d] свободно!", seatId)
             );

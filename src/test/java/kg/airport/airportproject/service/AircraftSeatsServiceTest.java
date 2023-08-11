@@ -163,4 +163,26 @@ public class AircraftSeatsServiceTest {
             Assertions.fail(e.getMessage());
         }
     }
+
+    @Test
+    public void testGetAircraftSeatEntityById_OK() {
+        AircraftSeatsEntity aircraftSeatsEntity = new AircraftSeatsEntity();
+        aircraftSeatsEntity
+                .setNumberInRow(1)
+                .setRowNumber(4)
+                .setReserved(Boolean.FALSE);
+        aircraftSeatsEntity = this.aircraftSeatsEntityRepository.save(aircraftSeatsEntity);
+
+        try {
+            AircraftSeatsEntity result =
+                    this.aircraftSeatsService.getAircraftSeatEntityById(aircraftSeatsEntity.getId());
+
+            Assertions.assertEquals(aircraftSeatsEntity.getId(), result.getId());
+            Assertions.assertEquals(Boolean.FALSE, result.getReserved());
+            Assertions.assertEquals(1, result.getNumberInRow());
+            Assertions.assertEquals(4, result.getRowNumber());
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+    }
 }
