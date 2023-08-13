@@ -67,8 +67,7 @@ public class EmployeesController {
             @RequestBody ApplicationUserRequestDto applicationUserRequestDto
     )
             throws UserPositionNotExists,
-            UserRolesNotAssignedException
-    {
+            UserRolesNotAssignedException, UsernameAlreadyExistsException, InvalidUserInfoException, InvalidCredentialsException, InvalidIdException {
         return this.authenticationService.registerNewEmployee(applicationUserRequestDto);
     }
 

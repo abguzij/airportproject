@@ -62,6 +62,7 @@ public class FlightsServiceImpl implements FlightsService {
         flightsEntity.setAircraftsEntity(aircraft);
 
         Integer aircraftSeatsNumber = this.aircraftSeatsService.getNumberOfFreeSeatsByAircraftId(aircraft.getId());
+        flightsEntity.setStatus(FlightStatus.REGISTERED);
         flightsEntity.setTicketsLeft(aircraftSeatsNumber);
 
         flightsEntity = this.flightsEntityRepository.save(flightsEntity);

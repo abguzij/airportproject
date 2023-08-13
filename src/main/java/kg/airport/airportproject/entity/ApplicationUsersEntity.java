@@ -40,18 +40,18 @@ public class ApplicationUsersEntity implements UserDetails {
 
     @OneToMany(mappedBy = "applicationUsersEntity")
     private List<UserFlightsEntity> userFlightsRegistartionsList;
-    @OneToOne(mappedBy = "servicedBy", cascade = CascadeType.MERGE)
+    @OneToOne(mappedBy = "servicedBy") //cascade = CascadeType.MERGE
     private AircraftsEntity servicedAircraft;
 
     public ApplicationUsersEntity() {
         this.userRolesEntityList = new ArrayList<>();
+        this.userFlightsRegistartionsList = new ArrayList<>();
     }
 
     @PrePersist
     private void prePersist() {
         this.isEnabled = Boolean.TRUE;
         this.registeredAt = LocalDateTime.now();
-        this.userFlightsRegistartionsList = new ArrayList<>();
     }
 
     @Override

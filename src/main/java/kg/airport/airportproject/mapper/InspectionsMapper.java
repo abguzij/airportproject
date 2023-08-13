@@ -22,7 +22,7 @@ public class InspectionsMapper {
                 .setPartState(source.getPartState())
                 .setPartType(source.getPartsEntity().getPartType())
                 .setAircraftId(source.getAircraftsEntity().getId())
-                .setAircraftTitle(source.getPartsEntity().getTitle())
+                .setAircraftTitle(source.getAircraftsEntity().getTitle())
                 .setInspectionCode(source.getInspectionCode())
                 .setRegisteredAt(source.getRegisteredAt());
     }

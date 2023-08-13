@@ -12,7 +12,7 @@ public class UserFlightRegistrationResponseDto {
     private LocalDateTime registeredAt;
     private Long employeeId;
     private String employeeFullName;
-    private UserPositionsEntity employeePosition;
+    private String employeePositionTitle;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Integer seatsRowNumber;
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -70,12 +70,12 @@ public class UserFlightRegistrationResponseDto {
         return this;
     }
 
-    public UserPositionsEntity getEmployeePosition() {
-        return employeePosition;
+    public String getEmployeePositionTitle() {
+        return employeePositionTitle;
     }
 
-    public UserFlightRegistrationResponseDto setEmployeePosition(UserPositionsEntity employeePosition) {
-        this.employeePosition = employeePosition;
+    public UserFlightRegistrationResponseDto setEmployeePositionTitle(String employeePositionTitle) {
+        this.employeePositionTitle = employeePositionTitle;
         return this;
     }
 

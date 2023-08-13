@@ -112,13 +112,16 @@ public class PartInspectionServiceImpl implements PartInspectionService {
                 );
             }
 
-            this.currentMaxInspectionCode += 1L;
             partInspectionsEntities.get(i)
                     .setPartsEntity(part)
                     .setRegisteredAt(localDateTimeNow)
                     .setAircraftsEntity(aircraft)
-                    .setConductedBy(aircraft.getServicedBy())
-                    .setInspectionCode(this.currentMaxInspectionCode);
+                    .setConductedBy(aircraft.getServicedBy());
+        }
+
+        this.currentMaxInspectionCode += 1L;
+        for (PartInspectionsEntity inspection : partInspectionsEntities) {
+            inspection.setInspectionCode(this.currentMaxInspectionCode);
         }
 
         partInspectionsEntities = this.partInspectionsEntityRepository.saveAll(partInspectionsEntities);
