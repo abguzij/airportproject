@@ -79,6 +79,8 @@ public class AircraftsServiceImpl implements AircraftsService {
             part.getAircraftsEntities().add(aircraft);
         }
 
+        aircraft.setStatus(AircraftStatus.NEEDS_INSPECTION);
+
         aircraft = this.aircraftsEntityRepository.save(aircraft);
         return AircraftsMapper.mapToAircraftResponseDto(aircraft);
     }
@@ -96,6 +98,7 @@ public class AircraftsServiceImpl implements AircraftsService {
                     String.format("Ошибка! Заправка для самолета с ID[%d] еще не была назначена!", aircraftId)
             );
         }
+
         ApplicationUsersEntity engineer =
                 (ApplicationUsersEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if(!engineer.getId().equals(aircraftsEntity.getServicedBy().getId())) {
@@ -109,8 +112,9 @@ public class AircraftsServiceImpl implements AircraftsService {
 
         aircraftsEntity.getServicedBy().setServicedAircraft(null);
         aircraftsEntity.setServicedBy(null);
-        aircraftsEntity = this.aircraftsEntityRepository.save(aircraftsEntity);
+        aircraftsEntity.setStatus(AircraftStatus.REFUELED);
 
+        aircraftsEntity = this.aircraftsEntityRepository.save(aircraftsEntity);
         return new StatusChangedResponse()
                 .setHttpStatus(HttpStatus.OK)
                 .setMessage(

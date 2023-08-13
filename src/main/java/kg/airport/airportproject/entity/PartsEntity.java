@@ -7,6 +7,7 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(schema = "public", name = "parts")
@@ -104,10 +105,3 @@ public class PartsEntity {
         return this;
     }
 }
-
-//    create table if not exists public.parts(
-//        id bigserial primary key,
-//        part_title varchar not null,
-//        aircraft_type varchar not null,
-//        part_type varchar not null
-//        );

@@ -7,6 +7,7 @@ import kg.airport.airportproject.entity.FlightsEntity;
 import kg.airport.airportproject.entity.UserFlightsEntity;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class FlightsMapper {
@@ -33,16 +34,25 @@ public class FlightsMapper {
     public static UserFlightRegistrationResponseDto mapToUserFlightRegistrationResponseDto(
             UserFlightsEntity source
     ) {
-        return new UserFlightRegistrationResponseDto()
-                .setId(source.getId())
-                .setFlightId(source.getFlightsEntity().getId())
-                .setFlightDestination(source.getFlightsEntity().getDestination())
-                .setEmployeeId(source.getId())
-                .setEmployeeFullName(source.getApplicationUsersEntity().getFullName())
-                .setEmployeePosition(source.getApplicationUsersEntity().getUserPosition())
-                .setRegisteredAt(source.getRegisteredAt())
-                .setUserStatus(source.getUserStatus())
-                .setSeatsRowNumber(source.getAircraftSeatsEntity().getRowNumber())
-                .setSeatNumberInRow(source.getAircraftSeatsEntity().getNumberInRow());
+        UserFlightRegistrationResponseDto responseDto =
+                new UserFlightRegistrationResponseDto()
+                        .setId(source.getId())
+                        .setFlightId(source.getFlightsEntity().getId())
+                        .setFlightDestination(source.getFlightsEntity().getDestination())
+                        .setEmployeeId(source.getId())
+                        .setEmployeeFullName(source.getApplicationUsersEntity().getFullName())
+                        .setEmployeePositionTitle(
+                                source.getApplicationUsersEntity().getUserPosition().getPositionTitle()
+                        )
+                        .setRegisteredAt(source.getRegisteredAt())
+                        .setUserStatus(source.getUserStatus());
+
+        if(Objects.nonNull(source.getAircraftSeatsEntity())) {
+            responseDto
+                    .setSeatsRowNumber(source.getAircraftSeatsEntity().getRowNumber())
+                    .setSeatNumberInRow(source.getAircraftSeatsEntity().getNumberInRow());
+        }
+
+        return responseDto;
     }
 }

@@ -306,6 +306,9 @@ public class ApplicationUserServiceTest {
                         .setApplicationUsersEntity(client)
         );
 
+        for (UserFlightsEntity registration : userFlightsEntities) {
+            registration.getApplicationUsersEntity().getUserFlightsRegistartionsList().add(registration);
+        }
         this.userFlightsEntityRepository.saveAll(userFlightsEntities);
 
         try {
@@ -339,10 +342,10 @@ public class ApplicationUserServiceTest {
         aircraft = this.aircraftsEntityRepository.save(aircraft);
 
         engineer2.setServicedAircraft(aircraft);
-        engineer2 = this.applicationUsersEntityRepository.save(engineer2);
-
         aircraft.setServicedBy(engineer2);
+
         aircraft = this.aircraftsEntityRepository.save(aircraft);
+        engineer2 = this.applicationUsersEntityRepository.save(engineer2);
 
         try {
             List<ApplicationUserResponseDto> applicationUserResponseDtoList =
@@ -382,9 +385,9 @@ public class ApplicationUserServiceTest {
         engineer = this.applicationUsersEntityRepository.save(engineer);
 
         try {
-            ApplicationUsersEntity result = this.applicationUserService.getEngineerEntityById(1L);
+            ApplicationUsersEntity result = this.applicationUserService.getEngineerEntityById(engineer.getId());
 
-            Assertions.assertEquals(1L, result.getId());
+            Assertions.assertEquals(engineer.getId(), result.getId());
             Assertions.assertEquals("engineer_1", result.getUsername());
             Assertions.assertEquals("engineer_1", result.getFullName());
         } catch (Exception e) {

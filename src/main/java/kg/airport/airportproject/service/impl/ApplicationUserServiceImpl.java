@@ -357,7 +357,7 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
         QApplicationUsersEntity root = QApplicationUsersEntity.applicationUsersEntity;
 
         booleanBuilder.and(root.userPosition.positionTitle.ne("CLIENT"));
-        if(!employeePositions.isEmpty()) {
+        if(Objects.nonNull(employeePositions) && !employeePositions.isEmpty()) {
             booleanBuilder.and(root.userPosition.positionTitle.in(employeePositions));
         }
 

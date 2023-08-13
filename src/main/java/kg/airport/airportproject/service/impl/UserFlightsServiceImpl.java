@@ -136,7 +136,7 @@ public class UserFlightsServiceImpl implements UserFlightsService {
             crewMemberRegistration.setFlightsEntity(flightsEntity);
             flightsEntity.getUserFlightsEntities().add(crewMemberRegistration);
 
-            crewMemberRegistration.setUserStatus(UserFlightsStatus.CLIENT_REGISTERED_FOR_FLIGHT);
+            crewMemberRegistration.setUserStatus(UserFlightsStatus.CREW_MEMBER_REGISTERED_FOR_FLIGHT);
 
             crewMembersRegistrations.add(crewMemberRegistration);
         }
@@ -285,6 +285,8 @@ public class UserFlightsServiceImpl implements UserFlightsService {
                     "Чтобы провести клиенту инструктаж стюард должен проверить занял ли клиент свое место в салоне!"
             );
         }
+
+        clientRegistration.setUserStatus(UserFlightsStatus.CLIENT_BRIEFED);
 
         clientRegistration = this.userFlightsEntityRepository.save(clientRegistration);
         return FlightsMapper.mapToUserFlightRegistrationResponseDto(clientRegistration);

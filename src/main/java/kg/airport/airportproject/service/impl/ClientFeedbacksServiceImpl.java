@@ -50,14 +50,20 @@ public class ClientFeedbacksServiceImpl implements ClientFeedbacksService {
         if(requestDto.getFeedbackText().isEmpty() || Objects.isNull(requestDto.getFeedbackText())) {
             throw new InvalidFeedbackTextException("Текст отзыва не может быть null или пустым!");
         }
+        if(Objects.isNull(requestDto.getFlightRegistrationId())) {
+            throw new IllegalArgumentException("ID регистрации на рейс не может быть null");
+        }
 
         ClientFeedbacksEntity feedback = FeedbacksMapper.mapClientFeedbackRequestDtoToEntity(requestDto);
         ApplicationUsersEntity currentUser =
                 (ApplicationUsersEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        UserFlightsEntity lastClientRegistration =
-                this.userFlightsService.getClientFlightRegistrationById(currentUser.getId());
+
+        UserFlightsEntity registration =
+                this.userFlightsService.getClientFlightRegistrationById(requestDto.getFlightRegistrationId());
+//        UserFlightsEntity lastClientRegistration =
+//                this.userFlightsService.getClientFlightRegistrationById(currentUser.getId());
         FlightsEntity flight =
-                this.flightsService.getFlightEntityByFlightId(lastClientRegistration.getFlightsEntity().getId());
+                this.flightsService.getFlightEntityByFlightId(registration.getFlightsEntity().getId());
 
         feedback.setApplicationUsersEntity(currentUser);
         feedback.setFlightsEntity(flight);

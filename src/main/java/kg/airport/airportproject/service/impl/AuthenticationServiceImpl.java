@@ -7,8 +7,7 @@ import kg.airport.airportproject.dto.JwtTokenResponseDto;
 import kg.airport.airportproject.entity.ApplicationUsersEntity;
 import kg.airport.airportproject.entity.UserPositionsEntity;
 import kg.airport.airportproject.entity.UserRolesEntity;
-import kg.airport.airportproject.exception.UserPositionNotExists;
-import kg.airport.airportproject.exception.UserRolesNotAssignedException;
+import kg.airport.airportproject.exception.*;
 import kg.airport.airportproject.mapper.ApplicationUsersMapper;
 import kg.airport.airportproject.mapper.AuthenticationMapper;
 import kg.airport.airportproject.repository.ApplicationUsersEntityRepository;
@@ -16,10 +15,10 @@ import kg.airport.airportproject.repository.UserPositionsEntityRepository;
 import kg.airport.airportproject.repository.UserRolesEntityRepository;
 import kg.airport.airportproject.security.JwtTokenHandler;
 import kg.airport.airportproject.service.AuthenticationService;
+import kg.airport.airportproject.validator.ApplicationUserValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -34,6 +33,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final ApplicationUsersEntityRepository applicationUsersEntityRepository;
     private final UserRolesEntityRepository userRolesEntityRepository;
     private final UserPositionsEntityRepository userPositionsEntityRepository;
+    private final ApplicationUserValidator applicationUserValidator;
     private final UserDetailsService userDetailsService;
     private final JwtTokenHandler jwtTokenHandler;
 
@@ -43,6 +43,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             ApplicationUsersEntityRepository applicationUsersEntityRepository,
             UserRolesEntityRepository userRolesEntityRepository,
             UserPositionsEntityRepository userPositionsEntityRepository,
+            ApplicationUserValidator applicationUserValidator,
             UserDetailsService userDetailsService,
             JwtTokenHandler jwtTokenHandler
     ) {
@@ -50,6 +51,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         this.applicationUsersEntityRepository = applicationUsersEntityRepository;
         this.userRolesEntityRepository = userRolesEntityRepository;
         this.userPositionsEntityRepository = userPositionsEntityRepository;
+        this.applicationUserValidator = applicationUserValidator;
         this.userDetailsService = userDetailsService;
         this.jwtTokenHandler = jwtTokenHandler;
     }
@@ -57,8 +59,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public ApplicationUserResponseDto registerNewClient(ApplicationUserRequestDto requestDto)
             throws UserRolesNotAssignedException,
-            UserPositionNotExists
+            UserPositionNotExists,
+            UsernameAlreadyExistsException,
+            InvalidUserInfoException,
+            InvalidCredentialsException,
+            InvalidIdException
     {
+        this.applicationUserValidator.validateUserRequestDto(requestDto);
         ApplicationUsersEntity applicationUsersEntity =
                 ApplicationUsersMapper.mapApplicationUserRequestDtoToEntity(requestDto);
 
@@ -90,8 +97,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public ApplicationUserResponseDto registerNewEmployee(ApplicationUserRequestDto requestDto)
             throws UserRolesNotAssignedException,
-            UserPositionNotExists
+            UserPositionNotExists,
+            UsernameAlreadyExistsException,
+            InvalidUserInfoException,
+            InvalidCredentialsException,
+            InvalidIdException
     {
+        this.applicationUserValidator.validateUserRequestDto(requestDto);
         ApplicationUsersEntity applicationUsersEntity =
                 ApplicationUsersMapper.mapApplicationUserRequestDtoToEntity(requestDto);
 

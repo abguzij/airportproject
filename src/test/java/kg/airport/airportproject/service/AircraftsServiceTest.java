@@ -1,0 +1,253 @@
+package kg.airport.airportproject.service;
+
+import kg.airport.airportproject.configuration.SecurityConfigurationTest;
+import kg.airport.airportproject.dto.AircraftRequestDto;
+import kg.airport.airportproject.dto.AircraftResponseDto;
+import kg.airport.airportproject.entity.*;
+import kg.airport.airportproject.entity.attributes.*;
+import kg.airport.airportproject.repository.AircraftsEntityRepository;
+import kg.airport.airportproject.repository.ApplicationUsersEntityRepository;
+import kg.airport.airportproject.repository.FlightsEntityRepository;
+import kg.airport.airportproject.repository.PartsEntityRepository;
+import kg.airport.airportproject.response.StatusChangedResponse;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+@SpringBootTest
+@ContextConfiguration(classes = SecurityConfigurationTest.class)
+@TestPropertySource(value = "classpath:test.properties")
+public class AircraftsServiceTest {
+    @Autowired
+    private AircraftsService aircraftsService;
+    @Autowired
+    private AircraftsEntityRepository aircraftsEntityRepository;
+    @Autowired
+    private FlightsEntityRepository flightsEntityRepository;
+    @Autowired
+    private PartsEntityRepository partsEntityRepository;
+    @Autowired
+    private ApplicationUsersEntityRepository applicationUsersEntityRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @MockBean
+    private PartInspectionService partInspectionService;
+
+    @Test
+    public void testRegisterNewAircraft_OK() {
+        List<PartsEntity> partsEntities = this.createTestAircraftParts();
+        partsEntities = this.partsEntityRepository.saveAll(partsEntities);
+
+        AircraftRequestDto requestDto = new AircraftRequestDto();
+        requestDto
+                .setTitle("test")
+                .setNumberOfRows(2)
+                .setAircraftType(AircraftType.PLANE)
+                .setNumberOfSeatsInRow(2)
+                .setPartIdList(
+                        List.of(partsEntities.get(0).getId(), partsEntities.get(2).getId())
+                );
+
+        try {
+            AircraftResponseDto responseDto = this.aircraftsService.registerNewAircraft(requestDto);
+
+            Assertions.assertEquals(requestDto.getAircraftType() , responseDto.getAircraftType());
+            Assertions.assertEquals(AircraftStatus.NEEDS_INSPECTION, responseDto.getStatus());
+            Assertions.assertEquals(requestDto.getTitle(), responseDto.getTitle());
+            Assertions.assertNotNull(responseDto.getRegisteredAt());
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+    }
+
+    // TODO: 11.08.2023 Протестировать методы требующие аутентикации во время тестирования контроллеров
+
+    @Test
+    public void testAssignAircraftsInspection_OK() {
+        AircraftsEntity aircraft = this.createAircraftsEntity(AircraftStatus.NEEDS_INSPECTION);
+        aircraft = this.aircraftsEntityRepository.save(aircraft);
+
+        ApplicationUsersEntity engineer = this.createEngineersEntityByParameters("test", "test");
+        engineer = this.applicationUsersEntityRepository.save(engineer);
+        try {
+            StatusChangedResponse statusChangedResponse =
+                    this.aircraftsService.assignAircraftInspection(aircraft.getId(), engineer.getId());
+            Assertions.assertTrue(statusChangedResponse.getMessage().endsWith("[ON_INSPECTION]"));
+
+            AircraftsEntity resultEntity = this.aircraftsService.findAircraftsEntityById(aircraft.getId());
+            Assertions.assertEquals(engineer.getId(), resultEntity.getServicedBy().getId());
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testConfirmAircraftServiceability_OK() {
+        AircraftsEntity aircraft = this.createAircraftsEntity(AircraftStatus.INSPECTED);
+        aircraft = this.aircraftsEntityRepository.save(aircraft);
+
+        try {
+            Mockito
+                    .when(this.partInspectionService.getLastAircraftInspectionResult(aircraft.getId()))
+                    .thenReturn(PartState.CORRECT);
+
+            StatusChangedResponse result = this.aircraftsService.confirmAircraftServiceability(aircraft.getId());
+            Assertions.assertTrue(
+                    result.getMessage().endsWith(String.format("[%s]", AircraftStatus.SERVICEABLE.toString()))
+            );
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testAssignAircraftRepairs_OK() {
+        AircraftsEntity aircraft = this.createAircraftsEntity(AircraftStatus.INSPECTED);
+        aircraft = this.aircraftsEntityRepository.save(aircraft);
+
+        ApplicationUsersEntity engineer = this.createEngineersEntityByParameters("test", "test");
+        engineer = this.applicationUsersEntityRepository.save(engineer);
+
+        try {
+            Mockito
+                    .when(this.partInspectionService.getLastAircraftInspectionResult(aircraft.getId()))
+                    .thenReturn(PartState.NEEDS_FIXING);
+
+            StatusChangedResponse result =
+                    this.aircraftsService.assignAircraftRepairs(aircraft.getId(), engineer.getId());
+            Assertions.assertTrue(
+                    result.getMessage().endsWith(String.format("[%s]", AircraftStatus.ON_REPAIRS.toString()))
+            );
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testSendAircraftToRegistrationConfirmation_OK() {
+        AircraftsEntity aircraft = this.createAircraftsEntity(AircraftStatus.SERVICEABLE);
+        aircraft = this.aircraftsEntityRepository.save(aircraft);
+
+        try {
+            StatusChangedResponse result =
+                    this.aircraftsService.sendAircraftToRegistrationConfirmation(aircraft.getId());
+            Assertions.assertTrue(
+                    result.getMessage().endsWith(
+                            String.format("[%s]", AircraftStatus.REGISTRATION_PENDING_CONFIRMATION.toString())
+                    )
+            );
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testConfirmAircraftRegistration_OK() {
+        AircraftsEntity aircraft = this.createAircraftsEntity(AircraftStatus.REGISTRATION_PENDING_CONFIRMATION);
+        aircraft = this.aircraftsEntityRepository.save(aircraft);
+
+        try {
+            StatusChangedResponse result =
+                    this.aircraftsService.confirmAircraftRegistration(aircraft.getId());
+            Assertions.assertTrue(
+                    result.getMessage().endsWith(
+                            String.format("[%s]", AircraftStatus.AVAILABLE.toString())
+                    )
+            );
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testAssignAircraftRefueling_OK() {
+        AircraftsEntity aircraft = this.createAircraftsEntity(AircraftStatus.AVAILABLE);
+        aircraft = this.aircraftsEntityRepository.save(aircraft);
+
+        FlightsEntity flight = new FlightsEntity();
+        flight
+                .setTicketsLeft(0)
+                .setDestination("test")
+                .setStatus(FlightStatus.DEPARTURE_INITIATED)
+                .setAircraftsEntity(aircraft);
+        aircraft.getFlightsEntities().add(flight);
+
+        this.flightsEntityRepository.save(flight);
+        this.aircraftsEntityRepository.save(aircraft);
+
+        ApplicationUsersEntity engineer = this.createEngineersEntityByParameters("test", "test");
+        engineer = this.applicationUsersEntityRepository.save(engineer);
+
+        try {
+            StatusChangedResponse result =
+                    this.aircraftsService.assignAircraftRefueling(aircraft.getId(), engineer.getId());
+            Assertions.assertTrue(
+                    result.getMessage().endsWith(String.format("[%s]", AircraftStatus.ON_REFUELING.toString()))
+            );
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testGetAllAircrafts_OK() {
+    }
+
+    // $2a$08$aV2e9d/hcmW57VagrFIlvuG2Kuvk9VLmGHECyG93i5sKAtHdY5VEq
+    private List<PartsEntity> createTestAircraftParts() {
+        List<PartsEntity> partsEntities = new ArrayList<>();
+        partsEntities.add(
+                new PartsEntity()
+                        .setTitle("test_1")
+                        .setAircraftType(AircraftType.PLANE)
+                        .setPartType(PartType.TAIL_PART)
+        );
+        partsEntities.add(
+                new PartsEntity()
+                        .setTitle("test_2")
+                        .setAircraftType(AircraftType.PLANE)
+                        .setPartType(PartType.POWER_PLANT)
+        );
+        partsEntities.add(
+                new PartsEntity()
+                        .setTitle("test_3")
+                        .setAircraftType(AircraftType.PLANE)
+                        .setPartType(PartType.WING_PART)
+        );
+        return this.partsEntityRepository.saveAll(partsEntities);
+    }
+
+    private ApplicationUsersEntity createEngineersEntityByParameters(
+            String username,
+            String fullName
+    ) {
+        ApplicationUsersEntity applicationUsersEntity = new ApplicationUsersEntity()
+                .setUsername(username)
+                .setFullName(fullName)
+                .setPassword(this.passwordEncoder.encode("test"))
+                .setUserPosition(new UserPositionsEntity().setId(6L).setPositionTitle("ENGINEER"));
+
+        applicationUsersEntity.getUserRolesEntityList().add(new UserRolesEntity().setId(7L).setRoleTitle("ENGINEER"));
+
+        return applicationUsersEntity;
+    }
+
+    private AircraftsEntity createAircraftsEntity(AircraftStatus status) {
+        return new AircraftsEntity()
+                .setAircraftType(AircraftType.PLANE)
+                .setStatus(status)
+                .setTitle("test");
+    }
+}

@@ -6,8 +6,7 @@ import kg.airport.airportproject.dto.ApplicationUserCredentialsRequestDto;
 import kg.airport.airportproject.dto.ApplicationUserRequestDto;
 import kg.airport.airportproject.dto.ApplicationUserResponseDto;
 import kg.airport.airportproject.dto.JwtTokenResponseDto;
-import kg.airport.airportproject.exception.UserPositionNotExists;
-import kg.airport.airportproject.exception.UserRolesNotAssignedException;
+import kg.airport.airportproject.exception.*;
 import kg.airport.airportproject.service.AuthenticationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -49,7 +48,11 @@ public class AuthenticationsController {
             @RequestBody ApplicationUserRequestDto requestDto
     )
             throws UserPositionNotExists,
-            UserRolesNotAssignedException
+            UserRolesNotAssignedException,
+            UsernameAlreadyExistsException,
+            InvalidUserInfoException,
+            InvalidCredentialsException,
+            InvalidIdException
     {
         return this.authenticationService.registerNewClient(requestDto);
     }
