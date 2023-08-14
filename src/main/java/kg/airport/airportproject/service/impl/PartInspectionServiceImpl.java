@@ -12,7 +12,6 @@ import kg.airport.airportproject.entity.attributes.PartState;
 import kg.airport.airportproject.exception.*;
 import kg.airport.airportproject.mapper.InspectionsMapper;
 import kg.airport.airportproject.repository.PartInspectionsEntityRepository;
-import kg.airport.airportproject.service.AircraftsService;
 import kg.airport.airportproject.service.PartInspectionService;
 import kg.airport.airportproject.service.PartsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +20,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -129,7 +129,10 @@ public class PartInspectionServiceImpl implements PartInspectionService {
     }
 
     @Override
-    public List<PartInspectionsResponseDto> getPartInspectionsHistory(Long aircraftId)
+    public List<PartInspectionsResponseDto> getPartInspectionsHistory(
+            Long aircraftId,
+            Long inspectionCode
+    )
             throws InvalidIdException,
             PartInspectionsNotFoundException
     {
@@ -144,19 +147,33 @@ public class PartInspectionServiceImpl implements PartInspectionService {
         QPartInspectionsEntity root = QPartInspectionsEntity.partInspectionsEntity;
 
         booleanBuilder.and(root.aircraftsEntity.id.eq(aircraftId));
+        if(Objects.nonNull(inspectionCode)) {
+            if(inspectionCode < 1L) {
+                throw new InvalidIdException("Код осмотра не может быть меньше 1!");
+            }
+            booleanBuilder.and(root.inspectionCode.eq(inspectionCode));
+        }
 
         Iterable<PartInspectionsEntity> partInspectionsEntityIterable =
                 this.partInspectionsEntityRepository.findAll(booleanBuilder.getValue());
+
+        Comparator<PartInspectionsEntity> comparator = new Comparator<PartInspectionsEntity>() {
+            @Override
+            public int compare(PartInspectionsEntity o1, PartInspectionsEntity o2) {
+                return o2.getInspectionCode().compareTo(o1.getInspectionCode());
+            }
+        };
         List<PartInspectionsResponseDto> partInspectionsResponseDtoList =
                 StreamSupport
                         .stream(partInspectionsEntityIterable.spliterator(), false)
+                        .sorted(comparator)
                         .map(InspectionsMapper::mapToPartInspectionsResponseDto)
                         .collect(Collectors.toList());
 
         if(partInspectionsResponseDtoList.isEmpty()) {
             throw new PartInspectionsNotFoundException(
                     String.format(
-                            "По ID[%d] самолета технических осмотров не найдено!",
+                            "Для самолета с ID[%d] по заданным параметрам не найдено ни одного техосмотра!",
                             aircraftId
                     )
             );
@@ -175,12 +192,27 @@ public class PartInspectionServiceImpl implements PartInspectionService {
 
         List<PartInspectionsEntity> lastInspection =
                 this.partInspectionsEntityRepository.getLastAircraftInspectionByAircraftId(aircraftId);
+
         if(lastInspection.isEmpty()) {
             throw new PartInspectionsNotFoundException(
-                    String.format("Для самолета с ID[%d] не найдено ни одного техосмотра!", aircraftId)
+                    String.format(
+                            "Для самолета с ID[%d] по заданным параметрам не найдено ни одного техосмотра!",
+                            aircraftId
+                    )
             );
         }
         return lastInspection;
+    }
+
+    @Override
+    public List<PartInspectionsResponseDto> getLastAircraftInspection(Long aircraftId)
+            throws InvalidIdException,
+            PartInspectionsNotFoundException
+    {
+        return this.getLastAircraftInspectionEntities(aircraftId)
+                .stream()
+                .map(InspectionsMapper::mapToPartInspectionsResponseDto)
+                .collect(Collectors.toList());
     }
 
     @Override

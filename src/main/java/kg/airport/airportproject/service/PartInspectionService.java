@@ -23,11 +23,18 @@ public interface PartInspectionService {
             IncompatiblePartException,
             AircraftIsNotOnServiceException, WrongAircraftException;
 
-    List<PartInspectionsResponseDto> getPartInspectionsHistory(Long aircraftId)
+    List<PartInspectionsResponseDto> getPartInspectionsHistory(
+            Long aircraftId,
+            Long inspectionCode
+    )
             throws InvalidIdException,
             PartInspectionsNotFoundException;
 
     List<PartInspectionsEntity> getLastAircraftInspectionEntities(Long aircraftId)
+            throws InvalidIdException,
+            PartInspectionsNotFoundException;
+
+    List<PartInspectionsResponseDto> getLastAircraftInspection(Long aircraftId)
             throws InvalidIdException,
             PartInspectionsNotFoundException;
 
