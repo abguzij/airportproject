@@ -26,12 +26,24 @@ public class InspectionsController {
     @PreAuthorize(value = "hasRole('CHIEF_ENGINEER')")
     @GetMapping(value = "/history")
     public List<PartInspectionsResponseDto> getPartInspectionsHistory(
+            @RequestParam Long aircraftId,
+            @RequestParam(required = false) Long inspectionCode
+    )
+            throws PartInspectionsNotFoundException,
+            InvalidIdException
+    {
+        return this.partInspectionService.getPartInspectionsHistory(aircraftId, inspectionCode);
+    }
+
+    @PreAuthorize(value = "hasRole('CHIEF_ENGINEER')")
+    @GetMapping(value = "/history/last-inspection")
+    public List<PartInspectionsResponseDto> getPartLastAircraftInspection(
             @RequestParam Long aircraftId
     )
             throws PartInspectionsNotFoundException,
             InvalidIdException
     {
-        return this.partInspectionService.getPartInspectionsHistory(aircraftId);
+        return this.partInspectionService.getLastAircraftInspection(aircraftId);
     }
 
     @PreAuthorize(value = "hasAnyRole('ENGINEER', 'CHIEF_ENGINEER')")
