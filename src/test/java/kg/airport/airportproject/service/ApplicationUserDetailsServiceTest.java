@@ -1,11 +1,10 @@
 package kg.airport.airportproject.service;
 
-import kg.airport.airportproject.configuration.SecurityConfigurationTest;
+import kg.airport.airportproject.configuration.UserDetailsConfigurationTest;
 import kg.airport.airportproject.entity.ApplicationUsersEntity;
 import kg.airport.airportproject.entity.UserPositionsEntity;
 import kg.airport.airportproject.entity.UserRolesEntity;
 import kg.airport.airportproject.repository.ApplicationUsersEntityRepository;
-import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,12 +16,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
-import java.time.LocalDateTime;
-
-import static org.junit.jupiter.api.Assertions.*;
-
 @SpringBootTest(properties = "spring.main.allow-bean-definition-overriding=true")
-@ContextConfiguration(classes = SecurityConfigurationTest.class)
+@ContextConfiguration(classes = UserDetailsConfigurationTest.class)
 @ExtendWith(MockitoExtension.class)
 @TestPropertySource(value = "classpath:test.properties")
 public class ApplicationUserDetailsServiceTest {

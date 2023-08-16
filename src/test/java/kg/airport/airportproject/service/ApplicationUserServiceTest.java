@@ -1,6 +1,6 @@
 package kg.airport.airportproject.service;
 
-import kg.airport.airportproject.configuration.SecurityConfigurationTest;
+import kg.airport.airportproject.configuration.UserDetailsConfigurationTest;
 import kg.airport.airportproject.dto.ApplicationUserRequestDto;
 import kg.airport.airportproject.dto.ApplicationUserResponseDto;
 import kg.airport.airportproject.entity.*;
@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SpringBootTest(properties = "spring.main.allow-bean-definition-overriding=true")
-@ContextConfiguration(classes = SecurityConfigurationTest.class)
+@ContextConfiguration(classes = UserDetailsConfigurationTest.class)
 @ExtendWith(MockitoExtension.class)
 @TestPropertySource(value = "classpath:test.properties")
 public class ApplicationUserServiceTest {
