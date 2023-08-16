@@ -1,6 +1,6 @@
 package kg.airport.airportproject.service;
 
-import kg.airport.airportproject.configuration.SecurityConfigurationTest;
+import kg.airport.airportproject.configuration.UserDetailsConfigurationTest;
 import kg.airport.airportproject.entity.*;
 import kg.airport.airportproject.entity.attributes.AircraftStatus;
 import kg.airport.airportproject.entity.attributes.AircraftType;
@@ -11,22 +11,16 @@ import kg.airport.airportproject.repository.*;
 import kg.airport.airportproject.response.StatusChangedResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
-import javax.persistence.Table;
-
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 @SpringBootTest(properties = "spring.main.allow-bean-definition-overriding=true")
-@ContextConfiguration(classes = SecurityConfigurationTest.class)
+@ContextConfiguration(classes = UserDetailsConfigurationTest.class)
 @TestPropertySource(value = "classpath:test.properties")
 public class FlightsServiceTest {
     @Autowired

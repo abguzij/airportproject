@@ -1,253 +1,362 @@
 package kg.airport.airportproject.service;
 
-import kg.airport.airportproject.configuration.SecurityConfigurationTest;
-import kg.airport.airportproject.dto.AircraftRequestDto;
+import com.querydsl.core.types.Predicate;
+import kg.airport.airportproject.configuration.UserDetailsConfigurationTest;
 import kg.airport.airportproject.dto.AircraftResponseDto;
-import kg.airport.airportproject.entity.*;
-import kg.airport.airportproject.entity.attributes.*;
+import kg.airport.airportproject.dto.AircraftTypesResponseDto;
+import kg.airport.airportproject.entity.AircraftsEntity;
+import kg.airport.airportproject.entity.ApplicationUsersEntity;
+import kg.airport.airportproject.entity.attributes.AircraftStatus;
+import kg.airport.airportproject.entity.attributes.AircraftType;
+import kg.airport.airportproject.exception.AircraftNotFoundException;
+import kg.airport.airportproject.exception.IncorrectDateFiltersException;
 import kg.airport.airportproject.repository.AircraftsEntityRepository;
-import kg.airport.airportproject.repository.ApplicationUsersEntityRepository;
-import kg.airport.airportproject.repository.FlightsEntityRepository;
-import kg.airport.airportproject.repository.PartsEntityRepository;
-import kg.airport.airportproject.response.StatusChangedResponse;
+import kg.airport.airportproject.security.mock.AuthenticationMockingUtils;
+import kg.airport.airportproject.service.impl.AircraftsServiceImpl;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-@SpringBootTest
-@ContextConfiguration(classes = SecurityConfigurationTest.class)
-@TestPropertySource(value = "classpath:test.properties")
+@ExtendWith(value = MockitoExtension.class)
 public class AircraftsServiceTest {
-    @Autowired
-    private AircraftsService aircraftsService;
-    @Autowired
-    private AircraftsEntityRepository aircraftsEntityRepository;
-    @Autowired
-    private FlightsEntityRepository flightsEntityRepository;
-    @Autowired
-    private PartsEntityRepository partsEntityRepository;
-    @Autowired
-    private ApplicationUsersEntityRepository applicationUsersEntityRepository;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+    private static final AircraftType searchedAircraftType = AircraftType.PLANE;
+    private static final AircraftStatus searchedAircraftStatus = AircraftStatus.SERVICEABLE;
+    private static final LocalDateTime startDate = LocalDateTime.parse("2020-02-12T23:40:00", formatter);
+    private static final LocalDateTime endDate = LocalDateTime.parse("2021-02-12T23:40:00", formatter);
 
-    @MockBean
+    @Spy
+    private PartsService partsService;
+    @Spy
+    private AircraftSeatsService aircraftSeatsService;
+    @Spy
+    private ApplicationUserService applicationUserService;
+
+    @Mock
     private PartInspectionService partInspectionService;
+    @Mock
+    private AircraftsEntityRepository aircraftsEntityRepository;
 
-    @Test
-    public void testRegisterNewAircraft_OK() {
-        List<PartsEntity> partsEntities = this.createTestAircraftParts();
-        partsEntities = this.partsEntityRepository.saveAll(partsEntities);
+    private AircraftsService aircraftsService;
 
-        AircraftRequestDto requestDto = new AircraftRequestDto();
-        requestDto
-                .setTitle("test")
-                .setNumberOfRows(2)
-                .setAircraftType(AircraftType.PLANE)
-                .setNumberOfSeatsInRow(2)
-                .setPartIdList(
-                        List.of(partsEntities.get(0).getId(), partsEntities.get(2).getId())
-                );
-
-        try {
-            AircraftResponseDto responseDto = this.aircraftsService.registerNewAircraft(requestDto);
-
-            Assertions.assertEquals(requestDto.getAircraftType() , responseDto.getAircraftType());
-            Assertions.assertEquals(AircraftStatus.NEEDS_INSPECTION, responseDto.getStatus());
-            Assertions.assertEquals(requestDto.getTitle(), responseDto.getTitle());
-            Assertions.assertNotNull(responseDto.getRegisteredAt());
-        } catch (Exception e) {
-            Assertions.fail(e.getMessage());
-        }
-    }
-
-    // TODO: 11.08.2023 Протестировать методы требующие аутентикации во время тестирования контроллеров
-
-    @Test
-    public void testAssignAircraftsInspection_OK() {
-        AircraftsEntity aircraft = this.createAircraftsEntity(AircraftStatus.NEEDS_INSPECTION);
-        aircraft = this.aircraftsEntityRepository.save(aircraft);
-
-        ApplicationUsersEntity engineer = this.createEngineersEntityByParameters("test", "test");
-        engineer = this.applicationUsersEntityRepository.save(engineer);
-        try {
-            StatusChangedResponse statusChangedResponse =
-                    this.aircraftsService.assignAircraftInspection(aircraft.getId(), engineer.getId());
-            Assertions.assertTrue(statusChangedResponse.getMessage().endsWith("[ON_INSPECTION]"));
-
-            AircraftsEntity resultEntity = this.aircraftsService.findAircraftsEntityById(aircraft.getId());
-            Assertions.assertEquals(engineer.getId(), resultEntity.getServicedBy().getId());
-        } catch (Exception e) {
-            Assertions.fail(e.getMessage());
-        }
-    }
-
-    @Test
-    public void testConfirmAircraftServiceability_OK() {
-        AircraftsEntity aircraft = this.createAircraftsEntity(AircraftStatus.INSPECTED);
-        aircraft = this.aircraftsEntityRepository.save(aircraft);
-
-        try {
-            Mockito
-                    .when(this.partInspectionService.getLastAircraftInspectionResult(aircraft.getId()))
-                    .thenReturn(PartState.CORRECT);
-
-            StatusChangedResponse result = this.aircraftsService.confirmAircraftServiceability(aircraft.getId());
-            Assertions.assertTrue(
-                    result.getMessage().endsWith(String.format("[%s]", AircraftStatus.SERVICEABLE.toString()))
-            );
-        } catch (Exception e) {
-            Assertions.fail(e.getMessage());
-        }
-    }
-
-    @Test
-    public void testAssignAircraftRepairs_OK() {
-        AircraftsEntity aircraft = this.createAircraftsEntity(AircraftStatus.INSPECTED);
-        aircraft = this.aircraftsEntityRepository.save(aircraft);
-
-        ApplicationUsersEntity engineer = this.createEngineersEntityByParameters("test", "test");
-        engineer = this.applicationUsersEntityRepository.save(engineer);
-
-        try {
-            Mockito
-                    .when(this.partInspectionService.getLastAircraftInspectionResult(aircraft.getId()))
-                    .thenReturn(PartState.NEEDS_FIXING);
-
-            StatusChangedResponse result =
-                    this.aircraftsService.assignAircraftRepairs(aircraft.getId(), engineer.getId());
-            Assertions.assertTrue(
-                    result.getMessage().endsWith(String.format("[%s]", AircraftStatus.ON_REPAIRS.toString()))
-            );
-        } catch (Exception e) {
-            Assertions.fail(e.getMessage());
-        }
-    }
-
-    @Test
-    public void testSendAircraftToRegistrationConfirmation_OK() {
-        AircraftsEntity aircraft = this.createAircraftsEntity(AircraftStatus.SERVICEABLE);
-        aircraft = this.aircraftsEntityRepository.save(aircraft);
-
-        try {
-            StatusChangedResponse result =
-                    this.aircraftsService.sendAircraftToRegistrationConfirmation(aircraft.getId());
-            Assertions.assertTrue(
-                    result.getMessage().endsWith(
-                            String.format("[%s]", AircraftStatus.REGISTRATION_PENDING_CONFIRMATION.toString())
-                    )
-            );
-        } catch (Exception e) {
-            Assertions.fail(e.getMessage());
-        }
-    }
-
-    @Test
-    public void testConfirmAircraftRegistration_OK() {
-        AircraftsEntity aircraft = this.createAircraftsEntity(AircraftStatus.REGISTRATION_PENDING_CONFIRMATION);
-        aircraft = this.aircraftsEntityRepository.save(aircraft);
-
-        try {
-            StatusChangedResponse result =
-                    this.aircraftsService.confirmAircraftRegistration(aircraft.getId());
-            Assertions.assertTrue(
-                    result.getMessage().endsWith(
-                            String.format("[%s]", AircraftStatus.AVAILABLE.toString())
-                    )
-            );
-        } catch (Exception e) {
-            Assertions.fail(e.getMessage());
-        }
-    }
-
-    @Test
-    public void testAssignAircraftRefueling_OK() {
-        AircraftsEntity aircraft = this.createAircraftsEntity(AircraftStatus.AVAILABLE);
-        aircraft = this.aircraftsEntityRepository.save(aircraft);
-
-        FlightsEntity flight = new FlightsEntity();
-        flight
-                .setTicketsLeft(0)
-                .setDestination("test")
-                .setStatus(FlightStatus.DEPARTURE_INITIATED)
-                .setAircraftsEntity(aircraft);
-        aircraft.getFlightsEntities().add(flight);
-
-        this.flightsEntityRepository.save(flight);
-        this.aircraftsEntityRepository.save(aircraft);
-
-        ApplicationUsersEntity engineer = this.createEngineersEntityByParameters("test", "test");
-        engineer = this.applicationUsersEntityRepository.save(engineer);
-
-        try {
-            StatusChangedResponse result =
-                    this.aircraftsService.assignAircraftRefueling(aircraft.getId(), engineer.getId());
-            Assertions.assertTrue(
-                    result.getMessage().endsWith(String.format("[%s]", AircraftStatus.ON_REFUELING.toString()))
-            );
-        } catch (Exception e) {
-            Assertions.fail(e.getMessage());
-        }
+    @BeforeEach
+    public void beforeEach() {
+        this.aircraftsService = new AircraftsServiceImpl(
+                this.aircraftSeatsService,
+                this.partsService,
+                this.applicationUserService,
+                this.partInspectionService,
+                this.aircraftsEntityRepository
+        );
     }
 
     @Test
     public void testGetAllAircrafts_OK() {
+        LocalDateTime requiredRegistrationDate = LocalDateTime.parse("2020-06-15T15:00:03", formatter);
+        Mockito
+                .when(this.aircraftsEntityRepository.findAll(Mockito.any(Predicate.class)))
+                .thenAnswer(
+                        invocationOnMock -> List.of(
+                                new AircraftsEntity()
+                                        .setId(1L)
+                                        .setTitle("test1")
+                                        .setAircraftType(AircraftType.PLANE)
+                                        .setStatus(AircraftStatus.SERVICEABLE)
+                                        .setRegisteredAt(requiredRegistrationDate)
+                        )
+                );
+        try {
+            List<AircraftResponseDto> aircraftResponseDtoList =
+                    this.aircraftsService.getAllAircrafts(
+                            searchedAircraftType,
+                            searchedAircraftStatus,
+                            endDate,
+                            startDate
+                    );
+
+            Assertions.assertEquals(1L, aircraftResponseDtoList.get(0).getId());
+            Assertions.assertEquals("test1", aircraftResponseDtoList.get(0).getTitle());
+            Assertions.assertEquals(searchedAircraftType, aircraftResponseDtoList.get(0).getAircraftType());
+            Assertions.assertEquals(requiredRegistrationDate, aircraftResponseDtoList.get(0).getRegisteredAt());
+            Assertions.assertEquals(searchedAircraftStatus, aircraftResponseDtoList.get(0).getStatus());
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
     }
 
-    // $2a$08$aV2e9d/hcmW57VagrFIlvuG2Kuvk9VLmGHECyG93i5sKAtHdY5VEq
-    private List<PartsEntity> createTestAircraftParts() {
-        List<PartsEntity> partsEntities = new ArrayList<>();
-        partsEntities.add(
-                new PartsEntity()
-                        .setTitle("test_1")
-                        .setAircraftType(AircraftType.PLANE)
-                        .setPartType(PartType.TAIL_PART)
+    @Test
+    public void testGetAllAircrafts_AircraftsNotFound() {
+        Mockito
+                .when(this.aircraftsEntityRepository.findAll(Mockito.any(Predicate.class)))
+                .thenAnswer(invocationOnMock -> new ArrayList<>());
+
+        Exception exception = Assertions.assertThrows(
+                AircraftNotFoundException.class,
+                () -> this.aircraftsService.getAllAircrafts(
+                        searchedAircraftType,
+                        searchedAircraftStatus,
+                        endDate,
+                        startDate
+                )
         );
-        partsEntities.add(
-                new PartsEntity()
-                        .setTitle("test_2")
-                        .setAircraftType(AircraftType.PLANE)
-                        .setPartType(PartType.POWER_PLANT)
+        Assertions.assertEquals(
+                "Самолетов по заданным параметрам не найдено!",
+                exception.getMessage()
         );
-        partsEntities.add(
-                new PartsEntity()
-                        .setTitle("test_3")
-                        .setAircraftType(AircraftType.PLANE)
-                        .setPartType(PartType.WING_PART)
-        );
-        return this.partsEntityRepository.saveAll(partsEntities);
     }
 
-    private ApplicationUsersEntity createEngineersEntityByParameters(
-            String username,
-            String fullName
-    ) {
-        ApplicationUsersEntity applicationUsersEntity = new ApplicationUsersEntity()
-                .setUsername(username)
-                .setFullName(fullName)
-                .setPassword(this.passwordEncoder.encode("test"))
-                .setUserPosition(new UserPositionsEntity().setId(6L).setPositionTitle("ENGINEER"));
-
-        applicationUsersEntity.getUserRolesEntityList().add(new UserRolesEntity().setId(7L).setRoleTitle("ENGINEER"));
-
-        return applicationUsersEntity;
+    @Test
+    public void testGetAllAircrafts_IncorrectDateFilters() {
+        Exception exception = Assertions.assertThrows(
+                IncorrectDateFiltersException.class,
+                () -> this.aircraftsService.getAllAircrafts(
+                        searchedAircraftType,
+                        searchedAircraftStatus,
+                        startDate,
+                        endDate
+                )
+        );
+        Assertions.assertEquals(
+                "Неверно заданы фильтры поиска по дате! Начальная дата не может быть позже конечной!",
+                exception.getMessage()
+        );
     }
 
-    private AircraftsEntity createAircraftsEntity(AircraftStatus status) {
-        return new AircraftsEntity()
-                .setAircraftType(AircraftType.PLANE)
-                .setStatus(status)
-                .setTitle("test");
+    @Test
+    public void testGetNewAircrafts_OK() {
+        AuthenticationMockingUtils.mockAuthenticatedEngineer();
+        LocalDateTime requiredRegistrationDate = LocalDateTime.parse("2020-06-15T15:00:03", formatter);
+        Mockito
+                .when(this.aircraftsEntityRepository.findAll(Mockito.any(Predicate.class)))
+                .thenAnswer(
+                        invocationOnMock -> List.of(
+                                new AircraftsEntity()
+                                        .setId(1L)
+                                        .setTitle("test1")
+                                        .setAircraftType(searchedAircraftType)
+                                        .setStatus(AircraftStatus.NEEDS_INSPECTION)
+                                        .setRegisteredAt(requiredRegistrationDate)
+                                        .setServicedBy(new ApplicationUsersEntity().setId(
+                                                UserDetailsConfigurationTest.ENGINEERS_DEFAULT_ID
+                                        ))
+                        )
+                );
+
+        try {
+            List<AircraftResponseDto> aircraftResponseDtoList =
+                    this.aircraftsService.getNewAircrafts(searchedAircraftType, endDate, startDate);
+
+            Assertions.assertEquals(1, aircraftResponseDtoList.size());
+            Assertions.assertEquals(AircraftStatus.NEEDS_INSPECTION, aircraftResponseDtoList.get(0).getStatus());
+            Assertions.assertEquals(searchedAircraftType, aircraftResponseDtoList.get(0).getAircraftType());
+            Assertions.assertTrue(endDate.isAfter(aircraftResponseDtoList.get(0).getRegisteredAt()));
+            Assertions.assertTrue(startDate.isBefore(aircraftResponseDtoList.get(0).getRegisteredAt()));
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testGetNewAircrafts_AircraftNotFound() {
+        AuthenticationMockingUtils.mockAuthenticatedEngineer();
+        Mockito
+                .when(this.aircraftsEntityRepository.findAll(Mockito.any(Predicate.class)))
+                .thenAnswer(invocationOnMock -> new ArrayList<>());
+
+        Exception exception = Assertions.assertThrows(
+                AircraftNotFoundException.class,
+                () -> this.aircraftsService.getNewAircrafts(
+                        searchedAircraftType,
+                        endDate,
+                        startDate
+                )
+        );
+        Assertions.assertEquals(
+                "Самолетов по заданным параметрам не найдено!",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    public void testGetNewAircrafts_IncorrectDateFilters() {
+        AuthenticationMockingUtils.mockAuthenticatedEngineer();
+
+        Exception exception = Assertions.assertThrows(
+                IncorrectDateFiltersException.class,
+                () -> this.aircraftsService.getNewAircrafts(
+                        searchedAircraftType,
+                        startDate,
+                        endDate
+                )
+        );
+        Assertions.assertEquals(
+                "Неверно заданы фильтры поиска по дате! Начальная дата не может быть позже конечной!",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    public void testGetAircraftsForRepairs_OK() {
+        AuthenticationMockingUtils.mockAuthenticatedEngineer();
+        LocalDateTime requiredRegistrationDate = LocalDateTime.parse("2020-06-15T15:00:03", formatter);
+        Mockito
+                .when(this.aircraftsEntityRepository.findAll(Mockito.any(Predicate.class)))
+                .thenAnswer(
+                        invocationOnMock -> List.of(
+                                new AircraftsEntity()
+                                        .setId(1L)
+                                        .setTitle("test1")
+                                        .setAircraftType(searchedAircraftType)
+                                        .setStatus(AircraftStatus.ON_REPAIRS)
+                                        .setRegisteredAt(requiredRegistrationDate)
+                                        .setServicedBy(new ApplicationUsersEntity().setId(
+                                                UserDetailsConfigurationTest.ENGINEERS_DEFAULT_ID
+                                        ))
+                        )
+                );
+        try {
+            List<AircraftResponseDto> aircraftResponseDtoList =
+                    this.aircraftsService.getAircraftsForRepairs(searchedAircraftType, endDate, startDate);
+
+            Assertions.assertEquals(1, aircraftResponseDtoList.size());
+            Assertions.assertEquals(AircraftStatus.ON_REPAIRS, aircraftResponseDtoList.get(0).getStatus());
+            Assertions.assertEquals(searchedAircraftType, aircraftResponseDtoList.get(0).getAircraftType());
+            Assertions.assertTrue(endDate.isAfter(aircraftResponseDtoList.get(0).getRegisteredAt()));
+            Assertions.assertTrue(startDate.isBefore(aircraftResponseDtoList.get(0).getRegisteredAt()));
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testGetAircraftsForRepairs_AircraftNotFound() {
+        AuthenticationMockingUtils.mockAuthenticatedEngineer();
+        Mockito
+                .when(this.aircraftsEntityRepository.findAll(Mockito.any(Predicate.class)))
+                .thenAnswer(invocationOnMock -> new ArrayList<>());
+
+        Exception exception = Assertions.assertThrows(
+                AircraftNotFoundException.class,
+                () -> this.aircraftsService.getAircraftsForRepairs(
+                        searchedAircraftType,
+                        endDate,
+                        startDate
+                )
+        );
+        Assertions.assertEquals(
+                "Самолетов по заданным параметрам не найдено!",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    public void testGetAircraftsForRepairs_IncorrectDateFilters() {
+        AuthenticationMockingUtils.mockAuthenticatedEngineer();
+
+        Exception exception = Assertions.assertThrows(
+                IncorrectDateFiltersException.class,
+                () -> this.aircraftsService.getAircraftsForRepairs(
+                        searchedAircraftType,
+                        startDate,
+                        endDate
+                )
+        );
+        Assertions.assertEquals(
+                "Неверно заданы фильтры поиска по дате! Начальная дата не может быть позже конечной!",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    public void testGetAircraftsForRefueling_OK() {
+        AuthenticationMockingUtils.mockAuthenticatedEngineer();
+        LocalDateTime requiredRegistrationDate = LocalDateTime.parse("2020-06-15T15:00:03", formatter);
+        Mockito
+                .when(this.aircraftsEntityRepository.findAll(Mockito.any(Predicate.class)))
+                .thenAnswer(
+                        invocationOnMock -> List.of(
+                                new AircraftsEntity()
+                                        .setId(1L)
+                                        .setTitle("test1")
+                                        .setAircraftType(searchedAircraftType)
+                                        .setStatus(AircraftStatus.ON_REFUELING)
+                                        .setRegisteredAt(requiredRegistrationDate)
+                                        .setServicedBy(new ApplicationUsersEntity().setId(
+                                                UserDetailsConfigurationTest.ENGINEERS_DEFAULT_ID
+                                        ))
+                        )
+                );
+        try {
+            List<AircraftResponseDto> aircraftResponseDtoList =
+                    this.aircraftsService.getAircraftsForRefueling(searchedAircraftType, endDate, startDate);
+
+            Assertions.assertEquals(1, aircraftResponseDtoList.size());
+            Assertions.assertEquals(AircraftStatus.ON_REFUELING, aircraftResponseDtoList.get(0).getStatus());
+            Assertions.assertEquals(searchedAircraftType, aircraftResponseDtoList.get(0).getAircraftType());
+            Assertions.assertTrue(endDate.isAfter(aircraftResponseDtoList.get(0).getRegisteredAt()));
+            Assertions.assertTrue(startDate.isBefore(aircraftResponseDtoList.get(0).getRegisteredAt()));
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testGetAircraftsForRefueling_AircraftNotFound() {
+        AuthenticationMockingUtils.mockAuthenticatedEngineer();
+        Mockito
+                .when(this.aircraftsEntityRepository.findAll(Mockito.any(Predicate.class)))
+                .thenAnswer(invocationOnMock -> new ArrayList<>());
+
+        Exception exception = Assertions.assertThrows(
+                AircraftNotFoundException.class,
+                () -> this.aircraftsService.getAircraftsForRefueling(
+                        searchedAircraftType,
+                        endDate,
+                        startDate
+                )
+        );
+        Assertions.assertEquals(
+                "Самолетов по заданным параметрам не найдено!",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    public void testGetAircraftsForRefueling_IncorrectDateFilters() {
+        AuthenticationMockingUtils.mockAuthenticatedEngineer();
+
+        Exception exception = Assertions.assertThrows(
+                IncorrectDateFiltersException.class,
+                () -> this.aircraftsService.getAircraftsForRefueling(
+                        searchedAircraftType,
+                        startDate,
+                        endDate
+                )
+        );
+        Assertions.assertEquals(
+                "Неверно заданы фильтры поиска по дате! Начальная дата не может быть позже конечной!",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    public void testGetAircraftTypes_OK() {
+        try {
+            AircraftTypesResponseDto aircraftTypesResponseDto =
+                    this.aircraftsService.getAllAircraftTypes();
+            Assertions.assertEquals(List.of(AircraftType.values()), aircraftTypesResponseDto.getAircraftTypes());
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
     }
 }

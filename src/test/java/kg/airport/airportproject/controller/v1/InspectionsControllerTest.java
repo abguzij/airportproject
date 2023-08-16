@@ -1,7 +1,7 @@
 package kg.airport.airportproject.controller.v1;
 
 import com.querydsl.core.types.Predicate;
-import kg.airport.airportproject.configuration.SecurityConfigurationTest;
+import kg.airport.airportproject.configuration.UserDetailsConfigurationTest;
 import kg.airport.airportproject.dto.PartInspectionsResponseDto;
 import kg.airport.airportproject.dto.PartStatesResponseDto;
 import kg.airport.airportproject.entity.*;
@@ -10,7 +10,6 @@ import kg.airport.airportproject.repository.PartInspectionsEntityRepository;
 import kg.airport.airportproject.response.ErrorResponse;
 import kg.airport.airportproject.security.JwtTokenAuthenticationFactory;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,28 +19,20 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.lang.reflect.Type;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = "spring.main.allow-bean-definition-overriding=true"
 )
-@ContextConfiguration(classes = SecurityConfigurationTest.class)
+@ContextConfiguration(classes = UserDetailsConfigurationTest.class)
 @TestPropertySource(value = "classpath:test.properties")
 public class InspectionsControllerTest {
     private static final Long AIRCRAFT_ID = 1L;

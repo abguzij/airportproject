@@ -1,6 +1,6 @@
 package kg.airport.airportproject.service;
 
-import kg.airport.airportproject.configuration.SecurityConfigurationTest;
+import kg.airport.airportproject.configuration.UserDetailsConfigurationTest;
 import kg.airport.airportproject.dto.AircraftSeatResponseDto;
 import kg.airport.airportproject.entity.AircraftSeatsEntity;
 import kg.airport.airportproject.entity.AircraftsEntity;
@@ -9,10 +9,7 @@ import kg.airport.airportproject.entity.attributes.AircraftType;
 import kg.airport.airportproject.repository.AircraftSeatsEntityRepository;
 import kg.airport.airportproject.repository.AircraftsEntityRepository;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
@@ -22,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SpringBootTest
-@ContextConfiguration(classes = SecurityConfigurationTest.class)
+@ContextConfiguration(classes = UserDetailsConfigurationTest.class)
 @TestPropertySource(value = "classpath:test.properties")
 public class AircraftSeatsServiceTest {
     @Autowired

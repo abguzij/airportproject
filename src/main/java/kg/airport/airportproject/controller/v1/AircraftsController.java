@@ -7,6 +7,7 @@ import kg.airport.airportproject.exception.*;
 import kg.airport.airportproject.response.StatusChangedResponse;
 import kg.airport.airportproject.service.AircraftsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -156,7 +157,9 @@ public class AircraftsController {
     public List<AircraftResponseDto> getAllAircrafts(
             @RequestParam(required = false) AircraftType aircraftType,
             @RequestParam(required = false) AircraftStatus aircraftStatus,
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
             @RequestParam(required = false) LocalDateTime registeredAfter,
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
             @RequestParam(required = false) LocalDateTime registeredBefore
     )
             throws AircraftNotFoundException,
@@ -169,7 +172,9 @@ public class AircraftsController {
     @GetMapping(value = "/new")
     public List<AircraftResponseDto> getNewAircrafts(
             @RequestParam(required = false) AircraftType aircraftType,
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
             @RequestParam(required = false) LocalDateTime registeredAfter,
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
             @RequestParam(required = false) LocalDateTime registeredBefore
     )
             throws AircraftNotFoundException,
@@ -182,7 +187,9 @@ public class AircraftsController {
     @GetMapping(value = "/for-repairs")
     public List<AircraftResponseDto> getAircraftsForRepairs(
             @RequestParam(required = false) AircraftType aircraftType,
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
             @RequestParam(required = false) LocalDateTime registeredAfter,
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
             @RequestParam(required = false) LocalDateTime registeredBefore
     )
             throws AircraftNotFoundException,
@@ -195,7 +202,9 @@ public class AircraftsController {
     @GetMapping(value = "/for-refueling")
     public List<AircraftResponseDto> getAircraftsForRefueling(
             @RequestParam(required = false) AircraftType aircraftType,
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
             @RequestParam(required = false) LocalDateTime registeredBefore,
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
             @RequestParam(required = false) LocalDateTime registeredAfter
     )
             throws AircraftNotFoundException,

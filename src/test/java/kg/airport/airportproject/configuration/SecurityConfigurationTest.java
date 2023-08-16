@@ -1,61 +1,54 @@
 package kg.airport.airportproject.configuration;
 
-import kg.airport.airportproject.entity.ApplicationUsersEntity;
-import kg.airport.airportproject.entity.UserRolesEntity;
+import kg.airport.airportproject.security.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.test.context.TestPropertySource;
-
-import javax.swing.*;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @TestConfiguration
 @TestPropertySource(value = "classpath:test.properties")
 public class SecurityConfigurationTest {
-    public static final String DEFAULT_CLIENT_USERNAME = "client";
-    public static final String DEFAULT_CLIENT_RAW_PASSWORD = "client";
-    public static final String DEFAULT_CHIEF_ENGINEERS_USERNAME = "chief_eng";
-    public static final String DEFAULT_CHIEF_ENGINEERS_RAW_PASSWORD = "chief_eng";
-    @Bean
-    public UserDetailsService applicationUserDetailsServiceImpl() {
-        return new InMemoryUserDetailsManager(
-                this.client(),
-                this.chiefEngineer()
-        );
+    private final AuthenticationEntryPoint authenticationEntryPoint;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @Autowired
+    public SecurityConfigurationTest(
+            AuthenticationEntryPoint authenticationEntryPoint,
+            JwtAuthenticationFilter jwtAuthenticationFilter
+    ) {
+        this.authenticationEntryPoint = authenticationEntryPoint;
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(8);
-    }
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http.csrf().disable();
+        http.cors();
 
-    private ApplicationUsersEntity client() {
-        ApplicationUsersEntity client = new ApplicationUsersEntity()
-                .setUsername(DEFAULT_CLIENT_USERNAME)
-                .setPassword(this.passwordEncoder().encode(DEFAULT_CLIENT_RAW_PASSWORD))
-                .setFullName("Default Client")
-                .setId(1L)
-                .setEnabled(true);
-        client.getUserRolesEntityList().add(new UserRolesEntity().setId(1L).setRoleTitle("CLIENT"));
-        return client;
-    }
+        http.exceptionHandling().authenticationEntryPoint(this.authenticationEntryPoint);
+        http.addFilterBefore(this.jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-    private ApplicationUsersEntity chiefEngineer() {
-        ApplicationUsersEntity chiefEngineer = new ApplicationUsersEntity()
-                .setUsername(DEFAULT_CHIEF_ENGINEERS_USERNAME)
-                .setPassword(this.passwordEncoder().encode(DEFAULT_CHIEF_ENGINEERS_RAW_PASSWORD))
-                .setFullName("Default Chief Engineer")
-                .setId(2L)
-                .setEnabled(true);
-        chiefEngineer.getUserRolesEntityList().add(new UserRolesEntity().setId(6L).setRoleTitle("CHIEF_ENGINEER"));
-        return chiefEngineer;
+        http
+                .httpBasic()
+                .and()
+                .authorizeHttpRequests()
+                .antMatchers(
+                        "/**/auth/**",
+                        "/v3/api-docs/**",
+                        "/swagger-resources/**",
+                        "/swagger-ui/**"
+                ).permitAll()
+                .anyRequest().authenticated()
+                .and()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+
+
+        return http.build();
     }
 }

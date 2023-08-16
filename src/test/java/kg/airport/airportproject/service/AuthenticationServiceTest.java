@@ -1,31 +1,22 @@
 package kg.airport.airportproject.service;
 
-import io.jsonwebtoken.Jwts;
-import kg.airport.airportproject.configuration.SecurityConfigurationTest;
+import kg.airport.airportproject.configuration.UserDetailsConfigurationTest;
 import kg.airport.airportproject.dto.ApplicationUserCredentialsRequestDto;
 import kg.airport.airportproject.dto.ApplicationUserRequestDto;
 import kg.airport.airportproject.dto.ApplicationUserResponseDto;
 import kg.airport.airportproject.dto.JwtTokenResponseDto;
 import kg.airport.airportproject.entity.ApplicationUsersEntity;
-import kg.airport.airportproject.repository.ApplicationUsersEntityRepository;
 import kg.airport.airportproject.security.JwtTokenHandler;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 @SpringBootTest
-@ContextConfiguration(classes = SecurityConfigurationTest.class)
+@ContextConfiguration(classes = UserDetailsConfigurationTest.class)
 @TestPropertySource(value = "classpath:test.properties")
 public class AuthenticationServiceTest {
     @Autowired

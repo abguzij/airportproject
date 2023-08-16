@@ -411,16 +411,15 @@ public class AircraftsServiceImpl implements AircraftsService {
             throws IncorrectDateFiltersException,
             AircraftNotFoundException
     {
-        BooleanBuilder booleanBuilder = new BooleanBuilder(
-                this.buildCommonAircraftsSearchPredicate(aircraftType, registeredAfter, registeredBefore)
-        );
-        QAircraftsEntity root = QAircraftsEntity.aircraftsEntity;
+        BooleanBuilder booleanBuilder =
+                this.buildCommonAircraftsSearchPredicate(aircraftType, registeredAfter, registeredBefore);
 
+        QAircraftsEntity root = QAircraftsEntity.aircraftsEntity;
         if(Objects.nonNull(aircraftStatus)) {
             booleanBuilder.and(root.status.eq(aircraftStatus));
         }
 
-        return this.findAircraftsByBuiltPredicate(booleanBuilder.getValue());
+        return this.findAircraftsByBuiltPredicate(booleanBuilder);
     }
 
     @Override
@@ -435,9 +434,9 @@ public class AircraftsServiceImpl implements AircraftsService {
         ApplicationUsersEntity authorizedUser =
                 (ApplicationUsersEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        BooleanBuilder booleanBuilder = new BooleanBuilder(
-                this.buildCommonAircraftsSearchPredicate(aircraftType, registeredAfter, registeredBefore)
-        );
+        BooleanBuilder booleanBuilder =
+                this.buildCommonAircraftsSearchPredicate(aircraftType, registeredAfter, registeredBefore);
+
         QAircraftsEntity root = QAircraftsEntity.aircraftsEntity;
         booleanBuilder.and(root.status.eq(AircraftStatus.ON_REPAIRS));
         if(UserRolesUtils.checkIfUserRolesListContainsSuchUserRoleTitle(
@@ -446,7 +445,7 @@ public class AircraftsServiceImpl implements AircraftsService {
         )) {
             booleanBuilder.and(root.servicedBy.id.eq(authorizedUser.getId()));
         }
-        return this.findAircraftsByBuiltPredicate(booleanBuilder.getValue());
+        return this.findAircraftsByBuiltPredicate(booleanBuilder);
     }
 
     @Override
@@ -460,9 +459,9 @@ public class AircraftsServiceImpl implements AircraftsService {
     {
         ApplicationUsersEntity authorizedUser =
                 (ApplicationUsersEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        BooleanBuilder booleanBuilder = new BooleanBuilder(
-                this.buildCommonAircraftsSearchPredicate(aircraftType, registeredAfter, registeredBefore)
-        );
+
+        BooleanBuilder booleanBuilder
+                = this.buildCommonAircraftsSearchPredicate(aircraftType, registeredAfter, registeredBefore);
         QAircraftsEntity root = QAircraftsEntity.aircraftsEntity;
         booleanBuilder.and(root.status.eq(AircraftStatus.NEEDS_INSPECTION));
         if(UserRolesUtils.checkIfUserRolesListContainsSuchUserRoleTitle(
@@ -471,7 +470,7 @@ public class AircraftsServiceImpl implements AircraftsService {
         )) {
             booleanBuilder.and(root.servicedBy.id.eq(authorizedUser.getId()));
         }
-        return this.findAircraftsByBuiltPredicate(booleanBuilder.getValue());
+        return this.findAircraftsByBuiltPredicate(booleanBuilder);
     }
 
     @Override
@@ -485,9 +484,10 @@ public class AircraftsServiceImpl implements AircraftsService {
     {
         ApplicationUsersEntity authorizedUser =
                 (ApplicationUsersEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        BooleanBuilder booleanBuilder = new BooleanBuilder(
-                this.buildCommonAircraftsSearchPredicate(aircraftType, registeredAfter, registeredBefore)
-        );
+
+        BooleanBuilder booleanBuilder =
+                this.buildCommonAircraftsSearchPredicate(aircraftType, registeredAfter, registeredBefore);
+
         QAircraftsEntity root = QAircraftsEntity.aircraftsEntity;
         booleanBuilder.and(root.status.eq(AircraftStatus.ON_REFUELING));
         if(UserRolesUtils.checkIfUserRolesListContainsSuchUserRoleTitle(
@@ -496,7 +496,7 @@ public class AircraftsServiceImpl implements AircraftsService {
         )) {
             booleanBuilder.and(root.servicedBy.id.eq(authorizedUser.getId()));
         }
-        return this.findAircraftsByBuiltPredicate(booleanBuilder.getValue());
+        return this.findAircraftsByBuiltPredicate(booleanBuilder);
     }
 
     @Override
@@ -524,7 +524,7 @@ public class AircraftsServiceImpl implements AircraftsService {
         return AircraftsMapper.mapToAircraftTypesResponseDto(List.of(AircraftType.values()));
     }
 
-    private Predicate buildCommonAircraftsSearchPredicate(
+    private BooleanBuilder buildCommonAircraftsSearchPredicate(
             AircraftType aircraftType,
             LocalDateTime registeredAfter,
             LocalDateTime registeredBefore
@@ -547,17 +547,17 @@ public class AircraftsServiceImpl implements AircraftsService {
                         "Неверно заданы фильтры поиска по дате! Начальная дата не может быть позже конечной!"
                 );
             }
-            booleanBuilder.and(root.registeredAt.goe(registeredAfter));
+            booleanBuilder.and(root.registeredAt.loe(registeredBefore));
         }
 
-        return booleanBuilder.getValue();
+        return booleanBuilder;
     }
 
-    private List<AircraftResponseDto> findAircraftsByBuiltPredicate(Predicate builtPredicate)
+    private List<AircraftResponseDto> findAircraftsByBuiltPredicate(BooleanBuilder booleanBuilder)
             throws AircraftNotFoundException
     {
         Iterable<AircraftsEntity> aircraftsEntityIterable =
-                this.aircraftsEntityRepository.findAll(builtPredicate);
+                this.aircraftsEntityRepository.findAll(booleanBuilder.getValue());
         List<AircraftResponseDto> aircraftResponseDtoList =
                 StreamSupport
                         .stream(aircraftsEntityIterable.spliterator(), false)
