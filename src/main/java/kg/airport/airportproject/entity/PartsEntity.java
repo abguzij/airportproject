@@ -104,4 +104,17 @@ public class PartsEntity {
         this.partInspectionsEntities = partInspectionsEntities;
         return this;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PartsEntity that = (PartsEntity) o;
+        return Objects.equals(title, that.title) && aircraftType == that.aircraftType && partType == that.partType;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(title, aircraftType, partType);
+    }
 }

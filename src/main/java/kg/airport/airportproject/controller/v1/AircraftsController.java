@@ -147,7 +147,9 @@ public class AircraftsController {
     )
             throws PartsNotFoundException,
             IncompatiblePartException,
-            InvalidIdException
+            InvalidIdException,
+            InvalidAircraftTypeException,
+            InvalidAircraftTitleException
     {
         return this.aircraftsService.registerNewAircraft(requestDto);
     }

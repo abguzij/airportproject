@@ -2,6 +2,10 @@ package kg.airport.airportproject.configuration;
 
 import kg.airport.airportproject.entity.ApplicationUsersEntity;
 import kg.airport.airportproject.entity.UserRolesEntity;
+import kg.airport.airportproject.exception.UserRolesNotFoundException;
+import kg.airport.airportproject.security.DefaultCredentialsProvider;
+import kg.airport.airportproject.security.TestApplicationUsersFactory;
+import kg.airport.airportproject.security.TestAuthoritiesFactory;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -13,15 +17,6 @@ import org.springframework.test.context.TestPropertySource;
 @TestConfiguration
 @TestPropertySource(value = "classpath:test.properties")
 public class UserDetailsConfigurationTest {
-    public static final String DEFAULT_CLIENT_USERNAME = "client";
-    public static final String DEFAULT_CLIENT_RAW_PASSWORD = "client";
-    public static final String DEFAULT_CHIEF_ENGINEERS_USERNAME = "chief_eng";
-    public static final String DEFAULT_CHIEF_ENGINEERS_RAW_PASSWORD = "chief_eng";
-    public static final Long ENGINEERS_DEFAULT_ID = 3L;
-    public static final String DEFAULT_ENGINEERS_USERNAME = "eng";
-    public static final String DEFAULT_ENGINEERS_RAW_PASSWORD = "eng";
-    public static final String DEFAULT_MANAGER_USERNAME = "manager";
-    public static final String DEFAULT_MANAGER_RAW_PASSWORD = "manager";
 
     @Bean
     public UserDetailsService applicationUserDetailsServiceImpl() {
@@ -29,7 +24,8 @@ public class UserDetailsConfigurationTest {
                 this.client(),
                 this.chiefEngineer(),
                 this.engineer(),
-                this.manager()
+                this.manager(),
+                this.dispatcher()
         );
     }
 
@@ -40,8 +36,8 @@ public class UserDetailsConfigurationTest {
 
     private ApplicationUsersEntity client() {
         ApplicationUsersEntity client = new ApplicationUsersEntity()
-                .setUsername(DEFAULT_CLIENT_USERNAME)
-                .setPassword(this.passwordEncoder().encode(DEFAULT_CLIENT_RAW_PASSWORD))
+                .setUsername(DefaultCredentialsProvider.DEFAULT_CLIENT_USERNAME)
+                .setPassword(this.passwordEncoder().encode(DefaultCredentialsProvider.DEFAULT_CLIENT_RAW_PASSWORD))
                 .setFullName("Default Client")
                 .setId(1L)
                 .setEnabled(true);
@@ -51,8 +47,10 @@ public class UserDetailsConfigurationTest {
 
     private ApplicationUsersEntity chiefEngineer() {
         ApplicationUsersEntity chiefEngineer = new ApplicationUsersEntity()
-                .setUsername(DEFAULT_CHIEF_ENGINEERS_USERNAME)
-                .setPassword(this.passwordEncoder().encode(DEFAULT_CHIEF_ENGINEERS_RAW_PASSWORD))
+                .setUsername(DefaultCredentialsProvider.DEFAULT_CHIEF_ENGINEERS_USERNAME)
+                .setPassword(
+                        this.passwordEncoder().encode(DefaultCredentialsProvider.DEFAULT_CHIEF_ENGINEERS_RAW_PASSWORD)
+                )
                 .setFullName("Default Chief Engineer")
                 .setId(2L)
                 .setEnabled(true);
@@ -62,10 +60,10 @@ public class UserDetailsConfigurationTest {
 
     public ApplicationUsersEntity engineer() {
         ApplicationUsersEntity engineer = new ApplicationUsersEntity()
-                .setUsername(DEFAULT_ENGINEERS_USERNAME)
-                .setPassword(this.passwordEncoder().encode(DEFAULT_ENGINEERS_RAW_PASSWORD))
+                .setUsername(DefaultCredentialsProvider.DEFAULT_ENGINEERS_USERNAME)
+                .setPassword(this.passwordEncoder().encode(DefaultCredentialsProvider.DEFAULT_ENGINEERS_RAW_PASSWORD))
                 .setFullName("Default Engineer")
-                .setId(ENGINEERS_DEFAULT_ID)
+                .setId(DefaultCredentialsProvider.ENGINEERS_DEFAULT_ID)
                 .setEnabled(true);
         engineer.getUserRolesEntityList().add(new UserRolesEntity().setId(7L).setRoleTitle("ENGINEER"));
         return engineer;
@@ -73,12 +71,26 @@ public class UserDetailsConfigurationTest {
 
     public ApplicationUsersEntity manager() {
         ApplicationUsersEntity manager = new ApplicationUsersEntity()
-                .setUsername(DEFAULT_MANAGER_USERNAME)
-                .setPassword(this.passwordEncoder().encode(DEFAULT_MANAGER_RAW_PASSWORD))
+                .setUsername(DefaultCredentialsProvider.DEFAULT_MANAGER_USERNAME)
+                .setPassword(this.passwordEncoder().encode(DefaultCredentialsProvider.DEFAULT_MANAGER_RAW_PASSWORD))
                 .setFullName("Default Manager")
                 .setId(4L)
                 .setEnabled(true);
         manager.getUserRolesEntityList().add(new UserRolesEntity().setId(3L).setRoleTitle("MANAGER"));
         return manager;
+    }
+
+    public ApplicationUsersEntity dispatcher() {
+        try {
+            return new ApplicationUsersEntity()
+                    .setUsername(DefaultCredentialsProvider.DEFAULT_DISPATCHER_USERNAME)
+                    .setPassword(this.passwordEncoder().encode(DefaultCredentialsProvider.DEFAULT_DISPATCHER_RAW_PASSWORD))
+                    .setFullName("Default Dispatcher")
+                    .setId(DefaultCredentialsProvider.DISPATCHER_DEFAULT_ID)
+                    .setEnabled(true)
+                    .setUserRolesEntityList(TestAuthoritiesFactory.getUserRolesByUserRoleTitle("DISPATCHER"));
+        } catch (UserRolesNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

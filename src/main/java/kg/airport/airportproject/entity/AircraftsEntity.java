@@ -7,6 +7,7 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(schema = "public", name = "aircrafts")
@@ -144,5 +145,18 @@ public class AircraftsEntity {
     public AircraftsEntity setPartsEntities(List<PartsEntity> partsEntities) {
         this.partsEntities = partsEntities;
         return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AircraftsEntity aircrafts = (AircraftsEntity) o;
+        return Objects.equals(title, aircrafts.title) && aircraftType == aircrafts.aircraftType && Objects.equals(aircraftSeatsEntityList, aircrafts.aircraftSeatsEntityList) && Objects.equals(partsEntities, aircrafts.partsEntities);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(title, aircraftType, aircraftSeatsEntityList, partsEntities);
     }
 }

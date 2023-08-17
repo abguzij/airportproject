@@ -1,7 +1,6 @@
 package kg.airport.airportproject.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.Predicate;
 import kg.airport.airportproject.dto.*;
 import kg.airport.airportproject.entity.*;
 import kg.airport.airportproject.entity.attributes.AircraftStatus;
@@ -14,6 +13,7 @@ import kg.airport.airportproject.repository.AircraftsEntityRepository;
 import kg.airport.airportproject.response.StatusChangedResponse;
 import kg.airport.airportproject.service.*;
 import kg.airport.airportproject.utils.UserRolesUtils;
+import kg.airport.airportproject.validator.AircraftsValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -33,6 +33,7 @@ public class AircraftsServiceImpl implements AircraftsService {
     private final ApplicationUserService applicationUserService;
     private final PartInspectionService partInspectionService;
     private final AircraftsEntityRepository aircraftsEntityRepository;
+    private final AircraftsValidator aircraftsValidator;
 
     @Autowired
     public AircraftsServiceImpl(
@@ -40,24 +41,25 @@ public class AircraftsServiceImpl implements AircraftsService {
             PartsService partsService,
             ApplicationUserService applicationUserService,
             PartInspectionService partInspectionService,
-            AircraftsEntityRepository aircraftsEntityRepository
-    ) {
+            AircraftsEntityRepository aircraftsEntityRepository,
+            AircraftsValidator aircraftsValidator) {
         this.aircraftSeatsService = aircraftSeatsService;
         this.partsService = partsService;
         this.applicationUserService = applicationUserService;
         this.partInspectionService = partInspectionService;
         this.aircraftsEntityRepository = aircraftsEntityRepository;
+        this.aircraftsValidator = aircraftsValidator;
     }
 
     @Override
     public AircraftResponseDto registerNewAircraft(AircraftRequestDto requestDto)
             throws PartsNotFoundException,
             IncompatiblePartException,
-            InvalidIdException
+            InvalidIdException,
+            InvalidAircraftTypeException,
+            InvalidAircraftTitleException
     {
-        if(Objects.isNull(requestDto)) {
-            throw new IllegalArgumentException("Создаваемый самолет не может быть null!");
-        }
+        this.aircraftsValidator.validateAircraftRequestDto(requestDto);
         AircraftsEntity aircraft = AircraftsMapper.mapAircraftRequestDtoToEntity(requestDto);
 
         List<AircraftSeatsEntity> aircraftSeatsEntities =

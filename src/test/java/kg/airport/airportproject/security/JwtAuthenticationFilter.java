@@ -3,6 +3,8 @@ package kg.airport.airportproject.security;
 import kg.airport.airportproject.entity.ApplicationUsersEntity;
 import kg.airport.airportproject.entity.UserRolesEntity;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.test.context.TestComponent;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,6 +24,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Component
+@ConditionalOnBean(name = "securityConfigurationTest")
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtTokenHandler jwtTokenHandler;
     private final UserDetailsService userDetailsService;
