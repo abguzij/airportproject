@@ -1,7 +1,6 @@
 package kg.airport.airportproject.service;
 
 import com.querydsl.core.types.Predicate;
-import kg.airport.airportproject.configuration.UserDetailsConfigurationTest;
 import kg.airport.airportproject.dto.AircraftRequestDto;
 import kg.airport.airportproject.dto.AircraftResponseDto;
 import kg.airport.airportproject.dto.AircraftTypesResponseDto;
@@ -11,12 +10,12 @@ import kg.airport.airportproject.entity.ApplicationUsersEntity;
 import kg.airport.airportproject.entity.PartsEntity;
 import kg.airport.airportproject.entity.attributes.AircraftStatus;
 import kg.airport.airportproject.entity.attributes.AircraftType;
-import kg.airport.airportproject.exception.AircraftNotFoundException;
-import kg.airport.airportproject.exception.IncorrectDateFiltersException;
-import kg.airport.airportproject.exception.InvalidAircraftTitleException;
+import kg.airport.airportproject.exception.*;
+import kg.airport.airportproject.mock.matcher.AircraftsStatusChangedMatcher;
 import kg.airport.airportproject.repository.AircraftsEntityRepository;
+import kg.airport.airportproject.response.StatusChangedResponse;
 import kg.airport.airportproject.security.DefaultCredentialsProvider;
-import kg.airport.airportproject.security.mock.AuthenticationMockingUtils;
+import kg.airport.airportproject.mock.AuthenticationMockingUtils;
 import kg.airport.airportproject.service.impl.AircraftsServiceImpl;
 import kg.airport.airportproject.validator.AircraftsValidator;
 import kg.airport.airportproject.validator.impl.AircraftsValidatorImpl;
@@ -32,6 +31,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @ExtendWith(value = MockitoExtension.class)
@@ -135,6 +135,81 @@ public class AircraftsServiceTest {
         );
         Assertions.assertEquals(
                 "Название создаваемого самолета не может быть null или пустым!",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    public void testRefuelAircraft_OK() {
+        AircraftsEntity aircraft = this.createAircraft();
+        aircraft.setStatus(AircraftStatus.ON_REFUELING);
+        ApplicationUsersEntity engineer = AuthenticationMockingUtils.buildDefaultEngineersEntity();
+        engineer.setServicedAircraft(aircraft);
+        aircraft.setServicedBy(engineer);
+
+        AuthenticationMockingUtils.mockAuthentication(engineer);
+
+        Mockito
+                .when(this.aircraftsEntityRepository.getAircraftsEntityById(Mockito.eq(1L)))
+                .thenReturn(Optional.of(aircraft));
+
+        AircraftsStatusChangedMatcher aircraftsStatusChangedMatcher =
+                new AircraftsStatusChangedMatcher(
+                        new AircraftsEntity().setStatus(AircraftStatus.REFUELED).setServicedBy(null)
+                );
+        Mockito
+                .when(this.aircraftsEntityRepository.save(Mockito.argThat(aircraftsStatusChangedMatcher)))
+                .thenAnswer(invocationOnMock -> invocationOnMock.getArguments()[0]);
+        try {
+            StatusChangedResponse statusChangedResponse = this.aircraftsService.refuelAircraft(1L);
+            Assertions.assertTrue(
+                    statusChangedResponse.getMessage().endsWith(String.format("[%s]",AircraftStatus.REFUELED))
+            );
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testRefuelAircraft_StatusChangeException() {
+        AircraftsEntity aircraft = this.createAircraft().setStatus(AircraftStatus.NEEDS_INSPECTION);
+        Mockito
+                .when(this.aircraftsEntityRepository.getAircraftsEntityById(Mockito.eq(1L)))
+                .thenReturn(Optional.of(aircraft));
+
+        Exception exception = Assertions.assertThrows(
+                StatusChangeException.class,
+                () -> this.aircraftsService.refuelAircraft(1L)
+        );
+        Assertions.assertEquals(
+                "Ошибка! Заправка для самолета с ID[1] еще не была назначена!",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    public void testRefuelAircraft_EngineerIsBusy() {
+        AircraftsEntity aircraft = this.createAircraft();
+        aircraft.setStatus(AircraftStatus.ON_REFUELING);
+        ApplicationUsersEntity engineer = AuthenticationMockingUtils.buildDefaultEngineersEntity();
+        engineer.setServicedAircraft(aircraft);
+        aircraft.setServicedBy(engineer);
+
+        ApplicationUsersEntity anotherEngineer = AuthenticationMockingUtils
+                .buildDefaultEngineersEntity()
+                .setId(DefaultCredentialsProvider.ENGINEERS_DEFAULT_ID + 1);
+        AuthenticationMockingUtils.mockAuthentication(anotherEngineer);
+
+        Mockito
+                .when(this.aircraftsEntityRepository.getAircraftsEntityById(Mockito.eq(1L)))
+                .thenReturn(Optional.of(aircraft));
+
+        Exception exception = Assertions.assertThrows(
+                WrongEngineerException.class,
+                () -> this.aircraftsService.refuelAircraft(1L)
+        );
+        Assertions.assertEquals(
+                "Ошибка! Заправка самолета с ID[1] была назначена другому инженеру!",
                 exception.getMessage()
         );
     }

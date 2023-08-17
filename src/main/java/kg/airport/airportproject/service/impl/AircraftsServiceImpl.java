@@ -103,7 +103,10 @@ public class AircraftsServiceImpl implements AircraftsService {
 
         ApplicationUsersEntity engineer =
                 (ApplicationUsersEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if(!engineer.getId().equals(aircraftsEntity.getServicedBy().getId())) {
+        if(
+                Objects.isNull(engineer.getServicedAircraft()) ||
+                        !engineer.getId().equals(aircraftsEntity.getServicedBy().getId())
+        ) {
             throw new WrongEngineerException(
                     String.format(
                             "Ошибка! Заправка самолета с ID[%d] была назначена другому инженеру!",
@@ -121,7 +124,7 @@ public class AircraftsServiceImpl implements AircraftsService {
                 .setHttpStatus(HttpStatus.OK)
                 .setMessage(
                         String.format(
-                                "Самолет успешно заправлен! Текущий статус самолета [%s]!",
+                                "Самолет успешно заправлен! Текущий статус самолета [%s]",
                                 aircraftsEntity.getStatus()
                         )
                 );

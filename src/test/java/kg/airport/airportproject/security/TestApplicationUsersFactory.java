@@ -30,7 +30,19 @@ public class TestApplicationUsersFactory {
             throw new IllegalArgumentException("Название роли пользовтеля не может быть null или пустым!");
         }
         ApplicationUsersEntity applicationUsersEntity = new ApplicationUsersEntity();
-        
+
+        if(userRoleTitle.equals("ENGINEER")) {
+            applicationUsersEntity.setUsername(DefaultCredentialsProvider.DEFAULT_ENGINEERS_USERNAME);
+            applicationUsersEntity.setPassword(
+                    this.passwordEncoder.encode(DefaultCredentialsProvider.DEFAULT_ENGINEERS_RAW_PASSWORD)
+            );
+            applicationUsersEntity.setFullName("Default Engineer");
+            applicationUsersEntity.setId(DefaultCredentialsProvider.ENGINEERS_DEFAULT_ID);
+            applicationUsersEntity.setEnabled(true);
+            applicationUsersEntity.setUserRolesEntityList(
+                    TestAuthoritiesFactory.getUserRolesByUserRoleTitle(userRoleTitle)
+            );
+        }
         if(userRoleTitle.equals("MANAGER")) {
             applicationUsersEntity.setUsername(DefaultCredentialsProvider.DEFAULT_MANAGER_USERNAME);
             applicationUsersEntity.setPassword(

@@ -1,7 +1,6 @@
 package kg.airport.airportproject.controller.v1;
 
 import com.querydsl.core.types.Predicate;
-import io.jsonwebtoken.lang.Objects;
 import kg.airport.airportproject.configuration.SecurityConfigurationTest;
 import kg.airport.airportproject.configuration.UserDetailsConfigurationTest;
 import kg.airport.airportproject.dto.AircraftRequestDto;
@@ -16,14 +15,13 @@ import kg.airport.airportproject.repository.AircraftsEntityRepository;
 import kg.airport.airportproject.response.ErrorResponse;
 import kg.airport.airportproject.security.JwtTokenAuthenticationFactory;
 import kg.airport.airportproject.security.TestApplicationUsersFactory;
-import kg.airport.airportproject.security.mock.AuthenticationMockingUtils;
+import kg.airport.airportproject.mock.AuthenticationMockingUtils;
 import kg.airport.airportproject.service.AircraftSeatsService;
 import kg.airport.airportproject.service.ApplicationUserService;
 import kg.airport.airportproject.service.PartInspectionService;
 import kg.airport.airportproject.service.PartsService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
