@@ -14,4 +14,7 @@ public abstract class DefaultCredentialsProvider {
     public static final Long DISPATCHER_DEFAULT_ID = 5L;
     public static final String DEFAULT_DISPATCHER_USERNAME = "dispatcher";
     public static final String DEFAULT_DISPATCHER_RAW_PASSWORD = "dispatcher";
+    public static final Long CHIEF_DISPATCHER_DEFAULT_ID = 6L;
+    public static final String DEFAULT_CHIEF_DISPATCHER_USERNAME = "сdispatcher";
+    public static final String DEFAULT_CHIEF_DISPATCHER_RAW_PASSWORD = "сdispatcher";
 }

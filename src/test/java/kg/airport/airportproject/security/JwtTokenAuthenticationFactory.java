@@ -44,6 +44,10 @@ public class JwtTokenAuthenticationFactory {
             credentialsRequestDto.setUsername(DefaultCredentialsProvider.DEFAULT_MANAGER_USERNAME);
             credentialsRequestDto.setPassword(DefaultCredentialsProvider.DEFAULT_MANAGER_RAW_PASSWORD);
         }
+        if(roleTitle.equals("CHIEF_DISPATCHER")) {
+            credentialsRequestDto.setUsername(DefaultCredentialsProvider.DEFAULT_CHIEF_DISPATCHER_USERNAME);
+            credentialsRequestDto.setPassword(DefaultCredentialsProvider.DEFAULT_CHIEF_DISPATCHER_RAW_PASSWORD);
+        }
         if(roleTitle.equals("DISPATCHER")) {
             credentialsRequestDto.setUsername(DefaultCredentialsProvider.DEFAULT_DISPATCHER_USERNAME);
             credentialsRequestDto.setPassword(DefaultCredentialsProvider.DEFAULT_DISPATCHER_RAW_PASSWORD);

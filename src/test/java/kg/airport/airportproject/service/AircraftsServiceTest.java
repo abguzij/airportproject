@@ -1,15 +1,12 @@
 package kg.airport.airportproject.service;
 
 import com.querydsl.core.types.Predicate;
-import kg.airport.airportproject.dto.AircraftRequestDto;
-import kg.airport.airportproject.dto.AircraftResponseDto;
-import kg.airport.airportproject.dto.AircraftTypesResponseDto;
-import kg.airport.airportproject.entity.AircraftSeatsEntity;
-import kg.airport.airportproject.entity.AircraftsEntity;
-import kg.airport.airportproject.entity.ApplicationUsersEntity;
-import kg.airport.airportproject.entity.PartsEntity;
+import kg.airport.airportproject.dto.*;
+import kg.airport.airportproject.entity.*;
 import kg.airport.airportproject.entity.attributes.AircraftStatus;
 import kg.airport.airportproject.entity.attributes.AircraftType;
+import kg.airport.airportproject.entity.attributes.FlightStatus;
+import kg.airport.airportproject.entity.attributes.PartState;
 import kg.airport.airportproject.exception.*;
 import kg.airport.airportproject.mock.matcher.AircraftsStatusChangedMatcher;
 import kg.airport.airportproject.repository.AircraftsEntityRepository;
@@ -210,6 +207,544 @@ public class AircraftsServiceTest {
         );
         Assertions.assertEquals(
                 "Ошибка! Заправка самолета с ID[1] была назначена другому инженеру!",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    public void testAssignAircraftInspection_OK() {
+        try {
+            AircraftsEntity aircraft = this.createAircraft();
+            aircraft.setStatus(AircraftStatus.NEEDS_INSPECTION);
+            Mockito
+                    .when(this.aircraftsEntityRepository.getAircraftsEntityById(Mockito.eq(1L)))
+                    .thenAnswer(invocationOnMock -> Optional.of(aircraft));
+
+            ApplicationUsersEntity engineer = AuthenticationMockingUtils.buildDefaultEngineersEntity();
+            Mockito
+                    .when(this.applicationUserService.getEngineerEntityById(
+                            DefaultCredentialsProvider.ENGINEERS_DEFAULT_ID
+                    ))
+                    .thenReturn(engineer);
+
+            AircraftsStatusChangedMatcher aircraftsStatusChangedMatcher =
+                    new AircraftsStatusChangedMatcher(
+                            new AircraftsEntity().setStatus(AircraftStatus.ON_INSPECTION).setServicedBy(engineer)
+                    );
+            Mockito
+                    .lenient()
+                    .when(this.aircraftsEntityRepository.save(Mockito.argThat(aircraftsStatusChangedMatcher)))
+                    .thenAnswer(invocationOnMock -> invocationOnMock.getArguments()[0]);
+
+            StatusChangedResponse result = this.aircraftsService.assignAircraftInspection(
+                    1L,
+                    DefaultCredentialsProvider.ENGINEERS_DEFAULT_ID
+            );
+
+            Assertions.assertTrue(
+                    result.getMessage().endsWith(String.format("[%s]", AircraftStatus.ON_INSPECTION))
+            );
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testAssignAircraftInspection_StatusChanged() {
+        AircraftsEntity aircraft = this.createAircraft();
+        aircraft.setStatus(AircraftStatus.SERVICEABLE);
+
+        Mockito
+                .when(this.aircraftsEntityRepository.getAircraftsEntityById(Mockito.eq(1L)))
+                .thenAnswer(invocationOnMock -> Optional.of(aircraft));
+
+        Exception exception = Assertions.assertThrows(
+                StatusChangeException.class,
+                () -> this.aircraftsService.assignAircraftInspection(
+                        1L,
+                        DefaultCredentialsProvider.ENGINEERS_DEFAULT_ID
+                )
+        );
+        Assertions.assertEquals(
+                "Для назначения техосмотра самолет должен быть передан на техосмотр диспетчером!",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    public void testAssignAircraftInspection_AircraftNotFound() {
+        Mockito
+                .when(this.aircraftsEntityRepository.getAircraftsEntityById(Mockito.eq(1L)))
+                .thenAnswer(invocationOnMock -> Optional.empty());
+
+        Exception exception = Assertions.assertThrows(
+                AircraftNotFoundException.class,
+                () -> this.aircraftsService.assignAircraftInspection(
+                        1L,
+                        DefaultCredentialsProvider.ENGINEERS_DEFAULT_ID
+                )
+        );
+        Assertions.assertEquals(
+                "Самолета с ID[1] не найдено!",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    public void testAssignAircraftRepairs_OK() {
+        try {
+            AircraftsEntity aircraft = this.createAircraft();
+            aircraft.setStatus(AircraftStatus.INSPECTED);
+            Mockito
+                    .when(this.aircraftsEntityRepository.getAircraftsEntityById(Mockito.eq(1L)))
+                    .thenAnswer(invocationOnMock -> Optional.of(aircraft));
+
+            ApplicationUsersEntity engineer = AuthenticationMockingUtils.buildDefaultEngineersEntity();
+            Mockito
+                    .when(this.applicationUserService.getEngineerEntityById(
+                            DefaultCredentialsProvider.ENGINEERS_DEFAULT_ID
+                    ))
+                    .thenReturn(engineer);
+
+            AircraftsStatusChangedMatcher aircraftsStatusChangedMatcher =
+                    new AircraftsStatusChangedMatcher(
+                            new AircraftsEntity().setStatus(AircraftStatus.ON_REPAIRS).setServicedBy(engineer)
+                    );
+            Mockito
+                    .when(this.partInspectionService.getLastAircraftInspectionResult(1L))
+                    .thenReturn(PartState.NEEDS_FIXING);
+            Mockito
+                    .lenient()
+                    .when(this.aircraftsEntityRepository.save(Mockito.argThat(aircraftsStatusChangedMatcher)))
+                    .thenAnswer(invocationOnMock -> invocationOnMock.getArguments()[0]);
+
+            StatusChangedResponse result = this.aircraftsService.assignAircraftRepairs(
+                    1L,
+                    DefaultCredentialsProvider.ENGINEERS_DEFAULT_ID
+            );
+
+            Assertions.assertTrue(
+                    result.getMessage().endsWith(String.format("[%s]", AircraftStatus.ON_REPAIRS))
+            );
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testAssignAircraftRepairs_StatusChanged() {
+        AircraftsEntity aircraft = this.createAircraft();
+        aircraft.setStatus(AircraftStatus.SERVICEABLE);
+
+        Mockito
+                .when(this.aircraftsEntityRepository.getAircraftsEntityById(Mockito.eq(1L)))
+                .thenAnswer(invocationOnMock -> Optional.of(aircraft));
+
+        Exception exception = Assertions.assertThrows(
+                StatusChangeException.class,
+                () -> this.aircraftsService.assignAircraftRepairs(
+                        1L,
+                        DefaultCredentialsProvider.ENGINEERS_DEFAULT_ID
+                )
+        );
+        Assertions.assertEquals(
+                "Чтобы отправить самолет на ремонт самолет должен быть осмотрен инженером!",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    public void testAssignAircraftRepairs_AircraftNotFound() {
+        Mockito
+                .when(this.aircraftsEntityRepository.getAircraftsEntityById(Mockito.eq(1L)))
+                .thenAnswer(invocationOnMock -> Optional.empty());
+
+        Exception exception = Assertions.assertThrows(
+                AircraftNotFoundException.class,
+                () -> this.aircraftsService.assignAircraftInspection(
+                        1L,
+                        DefaultCredentialsProvider.ENGINEERS_DEFAULT_ID
+                )
+        );
+        Assertions.assertEquals(
+                "Самолета с ID[1] не найдено!",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    public void testAssignAircraftRefueling_OK() {
+        try {
+            AircraftsEntity aircraft = this.createAircraft();
+            aircraft.setStatus(AircraftStatus.AVAILABLE);
+            aircraft.getFlightsEntities().add(new FlightsEntity().setStatus(FlightStatus.DEPARTURE_INITIATED));
+
+            Mockito
+                    .when(this.aircraftsEntityRepository.getAircraftsEntityById(Mockito.eq(1L)))
+                    .thenAnswer(invocationOnMock -> Optional.of(aircraft));
+
+            ApplicationUsersEntity engineer = AuthenticationMockingUtils.buildDefaultEngineersEntity();
+            Mockito
+                    .when(this.applicationUserService.getEngineerEntityById(
+                            DefaultCredentialsProvider.ENGINEERS_DEFAULT_ID
+                    ))
+                    .thenReturn(engineer);
+
+            AircraftsStatusChangedMatcher aircraftsStatusChangedMatcher =
+                    new AircraftsStatusChangedMatcher(
+                            new AircraftsEntity().setStatus(AircraftStatus.ON_REFUELING).setServicedBy(engineer)
+                    );
+            Mockito
+                    .lenient()
+                    .when(this.aircraftsEntityRepository.save(Mockito.argThat(aircraftsStatusChangedMatcher)))
+                    .thenAnswer(invocationOnMock -> invocationOnMock.getArguments()[0]);
+
+            StatusChangedResponse result = this.aircraftsService.assignAircraftRefueling(
+                    1L,
+                    DefaultCredentialsProvider.ENGINEERS_DEFAULT_ID
+            );
+
+            Assertions.assertTrue(
+                    result.getMessage().endsWith(String.format("[%s]", AircraftStatus.ON_REFUELING))
+            );
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testAssignAircraftRefueling_FlightsNotAssigned() {
+        AircraftsEntity aircraft = this.createAircraft();
+        aircraft.setStatus(AircraftStatus.SERVICEABLE);
+
+        Mockito
+                .when(this.aircraftsEntityRepository.getAircraftsEntityById(Mockito.eq(1L)))
+                .thenAnswer(invocationOnMock -> Optional.of(aircraft));
+
+        Exception exception = Assertions.assertThrows(
+                FlightsNotAssignedException.class,
+                () -> this.aircraftsService.assignAircraftRefueling(
+                        1L,
+                        DefaultCredentialsProvider.ENGINEERS_DEFAULT_ID
+                )
+        );
+        Assertions.assertEquals(
+                "Данный самолет не был назначен ни на один рейс!",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    public void testAssignAircraftRefueling_AircraftNotFound() {
+        Mockito
+                .when(this.aircraftsEntityRepository.getAircraftsEntityById(Mockito.eq(1L)))
+                .thenAnswer(invocationOnMock -> Optional.empty());
+
+        Exception exception = Assertions.assertThrows(
+                AircraftNotFoundException.class,
+                () -> this.aircraftsService.assignAircraftRefueling(
+                        1L,
+                        DefaultCredentialsProvider.ENGINEERS_DEFAULT_ID
+                )
+        );
+        Assertions.assertEquals(
+                "Самолета с ID[1] не найдено!",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    public void testInspectAircraft_OK() {
+        try {
+            AircraftsEntity aircraft = this.createAircraft();
+            aircraft.setStatus(AircraftStatus.ON_INSPECTION);
+            ApplicationUsersEntity engineer = AuthenticationMockingUtils.buildDefaultEngineersEntity();
+            engineer.setServicedAircraft(aircraft);
+            aircraft.setServicedBy(engineer);
+
+            AuthenticationMockingUtils.mockAuthentication(engineer);
+
+            Mockito
+                    .when(this.aircraftsEntityRepository.getAircraftsEntityById(Mockito.eq(1L)))
+                    .thenReturn(Optional.of(aircraft));
+
+            AircraftsStatusChangedMatcher aircraftsStatusChangedMatcher =
+                    new AircraftsStatusChangedMatcher(
+                            new AircraftsEntity().setStatus(AircraftStatus.INSPECTED).setServicedBy(null)
+                    );
+            Mockito
+                    .when(this.aircraftsEntityRepository.save(Mockito.argThat(aircraftsStatusChangedMatcher)))
+                    .thenAnswer(invocationOnMock -> invocationOnMock.getArguments()[0]);
+
+            List<PartInspectionsRequestDto> requestDtoList = List.of(
+                    new PartInspectionsRequestDto()
+                            .setAircraftId(aircraft.getId())
+                            .setPartState(PartState.CORRECT)
+                            .setPartId(1L)
+            );
+
+            Mockito
+                    .when(this.partInspectionService.registerPartInspections(Mockito.eq(aircraft), Mockito.anyList()))
+                    .thenAnswer(
+                            invocationOnMock -> List.of(
+                                    new PartInspectionsResponseDto()
+                                            .setAircraftId(aircraft.getId())
+                                            .setInspectionCode(1L)
+                                            .setAircraftTitle(aircraft.getTitle())
+                                            .setPartState(PartState.CORRECT)
+                                            .setPartId(1L)
+                            )
+                    );
+
+            List<PartInspectionsResponseDto> result =
+                    this.aircraftsService.inspectAircraft(1L, requestDtoList);
+            Assertions.assertEquals(1L, result.get(0).getAircraftId());
+            Assertions.assertEquals(1L, result.get(0).getInspectionCode());
+            Assertions.assertEquals(aircraft.getTitle(), result.get(0).getAircraftTitle());
+            Assertions.assertEquals(PartState.CORRECT, result.get(0).getPartState());
+            Assertions.assertEquals(1L, result.get(0).getPartId());
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testInspectAircraft_AircraftNotFound() {
+        AircraftsEntity aircraft = this.createAircraft();
+        aircraft.setStatus(AircraftStatus.ON_INSPECTION);
+
+        Mockito
+                .when(this.aircraftsEntityRepository.getAircraftsEntityById(Mockito.eq(1L)))
+                .thenAnswer(invocationOnMock -> Optional.empty());
+
+        List<PartInspectionsRequestDto> partInspectionsRequestDtoList = List.of(
+                new PartInspectionsRequestDto()
+        );
+
+        Exception exception = Assertions.assertThrows(
+                AircraftNotFoundException.class,
+                () -> this.aircraftsService.inspectAircraft(1L, partInspectionsRequestDtoList)
+        );
+        Assertions.assertEquals(
+                "Самолета с ID[1] не найдено!",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    public void testInspectAircraft_WrongStatus() {
+        AircraftsEntity aircraft = this.createAircraft();
+        aircraft.setStatus(AircraftStatus.SERVICEABLE);
+        ApplicationUsersEntity engineer = AuthenticationMockingUtils.buildDefaultEngineersEntity();
+        engineer.setServicedAircraft(aircraft);
+        aircraft.setServicedBy(engineer);
+
+        Mockito
+                .when(this.aircraftsEntityRepository.getAircraftsEntityById(Mockito.eq(1L)))
+                .thenReturn(Optional.of(aircraft));
+
+        List<PartInspectionsRequestDto> partInspectionsRequestDtoList = List.of(
+                new PartInspectionsRequestDto()
+        );
+
+        Exception exception = Assertions.assertThrows(
+                StatusChangeException.class,
+                () -> this.aircraftsService.inspectAircraft(1L, partInspectionsRequestDtoList)
+        );
+        Assertions.assertEquals(
+                "Для проведения техосмотра самолета он должен быть назначен главным инжененром!",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    public void testConfirmAircraftServiceability_OK() {
+        AircraftsEntity aircraft = this.createAircraft();
+        aircraft.setStatus(AircraftStatus.INSPECTED);
+        Mockito
+                .when(this.aircraftsEntityRepository.getAircraftsEntityById(Mockito.eq(1L)))
+                .thenReturn(Optional.of(aircraft));
+
+        AircraftsStatusChangedMatcher aircraftsStatusChangedMatcher =
+                new AircraftsStatusChangedMatcher(
+                        new AircraftsEntity().setStatus(AircraftStatus.SERVICEABLE).setServicedBy(null)
+                );
+        Mockito
+                .when(this.aircraftsEntityRepository.save(Mockito.argThat(aircraftsStatusChangedMatcher)))
+                .thenAnswer(invocationOnMock -> invocationOnMock.getArguments()[0]);
+        try {
+            Mockito
+                    .when(this.partInspectionService.getLastAircraftInspectionResult(1L))
+                    .thenReturn(PartState.CORRECT);
+
+            StatusChangedResponse result = this.aircraftsService.confirmAircraftServiceability(1L);
+            Assertions.assertTrue(
+                    result.getMessage().endsWith(String.format("[%s]", AircraftStatus.SERVICEABLE))
+            );
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testConfirmAircraftServiceability_AircraftNotFound() {
+        Mockito
+                .when(this.aircraftsEntityRepository.getAircraftsEntityById(Mockito.eq(1L)))
+                .thenAnswer(invocationOnMock -> Optional.empty());
+
+        Exception exception = Assertions.assertThrows(
+                AircraftNotFoundException.class,
+                () -> this.aircraftsService.confirmAircraftServiceability(1L)
+        );
+        Assertions.assertEquals(
+                "Самолета с ID[1] не найдено!",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    public void testConfirmAircraftServiceability_WrongStatus() {
+        AircraftsEntity aircraft = this.createAircraft();
+        aircraft.setStatus(AircraftStatus.IN_AIR);
+        Mockito
+                .when(this.aircraftsEntityRepository.getAircraftsEntityById(Mockito.eq(1L)))
+                .thenReturn(Optional.of(aircraft));
+
+        Exception exception = Assertions.assertThrows(
+                StatusChangeException.class,
+                () -> this.aircraftsService.confirmAircraftServiceability(1L)
+        );
+        Assertions.assertEquals(
+                "Чтобы подтвердить исправность самолета самолет должен быть осмотрен инженером!",
+                exception.getMessage()
+        );
+
+    }
+
+    @Test
+    public void testSendAircraftToRegistrationConfirmation_OK() {
+        AircraftsEntity aircraft = this.createAircraft();
+        aircraft.setStatus(AircraftStatus.SERVICEABLE);
+        Mockito
+                .when(this.aircraftsEntityRepository.getAircraftsEntityById(Mockito.eq(1L)))
+                .thenReturn(Optional.of(aircraft));
+
+        AircraftsStatusChangedMatcher aircraftsStatusChangedMatcher =
+                new AircraftsStatusChangedMatcher(
+                        new AircraftsEntity().setStatus(AircraftStatus.REGISTRATION_PENDING_CONFIRMATION)
+                                .setServicedBy(null)
+                );
+        Mockito
+                .when(this.aircraftsEntityRepository.save(Mockito.argThat(aircraftsStatusChangedMatcher)))
+                .thenAnswer(invocationOnMock -> invocationOnMock.getArguments()[0]);
+        try {
+            StatusChangedResponse result = this.aircraftsService.sendAircraftToRegistrationConfirmation(1L);
+            Assertions.assertTrue(
+                    result.getMessage().endsWith(String.format(
+                            "[%s]",
+                            AircraftStatus.REGISTRATION_PENDING_CONFIRMATION)
+                    )
+            );
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testSendAircraftToRegistrationConfirmation_AircraftNotFound() {
+        Mockito
+                .when(this.aircraftsEntityRepository.getAircraftsEntityById(Mockito.eq(1L)))
+                .thenAnswer(invocationOnMock -> Optional.empty());
+
+        Exception exception = Assertions.assertThrows(
+                AircraftNotFoundException.class,
+                () -> this.aircraftsService.sendAircraftToRegistrationConfirmation(1L)
+        );
+        Assertions.assertEquals(
+                "Самолета с ID[1] не найдено!",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    public void testSendAircraftToRegistrationConfirmation_WrongStatus() {
+        AircraftsEntity aircraft = this.createAircraft();
+        aircraft.setStatus(AircraftStatus.IN_AIR);
+        Mockito
+                .when(this.aircraftsEntityRepository.getAircraftsEntityById(Mockito.eq(1L)))
+                .thenReturn(Optional.of(aircraft));
+
+        Exception exception = Assertions.assertThrows(
+                StatusChangeException.class,
+                () -> this.aircraftsService.sendAircraftToRegistrationConfirmation(1L)
+        );
+        Assertions.assertEquals(
+                "Чтобы отправить самолет на подверждение регистрации" +
+                        " его техосмотр должен быть подтвержден главным инженером!",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    public void testConfirmAircraftRegistration_OK() {
+        AircraftsEntity aircraft = this.createAircraft();
+        aircraft.setStatus(AircraftStatus.REGISTRATION_PENDING_CONFIRMATION);
+        Mockito
+                .when(this.aircraftsEntityRepository.getAircraftsEntityById(Mockito.eq(1L)))
+                .thenReturn(Optional.of(aircraft));
+
+        AircraftsStatusChangedMatcher aircraftsStatusChangedMatcher =
+                new AircraftsStatusChangedMatcher(
+                        new AircraftsEntity().setStatus(AircraftStatus.AVAILABLE)
+                                .setServicedBy(null)
+                );
+        Mockito
+                .when(this.aircraftsEntityRepository.save(Mockito.argThat(aircraftsStatusChangedMatcher)))
+                .thenAnswer(invocationOnMock -> invocationOnMock.getArguments()[0]);
+        try {
+            StatusChangedResponse result = this.aircraftsService.confirmAircraftRegistration(1L);
+            Assertions.assertTrue(
+                    result.getMessage().endsWith(String.format(
+                            "[%s]",
+                            AircraftStatus.AVAILABLE)
+                    )
+            );
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testConfirmAircraftRegistration_AircraftNotFound() {
+        Mockito
+                .when(this.aircraftsEntityRepository.getAircraftsEntityById(Mockito.eq(1L)))
+                .thenAnswer(invocationOnMock -> Optional.empty());
+
+        Exception exception = Assertions.assertThrows(
+                AircraftNotFoundException.class,
+                () -> this.aircraftsService.confirmAircraftRegistration(1L)
+        );
+        Assertions.assertEquals(
+                "Самолета с ID[1] не найдено!",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    public void testConfirmAircraftRegistration_WrongStatus() {
+        AircraftsEntity aircraft = this.createAircraft();
+        aircraft.setStatus(AircraftStatus.IN_AIR);
+        Mockito
+                .when(this.aircraftsEntityRepository.getAircraftsEntityById(Mockito.eq(1L)))
+                .thenReturn(Optional.of(aircraft));
+
+        Exception exception = Assertions.assertThrows(
+                StatusChangeException.class,
+                () -> this.aircraftsService.confirmAircraftRegistration(1L)
+        );
+        Assertions.assertEquals(
+                "Для подтверждения регистрации самолета он должен быть направлен" +
+                        " главному диспетчеру диспетчером",
                 exception.getMessage()
         );
     }
@@ -512,6 +1047,48 @@ public class AircraftsServiceTest {
         } catch (Exception e) {
             Assertions.fail(e.getMessage());
         }
+    }
+
+    @Test
+    public void testFindAircraftsEntityById_OK() {
+        AircraftsEntity aircraft = this.createAircraft();
+        Mockito
+                .when(this.aircraftsEntityRepository.getAircraftsEntityById(Mockito.eq(1L)))
+                .thenAnswer(invocationOnMock -> Optional.of(aircraft));
+        try {
+            AircraftsEntity result = this.aircraftsService.findAircraftsEntityById(1L);
+            Assertions.assertEquals(aircraft, result);
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testFindAircraftsEntityById_InvalidId() {
+        Exception exception = Assertions.assertThrows(
+                InvalidIdException.class,
+                () -> this.aircraftsService.findAircraftsEntityById(0L)
+        );
+        Assertions.assertEquals(
+                "ID самолета не может быть меньше 1!",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    public void testFindAircraftsEntityById_AircraftNotFound() {
+        Mockito
+                .when(this.aircraftsEntityRepository.getAircraftsEntityById(1L))
+                .thenAnswer(invocationOnMock -> Optional.empty());
+
+        Exception exception = Assertions.assertThrows(
+                AircraftNotFoundException.class,
+                () -> this.aircraftsService.findAircraftsEntityById(1L)
+        );
+        Assertions.assertEquals(
+                "Самолета с ID[1] не найдено!",
+                exception.getMessage()
+        );
     }
 
     private List<PartsEntity> createPartsList(AircraftsEntity aircraftsEntity) {

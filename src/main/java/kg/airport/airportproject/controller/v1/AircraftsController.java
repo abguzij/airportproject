@@ -101,7 +101,7 @@ public class AircraftsController {
     }
 
     @PreAuthorize(value = "hasRole('CHIEF_DISPATCHER')")
-    @PutMapping(value = "/{aircraftId}/confirm_registration")
+    @PutMapping(value = "/{aircraftId}/confirm-registration")
     public StatusChangedResponse confirmAircraftRegistration(
             @PathVariable Long aircraftId
     )
@@ -122,7 +122,8 @@ public class AircraftsController {
             EngineerIsBusyException,
             StatusChangeException,
             ApplicationUserNotFoundException,
-            InvalidIdException
+            InvalidIdException,
+            FlightsNotAssignedException
     {
         return this.aircraftsService.assignAircraftRefueling(aircraftId, engineerId);
     }

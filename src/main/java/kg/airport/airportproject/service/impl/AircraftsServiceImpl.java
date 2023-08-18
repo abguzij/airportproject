@@ -319,10 +319,15 @@ public class AircraftsServiceImpl implements AircraftsService {
             InvalidIdException,
             StatusChangeException,
             ApplicationUserNotFoundException,
-            EngineerIsBusyException
+            EngineerIsBusyException,
+            FlightsNotAssignedException
     {
         AircraftsEntity aircraft = this.findAircraftsEntityById(aircraftId);
+
         List<FlightsEntity> aircraftsFlights = aircraft.getFlightsEntities();
+        if(Objects.isNull(aircraftsFlights) || aircraftsFlights.isEmpty()) {
+            throw new FlightsNotAssignedException("Данный самолет не был назначен ни на один рейс!");
+        }
         if(!aircraftsFlights.get(aircraftsFlights.size() - 1).getStatus().equals(FlightStatus.DEPARTURE_INITIATED)) {
             throw new StatusChangeException(
                     "Чтобы отправить самолет на заправку отпрака рейса самолета должна быть инициирована!"
@@ -519,7 +524,7 @@ public class AircraftsServiceImpl implements AircraftsService {
         Optional<AircraftsEntity> aircraftsEntityOptional =
                 this.aircraftsEntityRepository.getAircraftsEntityById(aircraftId);
         if(aircraftsEntityOptional.isEmpty()) {
-            throw new AircraftNotFoundException(String.format("Самолета с ID %d не найдено!", aircraftId));
+            throw new AircraftNotFoundException(String.format("Самолета с ID[%d] не найдено!", aircraftId));
         }
         return aircraftsEntityOptional.get();
     }

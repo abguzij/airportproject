@@ -25,7 +25,8 @@ public class UserDetailsConfigurationTest {
                 this.chiefEngineer(),
                 this.engineer(),
                 this.manager(),
-                this.dispatcher()
+                this.dispatcher(),
+                this.chiefDispatcher()
         );
     }
 
@@ -89,6 +90,22 @@ public class UserDetailsConfigurationTest {
                     .setId(DefaultCredentialsProvider.DISPATCHER_DEFAULT_ID)
                     .setEnabled(true)
                     .setUserRolesEntityList(TestAuthoritiesFactory.getUserRolesByUserRoleTitle("DISPATCHER"));
+        } catch (UserRolesNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public ApplicationUsersEntity chiefDispatcher() {
+        try {
+            return new ApplicationUsersEntity()
+                    .setUsername(DefaultCredentialsProvider.DEFAULT_CHIEF_DISPATCHER_USERNAME)
+                    .setPassword(this.passwordEncoder().encode(
+                            DefaultCredentialsProvider.DEFAULT_CHIEF_DISPATCHER_RAW_PASSWORD
+                    ))
+                    .setFullName("Default Chief Dispatcher")
+                    .setId(DefaultCredentialsProvider.CHIEF_DISPATCHER_DEFAULT_ID)
+                    .setEnabled(true)
+                    .setUserRolesEntityList(TestAuthoritiesFactory.getUserRolesByUserRoleTitle("CHIEF_DISPATCHER"));
         } catch (UserRolesNotFoundException e) {
             throw new RuntimeException(e);
         }

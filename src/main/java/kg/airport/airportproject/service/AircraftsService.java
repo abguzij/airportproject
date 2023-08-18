@@ -67,7 +67,7 @@ public interface AircraftsService {
             InvalidIdException,
             StatusChangeException,
             ApplicationUserNotFoundException,
-            EngineerIsBusyException;
+            EngineerIsBusyException, FlightsNotAssignedException;
 
     @Transactional
     List<PartInspectionsResponseDto> inspectAircraft(
