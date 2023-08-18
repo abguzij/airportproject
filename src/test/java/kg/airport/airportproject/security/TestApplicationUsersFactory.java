@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import java.util.Objects;
 
 @Component
-@ConditionalOnBean(name = "securityConfigurationTest")
+@ConditionalOnBean(name = "userDetailsConfigurationTest")
 public class TestApplicationUsersFactory {
     private final PasswordEncoder passwordEncoder;
 

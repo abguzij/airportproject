@@ -2,6 +2,7 @@ package kg.airport.airportproject.security;
 
 import kg.airport.airportproject.configuration.UserDetailsConfigurationTest;
 import kg.airport.airportproject.dto.ApplicationUserCredentialsRequestDto;
+import kg.airport.airportproject.entity.ApplicationUsersEntity;
 import kg.airport.airportproject.service.AuthenticationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +13,7 @@ import org.springframework.stereotype.Component;
 import java.util.Objects;
 
 @Component
-@ConditionalOnBean(name = "securityConfigurationTest")
+@ConditionalOnBean(name = "userDetailsConfigurationTest")
 public class JwtTokenAuthenticationFactory {
     private final AuthenticationService authenticationService;
 
@@ -48,6 +49,14 @@ public class JwtTokenAuthenticationFactory {
             credentialsRequestDto.setPassword(DefaultCredentialsProvider.DEFAULT_DISPATCHER_RAW_PASSWORD);
         }
 
+        return this.formatToken(this.authenticationService.login(credentialsRequestDto).getJwtToken());
+    }
+
+    public String authenticateConcreteUser(ApplicationUsersEntity applicationUsersEntity) {
+        ApplicationUserCredentialsRequestDto credentialsRequestDto =
+                new ApplicationUserCredentialsRequestDto()
+                        .setUsername(applicationUsersEntity.getUsername())
+                        .setPassword(applicationUsersEntity.getPassword());
         return this.formatToken(this.authenticationService.login(credentialsRequestDto).getJwtToken());
     }
 

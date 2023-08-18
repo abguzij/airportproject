@@ -188,7 +188,7 @@ public class AircraftsServiceTest {
     }
 
     @Test
-    public void testRefuelAircraft_EngineerIsBusy() {
+    public void testRefuelAircraft_WrongEngineer() {
         AircraftsEntity aircraft = this.createAircraft();
         aircraft.setStatus(AircraftStatus.ON_REFUELING);
         ApplicationUsersEntity engineer = AuthenticationMockingUtils.buildDefaultEngineersEntity();

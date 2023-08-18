@@ -1,6 +1,7 @@
 package kg.airport.airportproject.controller.v1;
 
 import com.querydsl.core.types.Predicate;
+import kg.airport.airportproject.adapter.InMemoryUserDetailsManagerAdapter;
 import kg.airport.airportproject.configuration.SecurityConfigurationTest;
 import kg.airport.airportproject.configuration.UserDetailsConfigurationTest;
 import kg.airport.airportproject.dto.AircraftRequestDto;
@@ -8,11 +9,15 @@ import kg.airport.airportproject.dto.AircraftResponseDto;
 import kg.airport.airportproject.dto.AircraftTypesResponseDto;
 import kg.airport.airportproject.entity.AircraftSeatsEntity;
 import kg.airport.airportproject.entity.AircraftsEntity;
+import kg.airport.airportproject.entity.ApplicationUsersEntity;
 import kg.airport.airportproject.entity.PartsEntity;
 import kg.airport.airportproject.entity.attributes.AircraftStatus;
 import kg.airport.airportproject.entity.attributes.AircraftType;
+import kg.airport.airportproject.mock.matcher.AircraftsStatusChangedMatcher;
 import kg.airport.airportproject.repository.AircraftsEntityRepository;
 import kg.airport.airportproject.response.ErrorResponse;
+import kg.airport.airportproject.response.StatusChangedResponse;
+import kg.airport.airportproject.security.DefaultCredentialsProvider;
 import kg.airport.airportproject.security.JwtTokenAuthenticationFactory;
 import kg.airport.airportproject.security.TestApplicationUsersFactory;
 import kg.airport.airportproject.mock.AuthenticationMockingUtils;
@@ -32,6 +37,8 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -41,6 +48,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @SpringBootTest(
@@ -63,6 +71,8 @@ public class AircraftsControllerTest {
     private JwtTokenAuthenticationFactory jwtTokenAuthenticationFactory;
     @Autowired
     private TestApplicationUsersFactory applicationUsersFactory;
+    @Autowired
+    private UserDetailsService userDetailsService;
 
     @MockBean
     private AircraftsEntityRepository aircraftsEntityRepository;
@@ -203,6 +213,147 @@ public class AircraftsControllerTest {
                     );
             Assertions.assertEquals(
                     "Тип создаваемого ссамолета не может быть null!",
+                    response.getBody().getMessage()
+            );
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testRefuelAircraft_OK() {
+        try {
+            AircraftsEntity aircraft = this.createAircraft();
+            aircraft.setStatus(AircraftStatus.ON_REFUELING);
+
+            ((InMemoryUserDetailsManagerAdapter) this.userDetailsService).updateUsersServicedAircraftByUsername(
+                    DefaultCredentialsProvider.DEFAULT_ENGINEERS_USERNAME,
+                    aircraft
+            );
+            ApplicationUsersEntity engineer = (ApplicationUsersEntity) this.userDetailsService.loadUserByUsername(
+                    DefaultCredentialsProvider.DEFAULT_ENGINEERS_USERNAME
+            );
+            aircraft.setServicedBy(engineer);
+
+            Mockito
+                    .when(this.aircraftsEntityRepository.getAircraftsEntityById(Mockito.eq(1L)))
+                    .thenAnswer(invocationOnMock -> Optional.of(aircraft));
+
+            AircraftsStatusChangedMatcher aircraftsStatusChangedMatcher =
+                    new AircraftsStatusChangedMatcher(
+                            new AircraftsEntity().setStatus(AircraftStatus.REFUELED).setServicedBy(null)
+                    );
+            Mockito
+                    .when(this.aircraftsEntityRepository.save(Mockito.argThat(aircraftsStatusChangedMatcher)))
+                    .thenAnswer(invocationOnMock -> invocationOnMock.getArguments()[0]);
+
+            String jwtToken = this.jwtTokenAuthenticationFactory.getJwtTokenForDefaultUserWithSpecifiedRoleTitle(
+                    "ENGINEER"
+            );
+
+            URI uri = new URI( "http://localhost:" + port + "/v1/aircrafts/1/refuel-aircraft");
+
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add("Authorization", jwtToken);
+
+            ResponseEntity<StatusChangedResponse> response =
+                    testRestTemplate.exchange(
+                            uri,
+                            HttpMethod.PUT,
+                            new HttpEntity<>(httpHeaders),
+                            StatusChangedResponse.class
+                    );
+
+            Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
+            Assertions.assertTrue(
+                    response.getBody().getMessage().endsWith(String.format("[%s]", AircraftStatus.REFUELED))
+            );
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testRefuelAircraft_StatusChangeException() {
+        try {
+            AircraftsEntity aircraft = this.createAircraft();
+            aircraft.setStatus(AircraftStatus.NEEDS_INSPECTION);
+
+            Mockito
+                    .when(this.aircraftsEntityRepository.getAircraftsEntityById(Mockito.eq(1L)))
+                    .thenAnswer(invocationOnMock -> Optional.of(aircraft));
+
+            AircraftsStatusChangedMatcher aircraftsStatusChangedMatcher =
+                    new AircraftsStatusChangedMatcher(
+                            new AircraftsEntity().setStatus(AircraftStatus.REFUELED).setServicedBy(null)
+                    );
+            Mockito
+                    .when(this.aircraftsEntityRepository.save(Mockito.argThat(aircraftsStatusChangedMatcher)))
+                    .thenAnswer(invocationOnMock -> invocationOnMock.getArguments()[0]);
+
+            String jwtToken = this.jwtTokenAuthenticationFactory.getJwtTokenForDefaultUserWithSpecifiedRoleTitle(
+                    "ENGINEER"
+            );
+
+            URI uri = new URI( "http://localhost:" + port + "/v1/aircrafts/1/refuel-aircraft");
+
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add("Authorization", jwtToken);
+
+            ResponseEntity<ErrorResponse> response =
+                    testRestTemplate.exchange(
+                            uri,
+                            HttpMethod.PUT,
+                            new HttpEntity<>(httpHeaders),
+                            ErrorResponse.class
+                    );
+
+            Assertions.assertEquals(
+                    "Ошибка! Заправка для самолета с ID[1] еще не была назначена!",
+                    response.getBody().getMessage()
+            );
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testRefuelAircraft_EngineerIsBusy() {
+        try {
+            AircraftsEntity aircraft = this.createAircraft();
+            aircraft.setStatus(AircraftStatus.ON_REFUELING);
+
+            Mockito
+                    .when(this.aircraftsEntityRepository.getAircraftsEntityById(Mockito.eq(1L)))
+                    .thenAnswer(invocationOnMock -> Optional.of(aircraft));
+
+            AircraftsStatusChangedMatcher aircraftsStatusChangedMatcher =
+                    new AircraftsStatusChangedMatcher(
+                            new AircraftsEntity().setStatus(AircraftStatus.REFUELED).setServicedBy(null)
+                    );
+            Mockito
+                    .when(this.aircraftsEntityRepository.save(Mockito.argThat(aircraftsStatusChangedMatcher)))
+                    .thenAnswer(invocationOnMock -> invocationOnMock.getArguments()[0]);
+
+            String jwtToken = this.jwtTokenAuthenticationFactory.getJwtTokenForDefaultUserWithSpecifiedRoleTitle(
+                    "ENGINEER"
+            );
+
+            URI uri = new URI( "http://localhost:" + port + "/v1/aircrafts/1/refuel-aircraft");
+
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add("Authorization", jwtToken);
+
+            ResponseEntity<ErrorResponse> response =
+                    testRestTemplate.exchange(
+                            uri,
+                            HttpMethod.PUT,
+                            new HttpEntity<>(httpHeaders),
+                            ErrorResponse.class
+                    );
+
+            Assertions.assertEquals(
+                    "Ошибка! Заправка самолета с ID[1] была назначена другому инженеру!",
                     response.getBody().getMessage()
             );
         } catch (Exception e) {

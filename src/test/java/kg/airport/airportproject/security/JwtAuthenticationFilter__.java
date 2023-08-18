@@ -1,17 +1,12 @@
 package kg.airport.airportproject.security;
 
-import kg.airport.airportproject.entity.ApplicationUsersEntity;
-import kg.airport.airportproject.entity.UserRolesEntity;
+import kg.airport.airportproject.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.test.context.TestComponent;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -19,18 +14,16 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
-@Component
-@ConditionalOnBean(name = "securityConfigurationTest")
-public class JwtAuthenticationFilter extends OncePerRequestFilter {
+//@Component
+//@ConditionalOnBean(name = "securityConfigurationTest")
+public class JwtAuthenticationFilter__ extends OncePerRequestFilter {
     private final JwtTokenHandler jwtTokenHandler;
     private final UserDetailsService userDetailsService;
 
-    @Autowired
-    public JwtAuthenticationFilter(
+    //@Autowired
+    public JwtAuthenticationFilter__(
             JwtTokenHandler jwtTokenHandler,
             UserDetailsService userDetailsService
     ) {
@@ -52,7 +45,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             UserDetails authenticatedUser = this.userDetailsService.loadUserByUsername(usernameFromToken);
 
             if(authenticatedUser instanceof User) {
-                authenticatedUser = this.convertUserToApplicationUsersEntity((User) authenticatedUser);
+                authenticatedUser = UserMapper.mapUserToApplicationUsersEntity((User) authenticatedUser);
             }
 
             UsernamePasswordAuthenticationToken basicAuthToken =
@@ -73,21 +66,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return authorizationHeaderValue.substring(7);
         }
         return null;
-    }
-
-    private ApplicationUsersEntity convertUserToApplicationUsersEntity(User user) {
-        ApplicationUsersEntity applicationUsersEntity = new ApplicationUsersEntity();
-        applicationUsersEntity
-                .setUsername(user.getUsername())
-                .setPassword(user.getPassword())
-                .setEnabled(user.isEnabled());
-
-        List<UserRolesEntity> userRolesEntityList = new ArrayList<>();
-        for (GrantedAuthority authority : user.getAuthorities()) {
-            userRolesEntityList.add((UserRolesEntity) authority);
-        }
-
-        applicationUsersEntity.setUserRolesEntityList(userRolesEntityList);
-        return applicationUsersEntity;
     }
 }

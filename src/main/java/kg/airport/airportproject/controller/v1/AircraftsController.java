@@ -128,7 +128,7 @@ public class AircraftsController {
     }
 
     @PreAuthorize(value = "hasRole('ENGINEER')")
-    @PutMapping(value = "/{aircraftId}/refuel_aircraft")
+    @PutMapping(value = "/{aircraftId}/refuel-aircraft")
     public StatusChangedResponse refuelAircraft(
             @PathVariable Long aircraftId
     )

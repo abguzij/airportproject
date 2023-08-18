@@ -4,7 +4,7 @@ import kg.airport.airportproject.entity.ApplicationUsersEntity;
 import kg.airport.airportproject.entity.UserRolesEntity;
 import kg.airport.airportproject.exception.UserRolesNotFoundException;
 import kg.airport.airportproject.security.DefaultCredentialsProvider;
-import kg.airport.airportproject.security.TestApplicationUsersFactory;
+import kg.airport.airportproject.adapter.InMemoryUserDetailsManagerAdapter;
 import kg.airport.airportproject.security.TestAuthoritiesFactory;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -20,7 +20,7 @@ public class UserDetailsConfigurationTest {
 
     @Bean
     public UserDetailsService applicationUserDetailsServiceImpl() {
-        return new InMemoryUserDetailsManager(
+        return new InMemoryUserDetailsManagerAdapter(
                 this.client(),
                 this.chiefEngineer(),
                 this.engineer(),
