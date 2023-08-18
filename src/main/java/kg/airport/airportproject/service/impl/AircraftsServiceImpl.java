@@ -1,7 +1,6 @@
 package kg.airport.airportproject.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.Predicate;
 import kg.airport.airportproject.dto.*;
 import kg.airport.airportproject.entity.*;
 import kg.airport.airportproject.entity.attributes.AircraftStatus;
@@ -14,6 +13,7 @@ import kg.airport.airportproject.repository.AircraftsEntityRepository;
 import kg.airport.airportproject.response.StatusChangedResponse;
 import kg.airport.airportproject.service.*;
 import kg.airport.airportproject.utils.UserRolesUtils;
+import kg.airport.airportproject.validator.AircraftsValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -33,6 +33,7 @@ public class AircraftsServiceImpl implements AircraftsService {
     private final ApplicationUserService applicationUserService;
     private final PartInspectionService partInspectionService;
     private final AircraftsEntityRepository aircraftsEntityRepository;
+    private final AircraftsValidator aircraftsValidator;
 
     @Autowired
     public AircraftsServiceImpl(
@@ -40,24 +41,25 @@ public class AircraftsServiceImpl implements AircraftsService {
             PartsService partsService,
             ApplicationUserService applicationUserService,
             PartInspectionService partInspectionService,
-            AircraftsEntityRepository aircraftsEntityRepository
-    ) {
+            AircraftsEntityRepository aircraftsEntityRepository,
+            AircraftsValidator aircraftsValidator) {
         this.aircraftSeatsService = aircraftSeatsService;
         this.partsService = partsService;
         this.applicationUserService = applicationUserService;
         this.partInspectionService = partInspectionService;
         this.aircraftsEntityRepository = aircraftsEntityRepository;
+        this.aircraftsValidator = aircraftsValidator;
     }
 
     @Override
     public AircraftResponseDto registerNewAircraft(AircraftRequestDto requestDto)
             throws PartsNotFoundException,
             IncompatiblePartException,
-            InvalidIdException
+            InvalidIdException,
+            InvalidAircraftTypeException,
+            InvalidAircraftTitleException
     {
-        if(Objects.isNull(requestDto)) {
-            throw new IllegalArgumentException("Создаваемый самолет не может быть null!");
-        }
+        this.aircraftsValidator.validateAircraftRequestDto(requestDto);
         AircraftsEntity aircraft = AircraftsMapper.mapAircraftRequestDtoToEntity(requestDto);
 
         List<AircraftSeatsEntity> aircraftSeatsEntities =
@@ -101,7 +103,10 @@ public class AircraftsServiceImpl implements AircraftsService {
 
         ApplicationUsersEntity engineer =
                 (ApplicationUsersEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if(!engineer.getId().equals(aircraftsEntity.getServicedBy().getId())) {
+        if(
+                Objects.isNull(engineer.getServicedAircraft()) ||
+                        !engineer.getId().equals(aircraftsEntity.getServicedBy().getId())
+        ) {
             throw new WrongEngineerException(
                     String.format(
                             "Ошибка! Заправка самолета с ID[%d] была назначена другому инженеру!",
@@ -119,7 +124,7 @@ public class AircraftsServiceImpl implements AircraftsService {
                 .setHttpStatus(HttpStatus.OK)
                 .setMessage(
                         String.format(
-                                "Самолет успешно заправлен! Текущий статус самолета [%s]!",
+                                "Самолет успешно заправлен! Текущий статус самолета [%s]",
                                 aircraftsEntity.getStatus()
                         )
                 );
@@ -314,10 +319,15 @@ public class AircraftsServiceImpl implements AircraftsService {
             InvalidIdException,
             StatusChangeException,
             ApplicationUserNotFoundException,
-            EngineerIsBusyException
+            EngineerIsBusyException,
+            FlightsNotAssignedException
     {
         AircraftsEntity aircraft = this.findAircraftsEntityById(aircraftId);
+
         List<FlightsEntity> aircraftsFlights = aircraft.getFlightsEntities();
+        if(Objects.isNull(aircraftsFlights) || aircraftsFlights.isEmpty()) {
+            throw new FlightsNotAssignedException("Данный самолет не был назначен ни на один рейс!");
+        }
         if(!aircraftsFlights.get(aircraftsFlights.size() - 1).getStatus().equals(FlightStatus.DEPARTURE_INITIATED)) {
             throw new StatusChangeException(
                     "Чтобы отправить самолет на заправку отпрака рейса самолета должна быть инициирована!"
@@ -514,7 +524,7 @@ public class AircraftsServiceImpl implements AircraftsService {
         Optional<AircraftsEntity> aircraftsEntityOptional =
                 this.aircraftsEntityRepository.getAircraftsEntityById(aircraftId);
         if(aircraftsEntityOptional.isEmpty()) {
-            throw new AircraftNotFoundException(String.format("Самолета с ID %d не найдено!", aircraftId));
+            throw new AircraftNotFoundException(String.format("Самолета с ID[%d] не найдено!", aircraftId));
         }
         return aircraftsEntityOptional.get();
     }

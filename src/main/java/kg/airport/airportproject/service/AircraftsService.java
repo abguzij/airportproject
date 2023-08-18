@@ -16,7 +16,7 @@ public interface AircraftsService {
     AircraftResponseDto registerNewAircraft(AircraftRequestDto requestDto)
             throws PartsNotFoundException,
             IncompatiblePartException,
-            InvalidIdException;
+            InvalidIdException, InvalidAircraftTypeException, InvalidAircraftTitleException;
 
     @Transactional
     StatusChangedResponse refuelAircraft(Long aircraftId)
@@ -67,7 +67,7 @@ public interface AircraftsService {
             InvalidIdException,
             StatusChangeException,
             ApplicationUserNotFoundException,
-            EngineerIsBusyException;
+            EngineerIsBusyException, FlightsNotAssignedException;
 
     @Transactional
     List<PartInspectionsResponseDto> inspectAircraft(

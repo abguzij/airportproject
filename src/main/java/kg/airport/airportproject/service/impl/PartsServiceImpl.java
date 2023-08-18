@@ -120,7 +120,9 @@ public class PartsServiceImpl implements PartsService {
             AircraftType aircraftType
     )
             throws PartsNotFoundException,
-            IncompatiblePartException, InvalidIdException {
+            IncompatiblePartException,
+            InvalidIdException
+    {
         if(Objects.isNull(partsIdList) || partsIdList.isEmpty()) {
             throw new IllegalArgumentException("Список ID деталей не может быть null или пустым!");
         }

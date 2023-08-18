@@ -101,7 +101,7 @@ public class AircraftsController {
     }
 
     @PreAuthorize(value = "hasRole('CHIEF_DISPATCHER')")
-    @PutMapping(value = "/{aircraftId}/confirm_registration")
+    @PutMapping(value = "/{aircraftId}/confirm-registration")
     public StatusChangedResponse confirmAircraftRegistration(
             @PathVariable Long aircraftId
     )
@@ -122,13 +122,14 @@ public class AircraftsController {
             EngineerIsBusyException,
             StatusChangeException,
             ApplicationUserNotFoundException,
-            InvalidIdException
+            InvalidIdException,
+            FlightsNotAssignedException
     {
         return this.aircraftsService.assignAircraftRefueling(aircraftId, engineerId);
     }
 
     @PreAuthorize(value = "hasRole('ENGINEER')")
-    @PutMapping(value = "/{aircraftId}/refuel_aircraft")
+    @PutMapping(value = "/{aircraftId}/refuel-aircraft")
     public StatusChangedResponse refuelAircraft(
             @PathVariable Long aircraftId
     )
@@ -147,7 +148,9 @@ public class AircraftsController {
     )
             throws PartsNotFoundException,
             IncompatiblePartException,
-            InvalidIdException
+            InvalidIdException,
+            InvalidAircraftTypeException,
+            InvalidAircraftTitleException
     {
         return this.aircraftsService.registerNewAircraft(requestDto);
     }

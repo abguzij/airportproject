@@ -64,6 +64,21 @@ public class AircraftsControllerAdvice {
         return new ErrorResponse().setHttpStatus(HttpStatus.BAD_REQUEST).setMessage(e.getMessage());
     }
 
+    @ExceptionHandler(value = InvalidAircraftTitleException.class)
+    public ErrorResponse handleInvalidAircraftTitleException(InvalidAircraftTitleException e) {
+        return new ErrorResponse().setHttpStatus(HttpStatus.BAD_REQUEST).setMessage(e.getMessage());
+    }
+
+    @ExceptionHandler(value = InvalidAircraftTypeException.class)
+    public ErrorResponse handleInvalidAircraftTypeException(InvalidAircraftTypeException e) {
+        return new ErrorResponse().setHttpStatus(HttpStatus.BAD_REQUEST).setMessage(e.getMessage());
+    }
+
+    @ExceptionHandler(value = FlightsNotAssignedException.class)
+    public ErrorResponse handleFlightsNotAssignedException(FlightsNotAssignedException e) {
+        return new ErrorResponse().setHttpStatus(HttpStatus.BAD_REQUEST).setMessage(e.getMessage());
+    }
+
     @ExceptionHandler(value = Exception.class)
     public ErrorResponse handleException(Exception e) {
         return new ErrorResponse().setMessage(e.getLocalizedMessage());

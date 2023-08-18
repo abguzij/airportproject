@@ -3,6 +3,7 @@ package kg.airport.airportproject.entity;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(schema = "public", name = "aircraft_seats")
@@ -82,5 +83,18 @@ public class AircraftSeatsEntity {
     public AircraftSeatsEntity setUserFlightsEntities(List<UserFlightsEntity> userFlightsEntities) {
         this.userFlightsEntities = userFlightsEntities;
         return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AircraftSeatsEntity that = (AircraftSeatsEntity) o;
+        return Objects.equals(numberInRow, that.numberInRow) && Objects.equals(rowNumber, that.rowNumber);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(numberInRow, rowNumber);
     }
 }

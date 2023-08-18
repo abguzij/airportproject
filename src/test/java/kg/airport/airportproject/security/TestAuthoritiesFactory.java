@@ -21,6 +21,12 @@ public class TestAuthoritiesFactory {
         if("MANAGER".equals(userRoleTitle)) {
             return List.of(new UserRolesEntity().setId(3L).setRoleTitle("MANAGER"));
         }
+        if("DISPATCHER".equals(userRoleTitle)) {
+            return List.of(new UserRolesEntity().setId(5L).setRoleTitle("DISPATCHER"));
+        }
+        if("CHIEF_DISPATCHER".equals(userRoleTitle)) {
+            return List.of(new UserRolesEntity().setId(4L).setRoleTitle("CHIEF_DISPATCHER"));
+        }
         throw new UserRolesNotFoundException("Роли пользователя с указанным названием не найдено!");
     }
 }
