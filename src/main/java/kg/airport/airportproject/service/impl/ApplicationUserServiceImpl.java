@@ -1,16 +1,14 @@
 package kg.airport.airportproject.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Predicate;
 import kg.airport.airportproject.dto.ApplicationUserRequestDto;
 import kg.airport.airportproject.dto.ApplicationUserResponseDto;
 import kg.airport.airportproject.entity.*;
-import kg.airport.airportproject.entity.attributes.FlightStatus;
 import kg.airport.airportproject.entity.attributes.UserFlightsStatus;
 import kg.airport.airportproject.exception.ApplicationUserNotFoundException;
 import kg.airport.airportproject.exception.InvalidIdException;
-import kg.airport.airportproject.exception.UserPositionNotExists;
+import kg.airport.airportproject.exception.UserPositionNotExistsException;
 import kg.airport.airportproject.mapper.ApplicationUsersMapper;
 import kg.airport.airportproject.repository.ApplicationUsersEntityRepository;
 import kg.airport.airportproject.repository.UserPositionsEntityRepository;
@@ -107,7 +105,7 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
             Long userId
     )
             throws ApplicationUserNotFoundException,
-            UserPositionNotExists,
+            UserPositionNotExistsException,
             InvalidIdException
     {
         if(Objects.isNull(userId)) {
@@ -131,7 +129,7 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
         Optional<UserPositionsEntity> userPositionOptional =
                 this.userPositionsEntityRepository.getUserPositionsEntityById(positionId);
         if(userPositionOptional.isEmpty()) {
-            throw new UserPositionNotExists(
+            throw new UserPositionNotExistsException(
                     String.format("Позиции пользователя с ID %d не существует в системе!", positionId)
             );
         }
