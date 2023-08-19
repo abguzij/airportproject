@@ -55,7 +55,7 @@ public class EmployeesController {
             @RequestParam Long userId
     )
             throws ApplicationUserNotFoundException,
-            UserPositionNotExists,
+            UserPositionNotExistsException,
             InvalidIdException
     {
         return this.applicationUserService.updateUsersInformation(applicationUserRequestDto, userId);
@@ -66,7 +66,7 @@ public class EmployeesController {
     public ApplicationUserResponseDto registerNewEmployee(
             @RequestBody ApplicationUserRequestDto applicationUserRequestDto
     )
-            throws UserPositionNotExists,
+            throws UserPositionNotExistsException,
             UserRolesNotAssignedException, UsernameAlreadyExistsException, InvalidUserInfoException, InvalidCredentialsException, InvalidIdException {
         return this.authenticationService.registerNewEmployee(applicationUserRequestDto);
     }

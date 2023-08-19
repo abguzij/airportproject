@@ -1,6 +1,8 @@
 package kg.airport.airportproject.security;
 
 import io.jsonwebtoken.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,6 +12,7 @@ import java.util.Date;
 
 @Component
 public class JwtTokenHandler {
+    private static final Logger logger = LoggerFactory.getLogger(JwtTokenHandler.class);
     @Value("${jwt.token.secret}")
     private String secretKey;
     @Value("${jwt.token.expired}")
@@ -43,13 +46,13 @@ public class JwtTokenHandler {
             Jwts.parser().setSigningKey(this.secretKey).parse(token);
             return true;
         } catch (ExpiredJwtException e) {
-            System.out.println("Token expired!");
+            logger.warn("Token expired!");
         } catch (MalformedJwtException e) {
-            System.out.println("Invalid token!");
+            logger.warn("Invalid token!");
         } catch (SignatureException e) {
-            System.out.println("Signature incorrect!");
+            logger.warn("Signature incorrect!");
         } catch (IllegalArgumentException e) {
-            System.out.println("Token had to contain claims (payload)!");
+            logger.warn("Token had to contain claims (payload)!");
         }
         return false;
     }

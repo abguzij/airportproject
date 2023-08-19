@@ -12,13 +12,4 @@ public interface ApplicationUserValidator {
 
     void checkUsernameForDuplicates(String username) throws UsernameAlreadyExistsException;
 
-    void checkThatPositionIdIsClient(Long positionId)
-            throws InvalidIdException,
-            UserRolesNotFoundException,
-            InvalidUserPositionException;
-
-    void checkThatPositionIdIsNotClient(Long positionId)
-            throws InvalidIdException,
-            UserRolesNotFoundException,
-            InvalidUserPositionException;
 }

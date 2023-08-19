@@ -59,7 +59,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public ApplicationUserResponseDto registerNewClient(ApplicationUserRequestDto requestDto)
             throws UserRolesNotAssignedException,
-            UserPositionNotExists,
+            UserPositionNotExistsException,
             UsernameAlreadyExistsException,
             InvalidUserInfoException,
             InvalidCredentialsException,
@@ -72,7 +72,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         Optional<UserPositionsEntity> userPositionsEntityOptional =
                 this.userPositionsEntityRepository.getUserPositionsEntityByPositionTitle("CLIENT");
         if(userPositionsEntityOptional.isEmpty()) {
-            throw new UserPositionNotExists("Введенной позиции пользователя не существует в системе!");
+            throw new UserPositionNotExistsException("Введенной позиции пользователя не существует в системе!");
         }
         UserPositionsEntity userPosition = userPositionsEntityOptional.get();
         applicationUsersEntity.setUserPosition(userPosition);
@@ -89,6 +89,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
         applicationUsersEntity.setUserRolesEntityList(userRolesEntityList);
         applicationUsersEntity.setPassword(this.passwordEncoder.encode(applicationUsersEntity.getPassword()));
+        applicationUsersEntity.setEnabled(Boolean.TRUE);
 
         applicationUsersEntity = this.applicationUsersEntityRepository.save(applicationUsersEntity);
         return ApplicationUsersMapper.mapToApplicationUserResponseDto(applicationUsersEntity);
@@ -97,7 +98,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public ApplicationUserResponseDto registerNewEmployee(ApplicationUserRequestDto requestDto)
             throws UserRolesNotAssignedException,
-            UserPositionNotExists,
+            UserPositionNotExistsException,
             UsernameAlreadyExistsException,
             InvalidUserInfoException,
             InvalidCredentialsException,
@@ -110,7 +111,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         Optional<UserPositionsEntity> userPositionsEntityOptional =
                 this.userPositionsEntityRepository.getUserPositionsEntityById(requestDto.getPositionId());
         if(userPositionsEntityOptional.isEmpty()) {
-            throw new UserPositionNotExists("Введенной позиции пользователя не существует в системе!");
+            throw new UserPositionNotExistsException("Введенной позиции пользователя не существует в системе!");
         }
         UserPositionsEntity userPosition = userPositionsEntityOptional.get();
         applicationUsersEntity.setUserPosition(userPosition);
@@ -127,6 +128,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
         applicationUsersEntity.setUserRolesEntityList(userRolesEntityList);
         applicationUsersEntity.setPassword(this.passwordEncoder.encode(applicationUsersEntity.getPassword()));
+        applicationUsersEntity.setEnabled(Boolean.TRUE);
 
         applicationUsersEntity = this.applicationUsersEntityRepository.save(applicationUsersEntity);
         return ApplicationUsersMapper.mapToApplicationUserResponseDto(applicationUsersEntity);

@@ -11,12 +11,20 @@ public interface AuthenticationService {
     @Transactional
     ApplicationUserResponseDto registerNewClient(ApplicationUserRequestDto requestDto)
             throws UserRolesNotAssignedException,
-            UserPositionNotExists, UsernameAlreadyExistsException, InvalidUserInfoException, InvalidCredentialsException, InvalidIdException;
+            UserPositionNotExistsException,
+            UsernameAlreadyExistsException,
+            InvalidUserInfoException,
+            InvalidCredentialsException,
+            InvalidIdException;
 
     @Transactional
     ApplicationUserResponseDto registerNewEmployee(ApplicationUserRequestDto requestDto)
             throws UserRolesNotAssignedException,
-            UserPositionNotExists, UsernameAlreadyExistsException, InvalidUserInfoException, InvalidCredentialsException, InvalidIdException;
+            UserPositionNotExistsException,
+            UsernameAlreadyExistsException,
+            InvalidUserInfoException,
+            InvalidCredentialsException,
+            InvalidIdException;
 
     JwtTokenResponseDto login(ApplicationUserCredentialsRequestDto requestDto);
 }

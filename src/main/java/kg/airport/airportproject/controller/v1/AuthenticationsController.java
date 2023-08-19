@@ -47,7 +47,7 @@ public class AuthenticationsController {
     public ApplicationUserResponseDto registerClient(
             @RequestBody ApplicationUserRequestDto requestDto
     )
-            throws UserPositionNotExists,
+            throws UserPositionNotExistsException,
             UserRolesNotAssignedException,
             UsernameAlreadyExistsException,
             InvalidUserInfoException,

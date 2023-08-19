@@ -21,15 +21,12 @@ import java.util.stream.StreamSupport;
 @Component
 public class ApplicationUserValidatorImpl implements ApplicationUserValidator {
     private final ApplicationUsersEntityRepository applicationUsersEntityRepository;
-    private final UserRolesEntityRepository userRolesEntityRepository;
 
     @Autowired
     public ApplicationUserValidatorImpl(
-            ApplicationUsersEntityRepository applicationUsersEntityRepository,
-            UserRolesEntityRepository userRolesEntityRepository
+            ApplicationUsersEntityRepository applicationUsersEntityRepository
     ) {
         this.applicationUsersEntityRepository = applicationUsersEntityRepository;
-        this.userRolesEntityRepository = userRolesEntityRepository;
     }
 
     @Override
@@ -70,61 +67,4 @@ public class ApplicationUserValidatorImpl implements ApplicationUserValidator {
             throw new UsernameAlreadyExistsException("Пользователь с таким именем уже существует в системе!");
         }
     }
-
-    @Override
-    public void checkThatPositionIdIsClient(Long positionId)
-            throws InvalidIdException,
-            UserRolesNotFoundException,
-            InvalidUserPositionException
-    {
-        if(!checkThatIsClientsId(positionId)) {
-            throw new InvalidUserPositionException("ID позиции пользователя не соотвествует ID позиции клиента!");
-        }
-    }
-
-    @Override
-    public void checkThatPositionIdIsNotClient(Long positionId)
-            throws InvalidIdException,
-            UserRolesNotFoundException,
-            InvalidUserPositionException
-    {
-        if(checkThatIsClientsId(positionId)) {
-            throw new InvalidUserPositionException("ID позиции пользователя не соотвествует ID позиции сотрудника!");
-        }
-    }
-
-    private boolean checkThatIsClientsId(Long positionID)
-            throws UserRolesNotFoundException,
-            InvalidIdException
-    {
-        if(Objects.isNull(positionID)) {
-            throw new IllegalArgumentException("ID позиции пользователя не может быть null!");
-        }
-        if(positionID < 1L) {
-            throw new InvalidIdException("ID позиции пользователя не может быть меньше 1!");
-        }
-        BooleanBuilder booleanBuilder = new BooleanBuilder();
-        QUserRolesEntity root = QUserRolesEntity.userRolesEntity;
-
-        booleanBuilder.and(root.roleTitle.eq("CLIENT"));
-
-        Iterable<UserRolesEntity> userRolesEntitiesIterable =
-                this.userRolesEntityRepository.findAll(booleanBuilder.getValue());
-        List<UserRolesEntity> userRolesEntityList =
-                StreamSupport
-                        .stream(userRolesEntitiesIterable.spliterator(), false)
-                        .collect(Collectors.toList());
-
-        if(userRolesEntityList.isEmpty()) {
-            throw new UserRolesNotFoundException("Роли пользователя CLIENT не найдено!");
-        }
-        for (UserRolesEntity role : userRolesEntityList) {
-            if(role.getUserPositions().getId().equals(positionID)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-
 }

@@ -5,7 +5,7 @@ import kg.airport.airportproject.dto.ApplicationUserResponseDto;
 import kg.airport.airportproject.entity.ApplicationUsersEntity;
 import kg.airport.airportproject.exception.ApplicationUserNotFoundException;
 import kg.airport.airportproject.exception.InvalidIdException;
-import kg.airport.airportproject.exception.UserPositionNotExists;
+import kg.airport.airportproject.exception.UserPositionNotExistsException;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -29,7 +29,7 @@ public interface ApplicationUserService {
             Long userId
     )
             throws ApplicationUserNotFoundException,
-            UserPositionNotExists,
+            UserPositionNotExistsException,
             InvalidIdException;
 
     List<ApplicationUserResponseDto> getAllClients(
