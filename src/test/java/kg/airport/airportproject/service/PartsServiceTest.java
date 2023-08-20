@@ -234,4 +234,78 @@ public class PartsServiceTest {
                 exception.getMessage()
         );
     }
+
+    @Test
+    public void testGetPartEntitiesByPartsIdListAndAircraftId_OK() {
+        List<PartsEntity> foundParts = PartsTestEntityProvider.getListOfTestPartsEntities();
+        List<Long> testPartIdList =
+                List.of(PartsTestEntityProvider.TEST_PART_ID, PartsTestEntityProvider.TEST_SECOND_PART_ID);
+        AircraftsEntity aircraft = AircraftsTestEntityProvider.getAircraftsTestEntity();
+        for (PartsEntity foundPart : foundParts) {
+            foundPart.getAircraftsEntities().add(aircraft);
+            aircraft.getPartsEntities().add(foundPart);
+        }
+
+        BooleanBuilder booleanBuilder = new BooleanBuilder();
+        QPartsEntity root = QPartsEntity.partsEntity;
+        booleanBuilder.and(root.id.in(testPartIdList));
+        booleanBuilder.and(root.aircraftsEntities.any().id.eq(aircraft.getId()));
+        Mockito
+                .when(this.partsEntityRepository.findAll(Mockito.eq(booleanBuilder.getValue())))
+                .thenReturn(foundParts);
+        try {
+            List<PartsEntity> resultList = this.partsService.getPartEntitiesByPartsIdListAndAircraftId(
+                    testPartIdList,
+                    aircraft.getId()
+            );
+
+            for (int i = 0; i < resultList.size(); i++) {
+                Assertions.assertEquals(foundParts.get(i).getId(), resultList.get(i).getId());
+                Assertions.assertEquals(foundParts.get(i).getAircraftType(), resultList.get(i).getAircraftType());
+            }
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testGetPartEntitiesByPartsIdListAndAircraftId_PartsNotFound() {
+        List<PartsEntity> foundParts = PartsTestEntityProvider.getListOfTestPartsEntities();
+        List<Long> testPartIdList =
+                List.of(PartsTestEntityProvider.TEST_PART_ID, PartsTestEntityProvider.TEST_SECOND_PART_ID);
+        AircraftsEntity aircraft = AircraftsTestEntityProvider.getAircraftsTestEntity();
+        for (PartsEntity foundPart : foundParts) {
+            foundPart.getAircraftsEntities().add(aircraft);
+            aircraft.getPartsEntities().add(foundPart);
+        }
+
+        BooleanBuilder booleanBuilder = new BooleanBuilder();
+        QPartsEntity root = QPartsEntity.partsEntity;
+        booleanBuilder.and(root.id.in(testPartIdList));
+        booleanBuilder.and(root.aircraftsEntities.any().id.eq(aircraft.getId()));
+        Mockito
+                .when(this.partsEntityRepository.findAll(Mockito.eq(booleanBuilder.getValue())))
+                .thenAnswer(invocationOnMock -> new ArrayList<>());
+
+        Exception exception = Assertions.assertThrows(
+                PartsNotFoundException.class,
+                () -> this.partsService.getPartEntitiesByPartsIdListAndAircraftId(testPartIdList, aircraft.getId())
+        );
+        Assertions.assertEquals(
+                "Деталей самолета по заданным ID деталей и ID самолета не найдено!",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    public void testGetPartEntitiesByPartsIdListAndAircraftId_NullAircraftId() {
+        List<Long> testPartIdList =
+                List.of(PartsTestEntityProvider.TEST_PART_ID, PartsTestEntityProvider.TEST_SECOND_PART_ID);
+
+        Exception exception = Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> this.partsService.getPartEntitiesByPartsIdListAndAircraftId(testPartIdList, null)
+        );
+        Assertions.assertEquals("ID самолета не может быть null!", exception.getMessage());
+    }
 }
