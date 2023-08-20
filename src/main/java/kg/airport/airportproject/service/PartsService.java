@@ -42,10 +42,12 @@ public interface PartsService {
             AircraftType aircraftType
     )
             throws PartsNotFoundException,
-            IncompatiblePartException, InvalidIdException;
+            IncompatiblePartException,
+            InvalidIdException;
 
     List<PartsEntity> getPartEntitiesByPartsIdListAndAircraftId(List<Long> partsIdList, Long aircraftId)
-            throws InvalidIdException, PartsNotFoundException;
+            throws InvalidIdException,
+            PartsNotFoundException;
 
     PartTypesResponseDto getAllPartTypes();
 }

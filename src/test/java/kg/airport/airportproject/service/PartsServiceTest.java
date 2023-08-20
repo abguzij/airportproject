@@ -170,4 +170,68 @@ public class PartsServiceTest {
                 exception.getMessage()
         );
     }
+
+    @Test
+    public void testGetPartEntitiesByPartsIdListAndAircraftType_OK() {
+        List<PartsEntity> foundParts = PartsTestEntityProvider.getListOfTestPartsEntities();
+        List<Long> testPartIdList =
+                List.of(PartsTestEntityProvider.TEST_PART_ID, PartsTestEntityProvider.TEST_SECOND_PART_ID);
+
+        Mockito
+                .when(this.partsEntityRepository.getPartsEntitiesByIdIn(Mockito.eq(testPartIdList)))
+                .thenReturn(foundParts);
+        try {
+            List<PartsEntity> resultList = this.partsService.getPartEntitiesByPartsIdListAndAircraftType(
+                    testPartIdList,
+                    AircraftsTestEntityProvider.TEST_AIRCRAFT_TYPE
+            );
+
+            for (PartsEntity result : resultList) {
+                Assertions.assertEquals(AircraftsTestEntityProvider.TEST_AIRCRAFT_TYPE, result.getAircraftType());
+                Assertions.assertTrue(testPartIdList.contains(result.getId()));
+            }
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testGetPartEntitiesByPartsIdListAndAircraftType_PartsNotFound() {
+        List<Long> testPartIdList =
+                List.of(PartsTestEntityProvider.TEST_PART_ID, PartsTestEntityProvider.TEST_SECOND_PART_ID);
+
+        Mockito
+                .when(this.partsEntityRepository.getPartsEntitiesByIdIn(Mockito.eq(testPartIdList)))
+                .thenAnswer(invocationOnMock -> new ArrayList<>());
+
+        Exception exception = Assertions.assertThrows(
+                PartsNotFoundException.class,
+                () -> this.partsService.getPartEntitiesByPartsIdListAndAircraftType(
+                        testPartIdList,
+                        AircraftsTestEntityProvider.TEST_AIRCRAFT_TYPE
+                )
+        );
+        Assertions.assertEquals(
+                "Деталей по заданным ID не найдено!",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    public void testGetPartEntitiesByPartsIdListAndAircraftType_NullAircraftType() {
+        List<Long> testPartIdList =
+                List.of(PartsTestEntityProvider.TEST_PART_ID, PartsTestEntityProvider.TEST_SECOND_PART_ID);
+
+        Exception exception = Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> this.partsService.getPartEntitiesByPartsIdListAndAircraftType(
+                        testPartIdList,
+                        null
+                )
+        );
+        Assertions.assertEquals(
+                "Тип самолета не может быть null!",
+                exception.getMessage()
+        );
+    }
 }
