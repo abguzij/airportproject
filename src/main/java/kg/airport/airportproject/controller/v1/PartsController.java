@@ -5,10 +5,10 @@ import kg.airport.airportproject.dto.PartResponseDto;
 import kg.airport.airportproject.dto.PartTypesResponseDto;
 import kg.airport.airportproject.entity.attributes.AircraftType;
 import kg.airport.airportproject.entity.attributes.PartType;
-import kg.airport.airportproject.exception.InvalidIdException;
-import kg.airport.airportproject.exception.PartsNotFoundException;
+import kg.airport.airportproject.exception.*;
 import kg.airport.airportproject.service.PartsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,7 +31,11 @@ public class PartsController {
     @PostMapping(value = "/register")
     public PartResponseDto registerNewPart(
             @RequestBody PartRequestDto requestDto
-    ) {
+    )
+            throws InvalidAircraftTypeException,
+            InvalidPartTypeException,
+            InvalidPartTitleException
+    {
         return this.partsService.registerNewPart(requestDto);
     }
 
@@ -39,7 +43,11 @@ public class PartsController {
     @PostMapping(value = "/register-all")
     public List<PartResponseDto> registerNewParts(
             @RequestBody List<PartRequestDto> requestDto
-    ) {
+    )
+            throws InvalidAircraftTypeException,
+            InvalidPartTypeException,
+            InvalidPartTitleException
+    {
         return this.partsService.registerNewParts(requestDto);
     }
 
@@ -50,7 +58,9 @@ public class PartsController {
             @RequestParam(required = false) PartType partType,
             @RequestParam(required = false) Long aircraftId,
             @RequestParam(required = false) Long partId,
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
             @RequestParam(required = false) LocalDateTime registeredBefore,
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
             @RequestParam(required = false) LocalDateTime registeredAfter
     )
             throws PartsNotFoundException,

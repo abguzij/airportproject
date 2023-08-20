@@ -8,12 +8,11 @@ import kg.airport.airportproject.entity.PartsEntity;
 import kg.airport.airportproject.entity.QPartsEntity;
 import kg.airport.airportproject.entity.attributes.AircraftType;
 import kg.airport.airportproject.entity.attributes.PartType;
-import kg.airport.airportproject.exception.IncompatiblePartException;
-import kg.airport.airportproject.exception.InvalidIdException;
-import kg.airport.airportproject.exception.PartsNotFoundException;
+import kg.airport.airportproject.exception.*;
 import kg.airport.airportproject.mapper.PartsMapper;
 import kg.airport.airportproject.repository.PartsEntityRepository;
 import kg.airport.airportproject.service.PartsService;
+import kg.airport.airportproject.validator.PartsValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,34 +26,42 @@ import java.util.stream.StreamSupport;
 @Service
 public class PartsServiceImpl implements PartsService {
     private final PartsEntityRepository partsEntityRepository;
+    private final PartsValidator partsValidator;
 
     @Autowired
     public PartsServiceImpl(
-            PartsEntityRepository partsEntityRepository
+            PartsEntityRepository partsEntityRepository,
+            PartsValidator partsValidator
     ) {
         this.partsEntityRepository = partsEntityRepository;
+        this.partsValidator = partsValidator;
     }
 
     @Override
-    public PartResponseDto registerNewPart(PartRequestDto requestDto) {
-        if(Objects.isNull(requestDto)) {
-            throw new IllegalArgumentException("Создаваемая деталь не может быть null");
-        }
-
+    public PartResponseDto registerNewPart(PartRequestDto requestDto)
+            throws InvalidAircraftTypeException,
+            InvalidPartTypeException,
+            InvalidPartTitleException
+    {
+        this.partsValidator.validatePartRequestDto(requestDto);
         PartsEntity partsEntity = PartsMapper.mapPartRequestDtoToEntity(requestDto);
         partsEntity = this.partsEntityRepository.save(partsEntity);
         return PartsMapper.mapToPartResponseDto(partsEntity);
     }
 
     @Override
-    public List<PartResponseDto> registerNewParts(List<PartRequestDto> partRequestDtoList) {
+    public List<PartResponseDto> registerNewParts(List<PartRequestDto> partRequestDtoList)
+            throws InvalidAircraftTypeException,
+            InvalidPartTypeException,
+            InvalidPartTitleException
+    {
         if(partRequestDtoList.isEmpty()) {
             throw new IllegalArgumentException("Список создаваемых деталей не может быть пустым!");
         }
 
         List<PartsEntity> partsEntities = new ArrayList<>();
         for (PartRequestDto partRequestDto : partRequestDtoList) {
-            // TODO: 30.07.2023 Здесь валидировать дто
+            this.partsValidator.validatePartRequestDto(partRequestDto);
             partsEntities.add(PartsMapper.mapPartRequestDtoToEntity(partRequestDto));
         }
         partsEntities = this.partsEntityRepository.saveAll(partsEntities);
