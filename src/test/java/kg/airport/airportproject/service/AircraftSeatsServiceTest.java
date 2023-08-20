@@ -292,6 +292,45 @@ public class AircraftSeatsServiceTest {
         );
     }
 
+    @Test
+    public void testGetNumberOfFreeSeatsByAircraftId_OK() {
+        AircraftSeatsEntity seat = AircraftSeatsTestEntityProvider.getReservedAircraftSeatsTestEntity();
+        AircraftsEntity aircraft = AircraftsTestEntityProvider.getAircraftsTestEntity();
+
+        seat.setAircraftsEntity(aircraft);
+        aircraft.getAircraftSeatsEntityList().add(seat);
+
+        Mockito
+                .when(this.aircraftSeatsEntityRepository.findAll(Mockito.any(Predicate.class)))
+                .thenAnswer(invocationOnMock -> List.of(seat));
+        try {
+            Integer result = this.aircraftSeatsService.getNumberOfFreeSeatsByAircraftId(
+                    AircraftsTestEntityProvider.TEST_AIRCRAFT_ID
+            );
+            Assertions.assertEquals(1, result);
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testGetNumberOfFreeSeatsByAircraftId_NullAircraftId() {
+        Exception exception = Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> this.aircraftSeatsService.getNumberOfFreeSeatsByAircraftId(null)
+        );
+        Assertions.assertEquals("ID самолета не может быть null!", exception.getMessage());
+    }
+
+    @Test
+    public void testGetNumberOfFreeSeatsByAircraftId_AircraftIdLessThan1() {
+        Exception exception = Assertions.assertThrows(
+                InvalidIdException.class,
+                () -> this.aircraftSeatsService.getNumberOfFreeSeatsByAircraftId(0L)
+        );
+        Assertions.assertEquals("ID самолета не может быть меньше 1!", exception.getMessage());
+    }
+
     private Integer evaluateRowNumber(Integer rowsNumber, Integer numberOfSeatsInRow, int index) {
         return rowsNumber - (rowsNumber - (index / numberOfSeatsInRow + 1));
     }
