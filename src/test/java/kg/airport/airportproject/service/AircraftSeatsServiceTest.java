@@ -86,4 +86,59 @@ public class AircraftSeatsServiceTest {
                 String.format("Ошибка! Место с ID [%d] уже забронировано!", aircraftSeatsEntity.getId())
         );
     }
+
+    @Test
+    public void testCancelSeatReservation_OK() {
+        AircraftSeatsEntity aircraftSeatsEntity =
+                AircraftSeatsTestEntityProvider.getReservedAircraftSeatsTestEntity();
+        Mockito
+                .when(this.aircraftSeatsEntityRepository.getAircraftSeatsEntityById(
+                        Mockito.eq(aircraftSeatsEntity.getId())
+                ))
+                .thenAnswer(invocationOnMock -> Optional.of(aircraftSeatsEntity));
+
+        ArgumentMatcher<AircraftSeatsEntity> matcher = new AircraftSeatsReservationMatcher(
+                AircraftSeatsTestEntityProvider.getNotReservedAircraftSeatsTestEntity()
+        );
+        Mockito
+                .when(this.aircraftSeatsEntityRepository.save(Mockito.argThat(matcher)))
+                .thenAnswer(invocationOnMock -> invocationOnMock.getArguments()[0]);
+        try {
+            AircraftSeatsEntity result = this.aircraftSeatsService.cancelSeatReservation(aircraftSeatsEntity.getId());
+
+            Assertions.assertEquals(AircraftSeatsTestEntityProvider.TEST_SEAT_NOT_RESERVED_VALUE, result.getReserved());
+            Assertions.assertEquals(aircraftSeatsEntity.getId(), result.getId());
+            Assertions.assertEquals(aircraftSeatsEntity.getRowNumber(), result.getRowNumber());
+            Assertions.assertEquals(aircraftSeatsEntity.getNumberInRow(), result.getNumberInRow());
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testCancelSeatReservation_InvalidId() {
+        Assertions.assertThrowsExactly(
+                InvalidIdException.class,
+                () -> this.aircraftSeatsService.cancelSeatReservation(0L),
+                "ID места в самолете не может быть меньше 1!"
+        );
+    }
+
+    @Test
+    public void testCancelSeatReservation_SeatNotReserved() {
+        AircraftSeatsEntity aircraftSeatsEntity =
+                AircraftSeatsTestEntityProvider.getNotReservedAircraftSeatsTestEntity();
+        Mockito
+                .when(this.aircraftSeatsEntityRepository.getAircraftSeatsEntityById(
+                        Mockito.eq(aircraftSeatsEntity.getId())
+                ))
+                .thenAnswer(invocationOnMock -> Optional.of(aircraftSeatsEntity));
+
+        Assertions.assertThrowsExactly(
+                SeatReservationException.class,
+                () -> this.aircraftSeatsService.cancelSeatReservation(aircraftSeatsEntity.getId()),
+                String.format("Ошибка! Место с ID [%d] свободно!", aircraftSeatsEntity.getId())
+        );
+
+    }
 }
