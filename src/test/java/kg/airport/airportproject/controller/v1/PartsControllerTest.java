@@ -399,6 +399,24 @@ class PartsControllerTest {
     @Test
     void testGetPartTypes_OK() {
         try {
+            String jwtToken = this.jwtTokenAuthenticationFactory.getJwtTokenForDefaultUserWithSpecifiedRoleTitle(
+                    "DISPATCHER"
+            );
+
+            URI uri = new URI( "http://localhost:" + port + "/v1/parts/part-types");
+
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add("Authorization", jwtToken);
+
+            ResponseEntity<PartTypesResponseDto> response =
+                    this.testRestTemplate.exchange(
+                            uri,
+                            HttpMethod.GET,
+                            new HttpEntity<>(httpHeaders),
+                            PartTypesResponseDto.class
+                    );
+
+            Assertions.assertEquals(List.of(PartType.values()), response.getBody().getPartTypeList());
         } catch (Exception e) {
             Assertions.fail(e.getMessage());
         }

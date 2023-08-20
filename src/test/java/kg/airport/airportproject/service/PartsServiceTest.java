@@ -308,4 +308,6 @@ public class PartsServiceTest {
         );
         Assertions.assertEquals("ID самолета не может быть null!", exception.getMessage());
     }
+
+
 }
