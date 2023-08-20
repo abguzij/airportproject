@@ -18,6 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
@@ -134,7 +135,7 @@ class PartsControllerTest {
                     this.testRestTemplate.exchange(
                             uri,
                             HttpMethod.POST,
-                            new HttpEntity<>(new PartRequestDto(), httpHeaders),
+                            new HttpEntity<>(requestDto, httpHeaders),
                             ErrorResponse.class
                     );
 
@@ -150,6 +151,103 @@ class PartsControllerTest {
     @Test
     void testRegisterNewParts_OK() {
         try {
+            List<PartRequestDto> requestDtoList = PartsTestDtoProvider.getListOfTestPartRequestDto();
+            List<PartsEntity> partsEntities = PartsTestEntityProvider.getListOfTestPartsEntities();
+
+            Mockito
+                    .when(this.partsEntityRepository.saveAll(Mockito.eq(partsEntities)))
+                    .thenAnswer(invocationOnMock -> invocationOnMock.getArguments()[0]);
+
+            String jwtToken = this.jwtTokenAuthenticationFactory.getJwtTokenForDefaultUserWithSpecifiedRoleTitle(
+                    "DISPATCHER"
+            );
+
+            URI uri = new URI( "http://localhost:" + port + "/v1/parts/register-all");
+
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add("Authorization", jwtToken);
+
+            ResponseEntity<List<PartResponseDto>> response =
+                    this.testRestTemplate.exchange(
+                            uri,
+                            HttpMethod.POST,
+                            new HttpEntity<>(requestDtoList, httpHeaders),
+                            new ParameterizedTypeReference<List<PartResponseDto>>() {}
+                    );
+
+            Assertions.assertEquals(requestDtoList.size(), response.getBody().size());
+            for (int i = 0; i < response.getBody().size(); i++) {
+                Assertions.assertEquals(requestDtoList.get(i).getPartType(), response.getBody().get(i).getPartType());
+                Assertions.assertEquals(requestDtoList.get(i).getTitle(), response.getBody().get(i).getTitle());
+                Assertions.assertEquals(
+                        requestDtoList.get(i).getAircraftType(),
+                        response.getBody().get(i).getAircraftType()
+                );
+            }
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    void testRegisterNewParts_InvalidAircraftType() {
+        try {
+            List<PartRequestDto> requestDtoList = PartsTestDtoProvider.getListOfTestPartRequestDto();
+            requestDtoList.get(1).setAircraftType(null);
+
+            String jwtToken = this.jwtTokenAuthenticationFactory.getJwtTokenForDefaultUserWithSpecifiedRoleTitle(
+                    "DISPATCHER"
+            );
+
+            URI uri = new URI( "http://localhost:" + port + "/v1/parts/register-all");
+
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add("Authorization", jwtToken);
+
+            ResponseEntity<ErrorResponse> response =
+                    this.testRestTemplate.exchange(
+                            uri,
+                            HttpMethod.POST,
+                            new HttpEntity<>(requestDtoList, httpHeaders),
+                            ErrorResponse.class
+                    );
+
+            Assertions.assertEquals(
+                    "Тип создаваемого самолета не может быть null!",
+                    response.getBody().getMessage()
+            );
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    void testRegisterNewParts_InvalidPartType() {
+        try {
+            List<PartRequestDto> requestDtoList = PartsTestDtoProvider.getListOfTestPartRequestDto();
+            requestDtoList.get(1).setPartType(null);
+
+            String jwtToken = this.jwtTokenAuthenticationFactory.getJwtTokenForDefaultUserWithSpecifiedRoleTitle(
+                    "DISPATCHER"
+            );
+
+            URI uri = new URI( "http://localhost:" + port + "/v1/parts/register-all");
+
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add("Authorization", jwtToken);
+
+            ResponseEntity<ErrorResponse> response =
+                    this.testRestTemplate.exchange(
+                            uri,
+                            HttpMethod.POST,
+                            new HttpEntity<>(requestDtoList, httpHeaders),
+                            ErrorResponse.class
+                    );
+
+            Assertions.assertEquals(
+                    "Тип создаваемой детали не может быть null!",
+                    response.getBody().getMessage()
+            );
         } catch (Exception e) {
             Assertions.fail(e.getMessage());
         }

@@ -17,6 +17,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(value = MockitoExtension.class)
@@ -52,6 +54,32 @@ public class PartsServiceTest {
             Assertions.assertEquals(requestDto.getTitle(), result.getTitle());
             Assertions.assertEquals(requestDto.getAircraftType(), result.getAircraftType());
             Assertions.assertEquals(requestDto.getPartType(), result.getPartType());
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testRegisterNewParts_OK() {
+        List<PartRequestDto> requestDtoList = PartsTestDtoProvider.getListOfTestPartRequestDto();
+        List<PartsEntity> partsEntities = PartsTestEntityProvider.getListOfTestPartsEntities();
+        try {
+            Mockito
+                    .doNothing()
+                    .when(this.partsValidator)
+                    .validatePartRequestDto(Mockito.any(PartRequestDto.class));
+            Mockito
+                    .when(this.partsEntityRepository.saveAll(Mockito.eq(partsEntities)))
+                    .thenAnswer(invocationOnMock -> invocationOnMock.getArguments()[0]);
+
+            List<PartResponseDto> resultList = this.partsService.registerNewParts(requestDtoList);
+
+            Assertions.assertEquals(requestDtoList.size(), resultList.size());
+            for (int i = 0; i < resultList.size(); i++) {
+                Assertions.assertEquals(requestDtoList.get(i).getPartType(), resultList.get(i).getPartType());
+                Assertions.assertEquals(requestDtoList.get(i).getTitle(), resultList.get(i).getTitle());
+                Assertions.assertEquals(requestDtoList.get(i).getAircraftType(), resultList.get(i).getAircraftType());
+            }
         } catch (Exception e) {
             Assertions.fail(e.getMessage());
         }
