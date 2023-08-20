@@ -7,9 +7,7 @@ import kg.airport.airportproject.entity.AircraftsEntity;
 import kg.airport.airportproject.entity.PartsEntity;
 import kg.airport.airportproject.entity.attributes.AircraftType;
 import kg.airport.airportproject.entity.attributes.PartType;
-import kg.airport.airportproject.exception.IncompatiblePartException;
-import kg.airport.airportproject.exception.InvalidIdException;
-import kg.airport.airportproject.exception.PartsNotFoundException;
+import kg.airport.airportproject.exception.*;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -17,10 +15,16 @@ import java.util.List;
 
 public interface PartsService {
     @Transactional
-    PartResponseDto registerNewPart(PartRequestDto requestDto);
+    PartResponseDto registerNewPart(PartRequestDto requestDto)
+            throws InvalidAircraftTypeException,
+            InvalidPartTypeException,
+            InvalidPartTitleException;
 
     @Transactional
-    List<PartResponseDto> registerNewParts(List<PartRequestDto> partRequestDtoList);
+    List<PartResponseDto> registerNewParts(List<PartRequestDto> partRequestDtoList)
+            throws InvalidAircraftTypeException,
+            InvalidPartTypeException,
+            InvalidPartTitleException;
 
     List<PartResponseDto> getAllParts(
             AircraftType aircraftType,
