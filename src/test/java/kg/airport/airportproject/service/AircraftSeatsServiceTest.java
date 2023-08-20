@@ -1,7 +1,12 @@
 package kg.airport.airportproject.service;
 
+import com.querydsl.core.types.Predicate;
+import kg.airport.airportproject.dto.AircraftSeatResponseDto;
 import kg.airport.airportproject.entity.AircraftSeatsEntity;
 import kg.airport.airportproject.entity.AircraftSeatsTestEntityProvider;
+import kg.airport.airportproject.entity.AircraftsEntity;
+import kg.airport.airportproject.entity.AircraftsTestEntityProvider;
+import kg.airport.airportproject.exception.AircraftSeatNotFoundException;
 import kg.airport.airportproject.exception.InvalidIdException;
 import kg.airport.airportproject.exception.SeatReservationException;
 import kg.airport.airportproject.mock.matcher.AircraftSeatsReservationMatcher;
@@ -16,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -180,6 +186,64 @@ public class AircraftSeatsServiceTest {
                 IllegalArgumentException.class,
                 () -> this.aircraftSeatsService.generateAircraftSeats(0, 1),
                 "Количество рядов и количество мест в ряду не может быть меньше 1!"
+        );
+    }
+
+    @Test
+    public void testGetAllAircraftSeats_OK() {
+        AircraftSeatsEntity seat = AircraftSeatsTestEntityProvider.getReservedAircraftSeatsTestEntity();
+        AircraftsEntity aircraft = AircraftsTestEntityProvider.getAircraftsTestEntity();
+
+        seat.setAircraftsEntity(aircraft);
+        aircraft.getAircraftSeatsEntityList().add(seat);
+
+        Mockito
+                .when(this.aircraftSeatsEntityRepository.findAll(Mockito.any(Predicate.class)))
+                .thenAnswer(invocationOnMock -> List.of(seat));
+        try {
+            List<AircraftSeatResponseDto> resultList = this.aircraftSeatsService.getAllAircraftSeats(
+                    AircraftsTestEntityProvider.TEST_AIRCRAFT_ID,
+                    AircraftSeatsTestEntityProvider.TEST_SEAT_RESERVED_VALUE
+            );
+
+            Assertions.assertEquals(1, resultList.size());
+            Assertions.assertEquals(
+                    AircraftSeatsTestEntityProvider.TEST_SEAT_RESERVED_VALUE,
+                    resultList.get(0).getReserved()
+            );
+            Assertions.assertEquals(seat.getId(), resultList.get(0).getId());
+            Assertions.assertEquals(seat.getRowNumber(), resultList.get(0).getRowNumber());
+            Assertions.assertEquals(seat.getNumberInRow(), resultList.get(0).getNumberInRow());
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testGetAllAircraftSeats_SeatNotFound() {
+        Mockito
+                .when(this.aircraftSeatsEntityRepository.findAll(Mockito.any(Predicate.class)))
+                .thenAnswer(invocationOnMock -> new ArrayList<>());
+
+        Assertions.assertThrowsExactly(
+                AircraftSeatNotFoundException.class,
+                () -> this.aircraftSeatsService.getAllAircraftSeats(
+                        AircraftsTestEntityProvider.TEST_AIRCRAFT_ID,
+                        AircraftSeatsTestEntityProvider.TEST_SEAT_RESERVED_VALUE
+                ),
+                "Мест для бронирования по заданным параметрам не найдено!"
+        );
+    }
+
+    @Test
+    public void testGetAllAircraftSeats_NullAircraftId() {
+        Assertions.assertThrowsExactly(
+                IllegalArgumentException.class,
+                () -> this.aircraftSeatsService.getAllAircraftSeats(
+                        null,
+                        AircraftSeatsTestEntityProvider.TEST_SEAT_RESERVED_VALUE
+                ),
+                "ID самолета для поиска мест для бронирования не может быть null!"
         );
     }
 

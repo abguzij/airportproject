@@ -125,7 +125,7 @@ public class AircraftSeatsServiceImpl implements AircraftSeatsService {
                         .collect(Collectors.toList());
 
         if(aircraftSeatResponseDtoList.isEmpty()) {
-            throw new AircraftSeatNotFoundException("Мест для бронирования по заданным параметрам не найдено");
+            throw new AircraftSeatNotFoundException("Мест для бронирования по заданным параметрам не найдено!");
         }
         return aircraftSeatResponseDtoList;
     }
