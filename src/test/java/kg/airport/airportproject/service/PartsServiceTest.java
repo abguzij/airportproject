@@ -1,11 +1,15 @@
 package kg.airport.airportproject.service;
 
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Predicate;
+import kg.airport.airportproject.date.RegistrationDateTestFiltersProvider;
 import kg.airport.airportproject.dto.PartRequestDto;
 import kg.airport.airportproject.dto.PartResponseDto;
 import kg.airport.airportproject.dto.PartsTestDtoProvider;
-import kg.airport.airportproject.entity.PartsEntity;
-import kg.airport.airportproject.entity.PartsTestEntityProvider;
+import kg.airport.airportproject.entity.*;
+import kg.airport.airportproject.exception.InvalidIdException;
 import kg.airport.airportproject.exception.InvalidPartTitleException;
+import kg.airport.airportproject.exception.PartsNotFoundException;
 import kg.airport.airportproject.repository.PartsEntityRepository;
 import kg.airport.airportproject.service.impl.PartsServiceImpl;
 import kg.airport.airportproject.validator.PartsValidator;
@@ -17,7 +21,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -83,5 +89,85 @@ public class PartsServiceTest {
         } catch (Exception e) {
             Assertions.fail(e.getMessage());
         }
+    }
+
+    @Test
+    public void testGetAllParts_OK() {
+        try {
+            BooleanBuilder booleanBuilder = new BooleanBuilder();
+            QPartsEntity root = QPartsEntity.partsEntity;
+            booleanBuilder.and(root.aircraftType.eq(AircraftsTestEntityProvider.TEST_AIRCRAFT_TYPE));
+            booleanBuilder.and(root.partType.eq(PartsTestEntityProvider.TEST_PART_TYPE));
+            booleanBuilder.and(root.aircraftsEntities.any().id.eq(AircraftsTestEntityProvider.TEST_AIRCRAFT_ID));
+            booleanBuilder.and(root.id.eq(PartsTestEntityProvider.TEST_PART_ID));
+            booleanBuilder.and(root.registeredAt.goe(RegistrationDateTestFiltersProvider.TEST_START_DATE_FILTER));
+            booleanBuilder.and(root.registeredAt.loe(RegistrationDateTestFiltersProvider.TEST_END_DATE_FILTER));
+
+            PartsEntity foundPartsEntity = PartsTestEntityProvider.getTestPartsEntity();
+            foundPartsEntity.setRegisteredAt(RegistrationDateTestFiltersProvider.TEST_REGISTRATION_DATE);
+            Mockito
+                    .when(this.partsEntityRepository.findAll(Mockito.eq(booleanBuilder.getValue())))
+                    .thenAnswer(invocationOnMock -> List.of(foundPartsEntity));
+
+            List<PartResponseDto> resultList = this.partsService.getAllParts(
+                    AircraftsTestEntityProvider.TEST_AIRCRAFT_TYPE,
+                    PartsTestEntityProvider.TEST_PART_TYPE,
+                    AircraftsTestEntityProvider.TEST_AIRCRAFT_ID,
+                    PartsTestEntityProvider.TEST_PART_ID,
+                    RegistrationDateTestFiltersProvider.TEST_END_DATE_FILTER,
+                    RegistrationDateTestFiltersProvider.TEST_START_DATE_FILTER
+            );
+
+            Assertions.assertEquals(1, resultList.size());
+            Assertions.assertEquals(foundPartsEntity.getTitle(), resultList.get(0).getTitle());
+            Assertions.assertEquals(foundPartsEntity.getPartType(), resultList.get(0).getPartType());
+            Assertions.assertEquals(foundPartsEntity.getAircraftType(), resultList.get(0).getAircraftType());
+            Assertions.assertEquals(foundPartsEntity.getId(), resultList.get(0).getId());
+            Assertions.assertEquals(foundPartsEntity.getRegisteredAt(), resultList.get(0).getRegisteredAt());
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testGetAllParts_PartsNotFound() {
+        Mockito
+                .when(this.partsEntityRepository.findAll(Mockito.any(Predicate.class)))
+                .thenAnswer(invocationOnMock -> new ArrayList<>());
+
+        Exception exception = Assertions.assertThrows(
+                PartsNotFoundException.class,
+                () -> this.partsService.getAllParts(
+                        AircraftsTestEntityProvider.TEST_AIRCRAFT_TYPE,
+                        PartsTestEntityProvider.TEST_PART_TYPE,
+                        AircraftsTestEntityProvider.TEST_AIRCRAFT_ID,
+                        PartsTestEntityProvider.TEST_PART_ID,
+                        RegistrationDateTestFiltersProvider.TEST_END_DATE_FILTER,
+                        RegistrationDateTestFiltersProvider.TEST_START_DATE_FILTER
+                )
+        );
+        Assertions.assertEquals(
+                "Деталей по заданным параметрам не найдено!",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    public void testGetAllParts_InvalidPartId() {
+        Exception exception = Assertions.assertThrows(
+                InvalidIdException.class,
+                () -> this.partsService.getAllParts(
+                        AircraftsTestEntityProvider.TEST_AIRCRAFT_TYPE,
+                        PartsTestEntityProvider.TEST_PART_TYPE,
+                        AircraftsTestEntityProvider.TEST_AIRCRAFT_ID,
+                        0L,
+                        RegistrationDateTestFiltersProvider.TEST_END_DATE_FILTER,
+                        RegistrationDateTestFiltersProvider.TEST_START_DATE_FILTER
+                )
+        );
+        Assertions.assertEquals(
+                "ID детали не может быть меньше 1!",
+                exception.getMessage()
+        );
     }
 }
