@@ -247,6 +247,51 @@ public class AircraftSeatsServiceTest {
         );
     }
 
+    @Test
+    public void testGetAircraftSeatEntityById_OK() {
+        AircraftSeatsEntity seat = AircraftSeatsTestEntityProvider.getReservedAircraftSeatsTestEntity();
+        Mockito
+                .when(this.aircraftSeatsEntityRepository.getAircraftSeatsEntityById(Mockito.eq(seat.getId())))
+                .thenAnswer(invocationOnMock -> Optional.of(seat));
+        try {
+            AircraftSeatsEntity result =
+                    this.aircraftSeatsService.getAircraftSeatEntityById(AircraftSeatsTestEntityProvider.TEST_SEAT_ID);
+
+            Assertions.assertEquals(AircraftSeatsTestEntityProvider.TEST_SEAT_ID, result.getId());
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testGetAircraftSeatEntityById_AircraftSeatNotFound() {
+        AircraftSeatsEntity seat = AircraftSeatsTestEntityProvider.getReservedAircraftSeatsTestEntity();
+        Mockito
+                .when(this.aircraftSeatsEntityRepository.getAircraftSeatsEntityById(Mockito.eq(seat.getId())))
+                .thenAnswer(invocationOnMock -> Optional.empty());
+
+        Exception exception = Assertions.assertThrows(
+                AircraftSeatNotFoundException.class,
+                () -> this.aircraftSeatsService.getAircraftSeatEntityById(AircraftSeatsTestEntityProvider.TEST_SEAT_ID)
+        );
+        Assertions.assertEquals(
+                String.format("Места в самолете с ID[%d] не найдено!", AircraftSeatsTestEntityProvider.TEST_SEAT_ID),
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    public void testGetAircraftSeatEntityById_NullSeatId() {
+        Exception exception = Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> this.aircraftSeatsService.getAircraftSeatEntityById(null)
+        );
+        Assertions.assertEquals(
+                "ID места в самолете не может быть null!",
+                exception.getMessage()
+        );
+    }
+
     private Integer evaluateRowNumber(Integer rowsNumber, Integer numberOfSeatsInRow, int index) {
         return rowsNumber - (rowsNumber - (index / numberOfSeatsInRow + 1));
     }
