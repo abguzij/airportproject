@@ -29,7 +29,9 @@ public interface AircraftSeatsService {
             throws InvalidIdException,
             AircraftSeatNotFoundException;
 
-    AircraftSeatsEntity getAircraftSeatEntityById(Long seatId) throws InvalidIdException, AircraftSeatNotFoundException;
+    AircraftSeatsEntity getAircraftSeatEntityById(Long seatId)
+            throws InvalidIdException,
+            AircraftSeatNotFoundException;
 
     Integer getNumberOfFreeSeatsByAircraftId(Long aircraftId) throws InvalidIdException;
 }

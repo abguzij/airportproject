@@ -73,21 +73,26 @@ public class AircraftSeatsServiceImpl implements AircraftSeatsService {
         if(Objects.isNull(rowsNumber) || Objects.isNull(numberOfSeatsInRow)) {
             throw new IllegalArgumentException("Количество рядов и количество мест в ряду не может быть null!");
         }
-        if(rowsNumber < 1 && numberOfSeatsInRow < 1) {
+        if(rowsNumber < 1 || numberOfSeatsInRow < 1) {
             throw new IllegalArgumentException("Количество рядов и количество мест в ряду не может быть меньше 1!");
         }
 
         List<AircraftSeatsEntity> aircraftSeatsEntities = new ArrayList<>();
-        for (int rowNumber = 1; rowNumber <= rowsNumber; rowNumber++) {
-            for (int numberInRow = 1; numberInRow <= numberOfSeatsInRow; numberInRow++) {
-                aircraftSeatsEntities.add(
-                        new AircraftSeatsEntity()
-                                .setRowNumber(rowNumber)
-                                .setNumberInRow(numberInRow)
-                                .setReserved(Boolean.FALSE)
-                );
-            }
+        for (int i = 0; i < (rowsNumber * numberOfSeatsInRow); i++) {
+            aircraftSeatsEntities.add(
+                    new AircraftSeatsEntity()
+                            .setRowNumber(this.evaluateRowNumber(rowsNumber, numberOfSeatsInRow, i))
+                            .setNumberInRow(this.evaluateNumberOfSeatInRow(numberOfSeatsInRow, i))
+                            .setReserved(Boolean.FALSE)
+            );
         }
+
+
+//        for (int rowNumber = 1; rowNumber <= rowsNumber; rowNumber++) {
+//            for (int numberInRow = 1; numberInRow <= numberOfSeatsInRow; numberInRow++) {
+//
+//            }
+//        }
         return aircraftSeatsEntities;
     }
 
@@ -120,7 +125,7 @@ public class AircraftSeatsServiceImpl implements AircraftSeatsService {
                         .collect(Collectors.toList());
 
         if(aircraftSeatResponseDtoList.isEmpty()) {
-            throw new AircraftSeatNotFoundException("Мест для бронирования по заданным параметрам не найдено");
+            throw new AircraftSeatNotFoundException("Мест для бронирования по заданным параметрам не найдено!");
         }
         return aircraftSeatResponseDtoList;
     }
@@ -172,5 +177,13 @@ public class AircraftSeatsServiceImpl implements AircraftSeatsService {
                         .collect(Collectors.toList());
 
         return aircraftSeatsEntities.size();
+    }
+
+    private Integer evaluateRowNumber(Integer rowsNumber, Integer numberOfSeatsInRow, int index) {
+        return rowsNumber - (rowsNumber - (index / numberOfSeatsInRow + 1));
+    }
+
+    private Integer evaluateNumberOfSeatInRow(Integer numberOfSeatsInRow, int index) {
+        return (index % numberOfSeatsInRow) + 1;
     }
 }
