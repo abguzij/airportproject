@@ -81,12 +81,12 @@ public class ApplicationUserValidatorTest {
     public void testCheckUsernameForDuplicates_OK() {
         Mockito
                 .when(this.applicationUsersEntityRepository.getApplicationUsersEntityByUsernameAndIsEnabledTrue(
-                        Mockito.eq(ApplicationUsersTestEntityProvider.TEST_USERNAME)
+                        Mockito.eq(ApplicationUsersTestEntityProvider.TEST_CLIENT_USERNAME)
                 ))
                 .thenAnswer(invocationOnMock -> Optional.empty());
 
         try {
-            this.applicationUserValidator.checkUsernameForDuplicates(ApplicationUsersTestEntityProvider.TEST_USERNAME);
+            this.applicationUserValidator.checkUsernameForDuplicates(ApplicationUsersTestEntityProvider.TEST_CLIENT_USERNAME);
         } catch (Exception e) {
             Assertions.fail(e.getMessage());
         }
@@ -97,14 +97,14 @@ public class ApplicationUserValidatorTest {
     public void testCheckUsernameForDuplicates_UsernameAlreadyExists() {
         Mockito
                 .when(this.applicationUsersEntityRepository.getApplicationUsersEntityByUsernameAndIsEnabledTrue(
-                        Mockito.eq(ApplicationUsersTestEntityProvider.TEST_USERNAME)
+                        Mockito.eq(ApplicationUsersTestEntityProvider.TEST_CLIENT_USERNAME)
                 ))
                 .thenAnswer(invocationOnMock -> Optional.of(ApplicationUsersTestEntityProvider.getTestClientEntity()));
 
         Exception exception = Assertions.assertThrowsExactly(
                 UsernameAlreadyExistsException.class,
                 () -> this.applicationUserValidator.checkUsernameForDuplicates(
-                        ApplicationUsersTestEntityProvider.TEST_USERNAME
+                        ApplicationUsersTestEntityProvider.TEST_CLIENT_USERNAME
                 ),
                 "Пользователь с таким именем уже существует в системе!"
         );

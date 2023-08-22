@@ -11,7 +11,7 @@ import kg.airport.airportproject.exception.*;
 import kg.airport.airportproject.mock.matcher.AircraftsStatusChangedMatcher;
 import kg.airport.airportproject.repository.AircraftsEntityRepository;
 import kg.airport.airportproject.response.StatusChangedResponse;
-import kg.airport.airportproject.security.DefaultCredentialsProvider;
+import kg.airport.airportproject.security.TestCredentialsProvider;
 import kg.airport.airportproject.mock.AuthenticationMockingUtils;
 import kg.airport.airportproject.service.impl.AircraftsServiceImpl;
 import kg.airport.airportproject.validator.AircraftsValidator;
@@ -194,7 +194,7 @@ public class AircraftsServiceTest {
 
         ApplicationUsersEntity anotherEngineer = AuthenticationMockingUtils
                 .buildDefaultEngineersEntity()
-                .setId(DefaultCredentialsProvider.ENGINEERS_DEFAULT_ID + 1);
+                .setId(TestCredentialsProvider.ENGINEERS_DEFAULT_ID + 1);
         AuthenticationMockingUtils.mockAuthentication(anotherEngineer);
 
         Mockito
@@ -223,7 +223,7 @@ public class AircraftsServiceTest {
             ApplicationUsersEntity engineer = AuthenticationMockingUtils.buildDefaultEngineersEntity();
             Mockito
                     .when(this.applicationUserService.getEngineerEntityById(
-                            DefaultCredentialsProvider.ENGINEERS_DEFAULT_ID
+                            TestCredentialsProvider.ENGINEERS_DEFAULT_ID
                     ))
                     .thenReturn(engineer);
 
@@ -238,7 +238,7 @@ public class AircraftsServiceTest {
 
             StatusChangedResponse result = this.aircraftsService.assignAircraftInspection(
                     1L,
-                    DefaultCredentialsProvider.ENGINEERS_DEFAULT_ID
+                    TestCredentialsProvider.ENGINEERS_DEFAULT_ID
             );
 
             Assertions.assertTrue(
@@ -262,7 +262,7 @@ public class AircraftsServiceTest {
                 StatusChangeException.class,
                 () -> this.aircraftsService.assignAircraftInspection(
                         1L,
-                        DefaultCredentialsProvider.ENGINEERS_DEFAULT_ID
+                        TestCredentialsProvider.ENGINEERS_DEFAULT_ID
                 )
         );
         Assertions.assertEquals(
@@ -281,7 +281,7 @@ public class AircraftsServiceTest {
                 AircraftNotFoundException.class,
                 () -> this.aircraftsService.assignAircraftInspection(
                         1L,
-                        DefaultCredentialsProvider.ENGINEERS_DEFAULT_ID
+                        TestCredentialsProvider.ENGINEERS_DEFAULT_ID
                 )
         );
         Assertions.assertEquals(
@@ -302,7 +302,7 @@ public class AircraftsServiceTest {
             ApplicationUsersEntity engineer = AuthenticationMockingUtils.buildDefaultEngineersEntity();
             Mockito
                     .when(this.applicationUserService.getEngineerEntityById(
-                            DefaultCredentialsProvider.ENGINEERS_DEFAULT_ID
+                            TestCredentialsProvider.ENGINEERS_DEFAULT_ID
                     ))
                     .thenReturn(engineer);
 
@@ -320,7 +320,7 @@ public class AircraftsServiceTest {
 
             StatusChangedResponse result = this.aircraftsService.assignAircraftRepairs(
                     1L,
-                    DefaultCredentialsProvider.ENGINEERS_DEFAULT_ID
+                    TestCredentialsProvider.ENGINEERS_DEFAULT_ID
             );
 
             Assertions.assertTrue(
@@ -344,7 +344,7 @@ public class AircraftsServiceTest {
                 StatusChangeException.class,
                 () -> this.aircraftsService.assignAircraftRepairs(
                         1L,
-                        DefaultCredentialsProvider.ENGINEERS_DEFAULT_ID
+                        TestCredentialsProvider.ENGINEERS_DEFAULT_ID
                 )
         );
         Assertions.assertEquals(
@@ -363,7 +363,7 @@ public class AircraftsServiceTest {
                 AircraftNotFoundException.class,
                 () -> this.aircraftsService.assignAircraftInspection(
                         1L,
-                        DefaultCredentialsProvider.ENGINEERS_DEFAULT_ID
+                        TestCredentialsProvider.ENGINEERS_DEFAULT_ID
                 )
         );
         Assertions.assertEquals(
@@ -386,7 +386,7 @@ public class AircraftsServiceTest {
             ApplicationUsersEntity engineer = AuthenticationMockingUtils.buildDefaultEngineersEntity();
             Mockito
                     .when(this.applicationUserService.getEngineerEntityById(
-                            DefaultCredentialsProvider.ENGINEERS_DEFAULT_ID
+                            TestCredentialsProvider.ENGINEERS_DEFAULT_ID
                     ))
                     .thenReturn(engineer);
 
@@ -401,7 +401,7 @@ public class AircraftsServiceTest {
 
             StatusChangedResponse result = this.aircraftsService.assignAircraftRefueling(
                     1L,
-                    DefaultCredentialsProvider.ENGINEERS_DEFAULT_ID
+                    TestCredentialsProvider.ENGINEERS_DEFAULT_ID
             );
 
             Assertions.assertTrue(
@@ -425,7 +425,7 @@ public class AircraftsServiceTest {
                 FlightsNotAssignedException.class,
                 () -> this.aircraftsService.assignAircraftRefueling(
                         1L,
-                        DefaultCredentialsProvider.ENGINEERS_DEFAULT_ID
+                        TestCredentialsProvider.ENGINEERS_DEFAULT_ID
                 )
         );
         Assertions.assertEquals(
@@ -444,7 +444,7 @@ public class AircraftsServiceTest {
                 AircraftNotFoundException.class,
                 () -> this.aircraftsService.assignAircraftRefueling(
                         1L,
-                        DefaultCredentialsProvider.ENGINEERS_DEFAULT_ID
+                        TestCredentialsProvider.ENGINEERS_DEFAULT_ID
                 )
         );
         Assertions.assertEquals(
@@ -836,7 +836,7 @@ public class AircraftsServiceTest {
                                         .setStatus(AircraftStatus.NEEDS_INSPECTION)
                                         .setRegisteredAt(requiredRegistrationDate)
                                         .setServicedBy(new ApplicationUsersEntity().setId(
-                                                DefaultCredentialsProvider.ENGINEERS_DEFAULT_ID
+                                                TestCredentialsProvider.ENGINEERS_DEFAULT_ID
                                         ))
                         )
                 );
@@ -909,7 +909,7 @@ public class AircraftsServiceTest {
                                         .setStatus(AircraftStatus.ON_REPAIRS)
                                         .setRegisteredAt(requiredRegistrationDate)
                                         .setServicedBy(new ApplicationUsersEntity().setId(
-                                                DefaultCredentialsProvider.ENGINEERS_DEFAULT_ID
+                                                TestCredentialsProvider.ENGINEERS_DEFAULT_ID
                                         ))
                         )
                 );
@@ -981,7 +981,7 @@ public class AircraftsServiceTest {
                                         .setStatus(AircraftStatus.ON_REFUELING)
                                         .setRegisteredAt(requiredRegistrationDate)
                                         .setServicedBy(new ApplicationUsersEntity().setId(
-                                                DefaultCredentialsProvider.ENGINEERS_DEFAULT_ID
+                                                TestCredentialsProvider.ENGINEERS_DEFAULT_ID
                                         ))
                         )
                 );

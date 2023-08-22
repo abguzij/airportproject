@@ -2,20 +2,18 @@ package kg.airport.airportproject.controller.v1;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
-import kg.airport.airportproject.configuration.UserDetailsConfigurationTest;
+import kg.airport.airportproject.configuration.SecurityConfigurationTest;
 import kg.airport.airportproject.date.RegistrationDateTestFiltersProvider;
 import kg.airport.airportproject.dto.*;
 import kg.airport.airportproject.entity.AircraftsTestEntityProvider;
 import kg.airport.airportproject.entity.PartsEntity;
 import kg.airport.airportproject.entity.PartsTestEntityProvider;
 import kg.airport.airportproject.entity.QPartsEntity;
-import kg.airport.airportproject.entity.attributes.AircraftType;
 import kg.airport.airportproject.entity.attributes.PartType;
 import kg.airport.airportproject.repository.PartsEntityRepository;
 import kg.airport.airportproject.response.ErrorResponse;
 import kg.airport.airportproject.security.JwtTokenAuthenticationFactory;
 import kg.airport.airportproject.service.PartsService;
-import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -25,25 +23,20 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.*;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = "spring.main.allow-bean-definition-overriding=true"
 )
-@ContextConfiguration(classes = UserDetailsConfigurationTest.class)
+@ContextConfiguration(classes = SecurityConfigurationTest.class)
 @TestPropertySource(value = "classpath:test.properties")
 class PartsControllerTest {
     @MockBean

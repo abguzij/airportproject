@@ -1,6 +1,6 @@
 package kg.airport.airportproject.security;
 
-public abstract class DefaultCredentialsProvider {
+public abstract class TestCredentialsProvider {
     public static final String DEFAULT_CLIENT_USERNAME = "client";
     public static final String DEFAULT_CLIENT_RAW_PASSWORD = "client";
     public static final String DEFAULT_CHIEF_ENGINEERS_USERNAME = "chief_eng";
@@ -17,4 +17,7 @@ public abstract class DefaultCredentialsProvider {
     public static final Long CHIEF_DISPATCHER_DEFAULT_ID = 6L;
     public static final String DEFAULT_CHIEF_DISPATCHER_USERNAME = "сdispatcher";
     public static final String DEFAULT_CHIEF_DISPATCHER_RAW_PASSWORD = "сdispatcher";
+    public static final Long TEST_ADMIN_ID = 7L;
+    public static final String TEST_ADMIN_USERNAME = "admin";
+    public static final String TEST_ADMIN_RAW_PASSWORD = "admin";
 }

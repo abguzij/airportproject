@@ -1,11 +1,8 @@
 package kg.airport.airportproject.controller.v1;
 
 import kg.airport.airportproject.configuration.SecurityConfigurationTest;
-import kg.airport.airportproject.configuration.UserDetailsConfigurationTest;
 import kg.airport.airportproject.dto.*;
 import kg.airport.airportproject.entity.*;
-import kg.airport.airportproject.exception.UserPositionNotExistsException;
-import kg.airport.airportproject.exception.UserRolesNotAssignedException;
 import kg.airport.airportproject.repository.ApplicationUsersEntityRepository;
 import kg.airport.airportproject.repository.UserPositionsEntityRepository;
 import kg.airport.airportproject.repository.UserRolesEntityRepository;
@@ -14,16 +11,12 @@ import kg.airport.airportproject.security.JwtTokenHandler;
 import kg.airport.airportproject.validator.ApplicationUserValidator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -35,13 +28,11 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = "spring.main.allow-bean-definition-overriding=true"
 )
-@ContextConfiguration(classes = {UserDetailsConfigurationTest.class, SecurityConfigurationTest.class})
+@ContextConfiguration(classes = {SecurityConfigurationTest.class, SecurityConfigurationTest.class})
 @TestPropertySource(value = "classpath:test.properties")
 public class AuthenticationsControllerTest {
     @Autowired
@@ -84,7 +75,7 @@ public class AuthenticationsControllerTest {
                 .when(this.userRolesEntityRepository.getUserRolesEntitiesByUserPositions(
                         Mockito.any(UserPositionsEntity.class)
                 ))
-                .thenAnswer(invocationOnMock -> UserRolesTestEntityProvider.getTestClientRoleEntity(
+                .thenAnswer(invocationOnMock -> UserRolesTestEntityProvider.getTestClientRoleTestEntityByRoleTitle(
                         UserRolesTestEntityProvider.TEST_CLIENT_ROLE_TITLE
                 ));
 
@@ -94,7 +85,7 @@ public class AuthenticationsControllerTest {
                     ApplicationUsersEntity applicationUser =
                             (ApplicationUsersEntity) invocationOnMock.getArguments()[0];
                     applicationUser.setRegisteredAt(LocalDateTime.now());
-                    return applicationUser.setId(ApplicationUsersTestEntityProvider.TEST_USER_ID);
+                    return applicationUser.setId(ApplicationUsersTestEntityProvider.TEST_CLIENT_USER_ID);
                 });
 
         try {
@@ -195,11 +186,11 @@ public class AuthenticationsControllerTest {
     @Test
     public void testLogin_OK() {
         ApplicationUserCredentialsRequestDto requestDto = new ApplicationUserCredentialsRequestDto();
-        requestDto.setPassword(ApplicationUsersTestEntityProvider.TEST_RAW_PASSWORD);
-        requestDto.setUsername(ApplicationUsersTestEntityProvider.TEST_USERNAME);
+        requestDto.setPassword(ApplicationUsersTestEntityProvider.TEST_CLIENT_RAW_PASSWORD);
+        requestDto.setUsername(ApplicationUsersTestEntityProvider.TEST_CLIENT_USERNAME);
 
         Mockito
-                .when(this.userDetailsService.loadUserByUsername(ApplicationUsersTestEntityProvider.TEST_USERNAME))
+                .when(this.userDetailsService.loadUserByUsername(ApplicationUsersTestEntityProvider.TEST_CLIENT_USERNAME))
                 .thenAnswer(invocationOnMock -> ApplicationUsersTestEntityProvider.getTestClientEntity());
 
         try {
@@ -212,7 +203,7 @@ public class AuthenticationsControllerTest {
             );
 
             String usernameFromJwtToken = this.jwtTokenHandler.getUsernameFromToken(response.getJwtToken());
-            Assertions.assertEquals(ApplicationUsersTestEntityProvider.TEST_USERNAME, usernameFromJwtToken);
+            Assertions.assertEquals(ApplicationUsersTestEntityProvider.TEST_CLIENT_USERNAME, usernameFromJwtToken);
         } catch (Exception e) {
             Assertions.fail(e.getMessage());
         }
@@ -221,11 +212,11 @@ public class AuthenticationsControllerTest {
     @Test
     public void testLogin_UsernameNotFound() {
         ApplicationUserCredentialsRequestDto requestDto = new ApplicationUserCredentialsRequestDto();
-        requestDto.setPassword(ApplicationUsersTestEntityProvider.TEST_RAW_PASSWORD);
-        requestDto.setUsername(ApplicationUsersTestEntityProvider.TEST_USERNAME);
+        requestDto.setPassword(ApplicationUsersTestEntityProvider.TEST_CLIENT_RAW_PASSWORD);
+        requestDto.setUsername(ApplicationUsersTestEntityProvider.TEST_CLIENT_USERNAME);
 
         Mockito
-                .when(this.userDetailsService.loadUserByUsername(ApplicationUsersTestEntityProvider.TEST_USERNAME))
+                .when(this.userDetailsService.loadUserByUsername(ApplicationUsersTestEntityProvider.TEST_CLIENT_USERNAME))
                 .thenThrow(new UsernameNotFoundException("Пользователь с таким именем не найден или был удален!"));
 
         try {

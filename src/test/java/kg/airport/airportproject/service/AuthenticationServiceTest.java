@@ -78,7 +78,7 @@ public class AuthenticationServiceTest {
                 .when(this.userRolesEntityRepository.getUserRolesEntitiesByUserPositions(
                         Mockito.any(UserPositionsEntity.class)
                 ))
-                .thenAnswer(invocationOnMock -> UserRolesTestEntityProvider.getTestClientRoleEntity(
+                .thenAnswer(invocationOnMock -> UserRolesTestEntityProvider.getTestClientRoleTestEntityByRoleTitle(
                         UserRolesTestEntityProvider.TEST_CLIENT_ROLE_TITLE
                 ));
 
@@ -88,7 +88,7 @@ public class AuthenticationServiceTest {
                     ApplicationUsersEntity applicationUser =
                             (ApplicationUsersEntity) invocationOnMock.getArguments()[0];
                     applicationUser.setRegisteredAt(LocalDateTime.now());
-                    return applicationUser.setId(ApplicationUsersTestEntityProvider.TEST_USER_ID);
+                    return applicationUser.setId(ApplicationUsersTestEntityProvider.TEST_CLIENT_USER_ID);
                 });
 
         try {
@@ -192,7 +192,7 @@ public class AuthenticationServiceTest {
                 .when(this.userRolesEntityRepository.getUserRolesEntitiesByUserPositions(
                         Mockito.any(UserPositionsEntity.class)
                 ))
-                .thenAnswer(invocationOnMock -> UserRolesTestEntityProvider.getTestClientRoleEntity(
+                .thenAnswer(invocationOnMock -> UserRolesTestEntityProvider.getTestClientRoleTestEntityByRoleTitle(
                         UserRolesTestEntityProvider.TEST_STEWARD_ROLE_TITLE
                 ));
 
@@ -202,7 +202,7 @@ public class AuthenticationServiceTest {
                     ApplicationUsersEntity applicationUser =
                             (ApplicationUsersEntity) invocationOnMock.getArguments()[0];
                     applicationUser.setRegisteredAt(LocalDateTime.now());
-                    return applicationUser.setId(ApplicationUsersTestEntityProvider.TEST_USER_ID);
+                    return applicationUser.setId(ApplicationUsersTestEntityProvider.TEST_CLIENT_USER_ID);
                 });
 
         try {
@@ -227,7 +227,7 @@ public class AuthenticationServiceTest {
     @Test
     public void testRegisterNewEmployee_UserPositionNotExists() throws Exception {
         ApplicationUserRequestDto requestDto = ApplicationUserTestDtoProvider
-                .getTestApplicationUserRequestDto(ApplicationUsersTestEntityProvider.TEST_USER_ID);
+                .getTestApplicationUserRequestDto(ApplicationUsersTestEntityProvider.TEST_CLIENT_USER_ID);
         Mockito
                 .doNothing()
                 .when(this.applicationUserValidator)
