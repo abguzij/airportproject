@@ -2,9 +2,12 @@ package kg.airport.airportproject.controller.v1;
 
 import kg.airport.airportproject.configuration.SecurityConfigurationTest;
 import kg.airport.airportproject.date.RegistrationDateTestFiltersProvider;
+import kg.airport.airportproject.dto.AircraftsRepairsStatisticsResponseDto;
 import kg.airport.airportproject.dto.DestinationStatisticsResponseDto;
 import kg.airport.airportproject.exception.IncorrectDateFiltersException;
+import kg.airport.airportproject.exception.PartInspectionsNotFoundException;
 import kg.airport.airportproject.repository.FlightsEntityRepository;
+import kg.airport.airportproject.repository.PartInspectionsEntityRepository;
 import kg.airport.airportproject.response.ErrorResponse;
 import kg.airport.airportproject.security.JwtTokenAuthenticationFactory;
 import org.junit.jupiter.api.Assertions;
@@ -39,6 +42,8 @@ import static org.junit.jupiter.api.Assertions.*;
 public class StatisticsControllerTest {
     @MockBean
     private FlightsEntityRepository flightsEntityRepository;
+    @MockBean
+    private PartInspectionsEntityRepository partInspectionsEntityRepository;
 
     @Autowired
     private JwtTokenAuthenticationFactory jwtTokenAuthenticationFactory;
@@ -165,6 +170,86 @@ public class StatisticsControllerTest {
 
             Assertions.assertEquals(
                     "В системе не было зарегистрировано ни одного рейса!",
+                    response.getBody().getMessage()
+            );
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testGetAircraftRepairsStatistics_OK() {
+        List<String> foundDistinctTitles = List.of("first", "second");
+        Mockito
+                .when(this.partInspectionsEntityRepository.getDistinctServicedAircraftsTitles())
+                .thenReturn(foundDistinctTitles);
+
+        List<Integer> foundRepairedPartsNumbers = List.of(2, 1);
+        Mockito
+                .when(this.partInspectionsEntityRepository.getNumbersOfRepairedPartsPerAircraft())
+                .thenReturn(foundRepairedPartsNumbers);
+        try {
+            String jwtToken = this.jwtTokenAuthenticationFactory.getJwtTokenForDefaultUserWithSpecifiedRoleTitle(
+                    "ADMIN"
+            );
+
+            URI uri = new URI( "http://localhost:" + port + "/v1/statistics/repaired-aircrafts");
+
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add(HttpHeaders.AUTHORIZATION, jwtToken);
+
+            ResponseEntity<List<AircraftsRepairsStatisticsResponseDto>> response =
+                    this.testRestTemplate.exchange(
+                            uri,
+                            HttpMethod.GET,
+                            new HttpEntity<>(httpHeaders),
+                            new ParameterizedTypeReference<List<AircraftsRepairsStatisticsResponseDto>>() {}
+                    );
+
+            Assertions.assertEquals(2, response.getBody().size());
+
+            Assertions.assertEquals(foundDistinctTitles.get(0), response.getBody().get(0).getAircraftTitle());
+            Assertions.assertEquals(
+                    foundRepairedPartsNumbers.get(0),
+                    response.getBody().get(0).getNumberOfRepairedParts()
+            );
+
+            Assertions.assertEquals(foundDistinctTitles.get(1), response.getBody().get(1).getAircraftTitle());
+            Assertions.assertEquals(
+                    foundRepairedPartsNumbers.get(1),
+                    response.getBody().get(1).getNumberOfRepairedParts()
+            );
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testGetAircraftRepairsStatistics_PartInspectionsNotFound() {
+        try {
+            Mockito
+                    .when(this.partInspectionsEntityRepository.getDistinctServicedAircraftsTitles())
+                    .thenReturn(new ArrayList<>());
+
+            String jwtToken = this.jwtTokenAuthenticationFactory.getJwtTokenForDefaultUserWithSpecifiedRoleTitle(
+                    "ADMIN"
+            );
+
+            URI uri = new URI( "http://localhost:" + port + "/v1/statistics/repaired-aircrafts");
+
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add(HttpHeaders.AUTHORIZATION, jwtToken);
+
+            ResponseEntity<ErrorResponse> response =
+                    this.testRestTemplate.exchange(
+                            uri,
+                            HttpMethod.GET,
+                            new HttpEntity<>(httpHeaders),
+                            ErrorResponse.class
+                    );
+
+            Assertions.assertEquals(
+                    "Самолетов проходивших ремонт не найдено!",
                     response.getBody().getMessage()
             );
         } catch (Exception e) {

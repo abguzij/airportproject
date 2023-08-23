@@ -1,10 +1,13 @@
 package kg.airport.airportproject.service;
 
 import kg.airport.airportproject.date.RegistrationDateTestFiltersProvider;
+import kg.airport.airportproject.dto.AircraftsRepairsStatisticsResponseDto;
 import kg.airport.airportproject.dto.DestinationStatisticsResponseDto;
 import kg.airport.airportproject.exception.FlightsNotFoundException;
 import kg.airport.airportproject.exception.IncorrectDateFiltersException;
+import kg.airport.airportproject.exception.PartInspectionsNotFoundException;
 import kg.airport.airportproject.repository.FlightsEntityRepository;
+import kg.airport.airportproject.repository.PartInspectionsEntityRepository;
 import kg.airport.airportproject.service.impl.StatisticsServiceImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,18 +20,21 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 @ExtendWith(value = MockitoExtension.class)
 public class StatisticsServiceTest {
     @Mock
     private FlightsEntityRepository flightsEntityRepository;
+    @Mock
+    private PartInspectionsEntityRepository partInspectionsEntityRepository;
 
     private StatisticsService statisticsService;
 
     @BeforeEach
     private void beforeEach() {
-        this.statisticsService = new StatisticsServiceImpl(this.flightsEntityRepository);
+        this.statisticsService = new StatisticsServiceImpl(
+                this.flightsEntityRepository,
+                this.partInspectionsEntityRepository
+        );
     }
 
     @Test
@@ -100,6 +106,50 @@ public class StatisticsServiceTest {
         );
         Assertions.assertEquals(
                 "В системе не было зарегистрировано ни одного рейса!",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    public void testGetAircraftRepairsStatistics_OK() {
+        List<String> foundDistinctTitles = List.of("first", "second");
+        Mockito
+                .when(this.partInspectionsEntityRepository.getDistinctServicedAircraftsTitles())
+                .thenReturn(foundDistinctTitles);
+
+        List<Integer> foundRepairedPartsNumbers = List.of(2, 1);
+        Mockito
+                .when(this.partInspectionsEntityRepository.getNumbersOfRepairedPartsPerAircraft())
+                .thenReturn(foundRepairedPartsNumbers);
+        try {
+            List<AircraftsRepairsStatisticsResponseDto> resultList =
+                    this.statisticsService.getAircraftRepairsStatistics();
+
+            Assertions.assertEquals(2, resultList.size());
+
+            Assertions.assertEquals(foundDistinctTitles.get(0), resultList.get(0).getAircraftTitle());
+            Assertions.assertEquals(foundRepairedPartsNumbers.get(0), resultList.get(0).getNumberOfRepairedParts());
+
+            Assertions.assertEquals(foundDistinctTitles.get(1), resultList.get(1).getAircraftTitle());
+            Assertions.assertEquals(foundRepairedPartsNumbers.get(1), resultList.get(1).getNumberOfRepairedParts());
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testGetAircraftRepairsStatistics_PartInspectionsNotFound() {
+        Mockito
+                .when(this.partInspectionsEntityRepository.getDistinctServicedAircraftsTitles())
+                .thenReturn(new ArrayList<>());
+
+        Exception exception = Assertions.assertThrows(
+                PartInspectionsNotFoundException.class,
+                () -> this.statisticsService.getAircraftRepairsStatistics()
+        );
+
+        Assertions.assertEquals(
+                "Самолетов проходивших ремонт не найдено!",
                 exception.getMessage()
         );
     }

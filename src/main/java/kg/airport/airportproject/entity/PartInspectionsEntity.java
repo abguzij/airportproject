@@ -26,7 +26,7 @@ public class PartInspectionsEntity {
     @ManyToOne
     @JoinColumn(name = "part_id", referencedColumnName = "id")
     private PartsEntity partsEntity;
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "aircraft_id", referencedColumnName = "id")
     private AircraftsEntity aircraftsEntity;
 

@@ -1,7 +1,6 @@
 package kg.airport.airportproject.repository;
 
 import kg.airport.airportproject.entity.PartInspectionsEntity;
-import org.hibernate.annotations.Parameter;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
@@ -9,7 +8,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface PartInspectionsEntityRepository
@@ -29,4 +27,24 @@ public interface PartInspectionsEntityRepository
     List<PartInspectionsEntity> getLastAircraftInspectionByAircraftId(
             @Param(value = "aircraftId") Long aircraftId
     );
+
+    @Query(
+            value = "select a.aircraft_title\n" +
+                    "from part_inspections\n" +
+                    "join aircrafts a on a.id = part_inspections.aircraft_id\n" +
+                    "where part_state = 'NEEDS_FIXING'\n" +
+                    "group by a.aircraft_title;",
+            nativeQuery = true
+    )
+    List<String> getDistinctServicedAircraftsTitles();
+
+    @Query(
+            value = "select count(part_inspections.id)\n" +
+                    "from part_inspections\n" +
+                    "join aircrafts a on a.id = part_inspections.aircraft_id\n" +
+                    "where part_state = 'NEEDS_FIXING'\n" +
+                    "group by a.aircraft_title;",
+            nativeQuery = true
+    )
+    List<Integer> getNumbersOfRepairedPartsPerAircraft();
 }
