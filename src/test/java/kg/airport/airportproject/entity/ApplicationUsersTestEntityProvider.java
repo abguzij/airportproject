@@ -5,8 +5,6 @@ import kg.airport.airportproject.security.TestCredentialsProvider;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.time.LocalDateTime;
-
 public class ApplicationUsersTestEntityProvider {
     public static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(8);
     public static final String TEST_CLIENT_USERNAME = "client";
@@ -29,7 +27,7 @@ public class ApplicationUsersTestEntityProvider {
                         UserPositionsTestEntityProvider.TEST_CLIENT_POSITION_ID
                 ))
                 .setEnabled(Boolean.TRUE)
-                .setRegisteredAt(RegistrationDateTestFiltersProvider.TEST_REGISTRATION_DATE);
+                .setRegisteredAt(RegistrationDateTestFiltersProvider.TEST_VALID_REGISTRATION_DATE);
     }
 
     public static ApplicationUsersEntity getTestAdminsEntity() {
@@ -45,7 +43,7 @@ public class ApplicationUsersTestEntityProvider {
                         UserPositionsTestEntityProvider.TEST_SYSTEM_ADMINISTRATOR_POSITION_ID
                 ))
                 .setEnabled(Boolean.TRUE)
-                .setRegisteredAt(RegistrationDateTestFiltersProvider.TEST_REGISTRATION_DATE);
+                .setRegisteredAt(RegistrationDateTestFiltersProvider.TEST_VALID_REGISTRATION_DATE);
     }
 
 }

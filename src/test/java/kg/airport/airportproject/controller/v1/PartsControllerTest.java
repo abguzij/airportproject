@@ -274,7 +274,7 @@ class PartsControllerTest {
             booleanBuilder.and(root.registeredAt.loe(RegistrationDateTestFiltersProvider.TEST_END_DATE_FILTER));
 
             PartsEntity foundPartsEntity = PartsTestEntityProvider.getTestPartsEntity();
-            foundPartsEntity.setRegisteredAt(RegistrationDateTestFiltersProvider.TEST_REGISTRATION_DATE);
+            foundPartsEntity.setRegisteredAt(RegistrationDateTestFiltersProvider.TEST_VALID_REGISTRATION_DATE);
             Mockito
                     .when(this.partsEntityRepository.findAll(Mockito.eq(booleanBuilder.getValue())))
                     .thenAnswer(invocationOnMock -> List.of(foundPartsEntity));

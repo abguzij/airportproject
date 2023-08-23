@@ -42,7 +42,7 @@ public class PartsValidatorTest {
                 () -> this.partsValidator.validatePartRequestDto(requestDto)
         );
         Assertions.assertEquals(
-                "Тип создаваемой детали не может быть null",
+                "Тип создаваемой детали не может быть null!",
                 exception.getMessage()
         );
     }
