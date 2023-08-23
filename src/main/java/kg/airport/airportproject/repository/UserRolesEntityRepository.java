@@ -17,4 +17,6 @@ public interface UserRolesEntityRepository
     List<UserRolesEntity> getUserRolesEntitiesByUserPositions(UserPositionsEntity userPositionsEntity);
 
     List<UserRolesEntity> getUserRolesEntitiesByRoleTitle(String roleTitle);
+
+    List<UserRolesEntity> getUserRolesEntitiesByIdIn(List<Long> idList);
 }

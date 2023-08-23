@@ -1,5 +1,6 @@
 package kg.airport.airportproject.entity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class UserRolesTestEntityProvider {
@@ -11,13 +12,19 @@ public class UserRolesTestEntityProvider {
     public static final String TEST_STEWARD_ROLE_TITLE = "STEWARD";
     public static List<UserRolesEntity> getTestClientRoleTestEntityByRoleTitle(String roleTitle) {
         if(roleTitle.equals(TEST_CLIENT_ROLE_TITLE)) {
-            return List.of(new UserRolesEntity().setId(TEST_CLIENT_ROLE_ID).setRoleTitle(TEST_CLIENT_ROLE_TITLE));
+            return new ArrayList<>(
+                    List.of(new UserRolesEntity().setId(TEST_CLIENT_ROLE_ID).setRoleTitle(TEST_CLIENT_ROLE_TITLE))
+            );
         }
         if(roleTitle.equals(TEST_ADMIN_ROLE_TITLE)) {
-            return List.of(new UserRolesEntity().setId(TEST_ADMIN_ROLE_ID).setRoleTitle(TEST_ADMIN_ROLE_TITLE));
+            return new ArrayList<>(
+                    List.of(new UserRolesEntity().setId(TEST_ADMIN_ROLE_ID).setRoleTitle(TEST_ADMIN_ROLE_TITLE))
+            );
         }
         if(roleTitle.equals(TEST_STEWARD_ROLE_TITLE)) {
-            return List.of(new UserRolesEntity().setId(TEST_STEWARD_ROLE_ID).setRoleTitle(TEST_STEWARD_ROLE_TITLE));
+            return new ArrayList<>(
+                    List.of(new UserRolesEntity().setId(TEST_STEWARD_ROLE_ID).setRoleTitle(TEST_STEWARD_ROLE_TITLE))
+            );
         }
         throw new RuntimeException("Роли с указанным названием не существует в системе!");
     }

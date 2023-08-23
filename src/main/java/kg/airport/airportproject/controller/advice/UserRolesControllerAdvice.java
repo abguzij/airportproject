@@ -1,6 +1,8 @@
 package kg.airport.airportproject.controller.advice;
 
 import kg.airport.airportproject.controller.v1.UserRolesController;
+import kg.airport.airportproject.exception.ApplicationUserNotFoundException;
+import kg.airport.airportproject.exception.InvalidIdException;
 import kg.airport.airportproject.exception.UserRolesNotFoundException;
 import kg.airport.airportproject.response.ErrorResponse;
 import org.springframework.http.HttpHeaders;
@@ -20,6 +22,16 @@ public class UserRolesControllerAdvice {
 
     @ExceptionHandler(value = UserRolesNotFoundException.class)
     public ErrorResponse handleUserRolesNotFoundException(UserRolesNotFoundException e) {
+        return new ErrorResponse().setHttpStatus(HttpStatus.BAD_REQUEST).setMessage("HANDELED!");
+    }
+
+    @ExceptionHandler(value = ApplicationUserNotFoundException.class)
+    public ErrorResponse handleApplicationUserNotFoundException(ApplicationUserNotFoundException e) {
+        return new ErrorResponse().setHttpStatus(HttpStatus.BAD_REQUEST).setMessage(e.getMessage());
+    }
+
+    @ExceptionHandler(value = InvalidIdException.class)
+    public ErrorResponse handleInvalidIdException(InvalidIdException e) {
         return new ErrorResponse().setHttpStatus(HttpStatus.BAD_REQUEST).setMessage(e.getMessage());
     }
 }
