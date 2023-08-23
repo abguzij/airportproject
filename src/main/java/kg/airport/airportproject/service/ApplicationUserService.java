@@ -47,15 +47,21 @@ public interface ApplicationUserService {
     )
             throws ApplicationUserNotFoundException;
 
-    List<ApplicationUserResponseDto> getAllFreeCrewMembers() throws ApplicationUserNotFoundException;
+    List<ApplicationUserResponseDto> getAllFreeCrewMembers()
+            throws ApplicationUserNotFoundException;
 
-    List<ApplicationUserResponseDto> getAllFreeEngineers() throws ApplicationUserNotFoundException;
+    List<ApplicationUserResponseDto> getAllFreeEngineers()
+            throws ApplicationUserNotFoundException;
 
     List<ApplicationUsersEntity> getUserEntitiesByIdList(List<Long> userIdList)
             throws ApplicationUserNotFoundException,
             InvalidIdException;
 
     ApplicationUsersEntity getEngineerEntityById(Long engineerId)
+            throws InvalidIdException,
+            ApplicationUserNotFoundException;
+
+    ApplicationUsersEntity getApplicationUserById(Long userId)
             throws InvalidIdException,
             ApplicationUserNotFoundException;
 }

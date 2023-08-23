@@ -1,6 +1,9 @@
 package kg.airport.airportproject.exception;
 
-public class UserRolesNotFoundException extends Exception {
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
+public class UserRolesNotFoundException extends RuntimeException {
     public UserRolesNotFoundException(String message) {
         super(message);
     }

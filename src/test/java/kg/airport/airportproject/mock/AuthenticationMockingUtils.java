@@ -2,7 +2,7 @@ package kg.airport.airportproject.mock;
 
 import kg.airport.airportproject.entity.ApplicationUsersEntity;
 import kg.airport.airportproject.entity.UserRolesEntity;
-import kg.airport.airportproject.security.DefaultCredentialsProvider;
+import kg.airport.airportproject.security.TestCredentialsProvider;
 import org.mockito.Mockito;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -47,10 +47,10 @@ public class AuthenticationMockingUtils {
 
     public static ApplicationUsersEntity buildDefaultEngineersEntity() {
         ApplicationUsersEntity engineer = new ApplicationUsersEntity()
-                .setUsername(DefaultCredentialsProvider.DEFAULT_ENGINEERS_USERNAME)
-                .setPassword(passwordEncoder.encode(DefaultCredentialsProvider.DEFAULT_ENGINEERS_RAW_PASSWORD))
+                .setUsername(TestCredentialsProvider.DEFAULT_ENGINEERS_USERNAME)
+                .setPassword(passwordEncoder.encode(TestCredentialsProvider.DEFAULT_ENGINEERS_RAW_PASSWORD))
                 .setFullName("Default Engineer")
-                .setId(DefaultCredentialsProvider.ENGINEERS_DEFAULT_ID)
+                .setId(TestCredentialsProvider.ENGINEERS_DEFAULT_ID)
                 .setEnabled(true);
         engineer.getUserRolesEntityList().add(new UserRolesEntity().setId(7L).setRoleTitle("ENGINEER"));
         return engineer;

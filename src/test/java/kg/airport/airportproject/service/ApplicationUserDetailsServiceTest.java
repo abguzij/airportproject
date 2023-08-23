@@ -16,8 +16,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 @ExtendWith(value = MockitoExtension.class)
 public class ApplicationUserDetailsServiceTest {
     @Mock
@@ -33,15 +31,15 @@ public class ApplicationUserDetailsServiceTest {
     public void testLoadUserByUsername_OK() {
         Mockito
                 .when(this.applicationUsersEntityRepository.getApplicationUsersEntityByUsernameAndIsEnabledTrue(
-                        Mockito.eq(ApplicationUsersTestEntityProvider.TEST_USERNAME)
+                        Mockito.eq(ApplicationUsersTestEntityProvider.TEST_CLIENT_USERNAME)
                 ))
                 .thenAnswer(invocationOnMock -> Optional.of(ApplicationUsersTestEntityProvider.getTestClientEntity()));
         try {
             UserDetails userDetails = this.applicationUserDetailsService
-                    .loadUserByUsername(ApplicationUsersTestEntityProvider.TEST_USERNAME);
+                    .loadUserByUsername(ApplicationUsersTestEntityProvider.TEST_CLIENT_USERNAME);
 
             Assertions.assertTrue(userDetails instanceof ApplicationUsersEntity);
-            Assertions.assertEquals(ApplicationUsersTestEntityProvider.TEST_USERNAME, userDetails.getUsername());
+            Assertions.assertEquals(ApplicationUsersTestEntityProvider.TEST_CLIENT_USERNAME, userDetails.getUsername());
         } catch (Exception e) {
             Assertions.fail(e.getMessage());
         }
@@ -51,14 +49,14 @@ public class ApplicationUserDetailsServiceTest {
     public void testLoadUserByUsername_UsernameNotFound() {
         Mockito
                 .when(this.applicationUsersEntityRepository.getApplicationUsersEntityByUsernameAndIsEnabledTrue(
-                        Mockito.eq(ApplicationUsersTestEntityProvider.TEST_USERNAME)
+                        Mockito.eq(ApplicationUsersTestEntityProvider.TEST_CLIENT_USERNAME)
                 ))
                 .thenAnswer(invocationOnMock -> Optional.empty());
 
         Assertions.assertThrowsExactly(
                 UsernameNotFoundException.class,
                 () -> this.applicationUserDetailsService.loadUserByUsername(
-                        ApplicationUsersTestEntityProvider.TEST_USERNAME
+                        ApplicationUsersTestEntityProvider.TEST_CLIENT_USERNAME
                 ),
                 "Пользователь с таким именем не найден или был удален!"
         );

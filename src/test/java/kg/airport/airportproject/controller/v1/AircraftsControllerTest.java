@@ -3,21 +3,17 @@ package kg.airport.airportproject.controller.v1;
 import com.querydsl.core.types.Predicate;
 import kg.airport.airportproject.adapter.InMemoryUserDetailsManagerAdapter;
 import kg.airport.airportproject.configuration.SecurityConfigurationTest;
-import kg.airport.airportproject.configuration.UserDetailsConfigurationTest;
 import kg.airport.airportproject.dto.*;
 import kg.airport.airportproject.entity.*;
 import kg.airport.airportproject.entity.attributes.AircraftStatus;
 import kg.airport.airportproject.entity.attributes.AircraftType;
 import kg.airport.airportproject.entity.attributes.FlightStatus;
 import kg.airport.airportproject.entity.attributes.PartState;
-import kg.airport.airportproject.exception.AircraftNotFoundException;
-import kg.airport.airportproject.exception.FlightsNotAssignedException;
-import kg.airport.airportproject.exception.StatusChangeException;
 import kg.airport.airportproject.mock.matcher.AircraftsStatusChangedMatcher;
 import kg.airport.airportproject.repository.AircraftsEntityRepository;
 import kg.airport.airportproject.response.ErrorResponse;
 import kg.airport.airportproject.response.StatusChangedResponse;
-import kg.airport.airportproject.security.DefaultCredentialsProvider;
+import kg.airport.airportproject.security.TestCredentialsProvider;
 import kg.airport.airportproject.security.JwtTokenAuthenticationFactory;
 import kg.airport.airportproject.security.TestApplicationUsersFactory;
 import kg.airport.airportproject.mock.AuthenticationMockingUtils;
@@ -54,7 +50,7 @@ import java.util.stream.Collectors;
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = "spring.main.allow-bean-definition-overriding=true"
 )
-@ContextConfiguration(classes = {UserDetailsConfigurationTest.class, SecurityConfigurationTest.class})
+@ContextConfiguration(classes = {SecurityConfigurationTest.class, SecurityConfigurationTest.class})
 @TestPropertySource(value = "classpath:test.properties")
 public class AircraftsControllerTest {
     private static final Long aircraftId = 1L;
@@ -231,7 +227,7 @@ public class AircraftsControllerTest {
             ApplicationUsersEntity engineer = AuthenticationMockingUtils.buildDefaultEngineersEntity();
             Mockito
                     .when(this.applicationUserService.getEngineerEntityById(
-                            DefaultCredentialsProvider.ENGINEERS_DEFAULT_ID
+                            TestCredentialsProvider.ENGINEERS_DEFAULT_ID
                     ))
                     .thenReturn(engineer);
 
@@ -251,7 +247,7 @@ public class AircraftsControllerTest {
             URI uri = new URI( "http://localhost:" + port + "/v1/aircrafts/1/assign-aircraft-inspection");
             UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder
                     .fromUri(uri)
-                    .queryParam("engineersId", DefaultCredentialsProvider.ENGINEERS_DEFAULT_ID);
+                    .queryParam("engineersId", TestCredentialsProvider.ENGINEERS_DEFAULT_ID);
 
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add("Authorization", jwtToken);
@@ -291,7 +287,7 @@ public class AircraftsControllerTest {
             URI uri = new URI( "http://localhost:" + port + "/v1/aircrafts/1/assign-aircraft-inspection");
             UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder
                     .fromUri(uri)
-                    .queryParam("engineersId", DefaultCredentialsProvider.ENGINEERS_DEFAULT_ID);
+                    .queryParam("engineersId", TestCredentialsProvider.ENGINEERS_DEFAULT_ID);
 
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add("Authorization", jwtToken);
@@ -328,7 +324,7 @@ public class AircraftsControllerTest {
             URI uri = new URI( "http://localhost:" + port + "/v1/aircrafts/1/assign-aircraft-inspection");
             UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder
                     .fromUri(uri)
-                    .queryParam("engineersId", DefaultCredentialsProvider.ENGINEERS_DEFAULT_ID);
+                    .queryParam("engineersId", TestCredentialsProvider.ENGINEERS_DEFAULT_ID);
 
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add("Authorization", jwtToken);
@@ -361,7 +357,7 @@ public class AircraftsControllerTest {
             ApplicationUsersEntity engineer = AuthenticationMockingUtils.buildDefaultEngineersEntity();
             Mockito
                     .when(this.applicationUserService.getEngineerEntityById(
-                            DefaultCredentialsProvider.ENGINEERS_DEFAULT_ID
+                            TestCredentialsProvider.ENGINEERS_DEFAULT_ID
                     ))
                     .thenReturn(engineer);
 
@@ -381,7 +377,7 @@ public class AircraftsControllerTest {
             URI uri = new URI( "http://localhost:" + port + "/v1/aircrafts/1/assign_refueling");
             UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder
                     .fromUri(uri)
-                    .queryParam("engineerId", DefaultCredentialsProvider.ENGINEERS_DEFAULT_ID);
+                    .queryParam("engineerId", TestCredentialsProvider.ENGINEERS_DEFAULT_ID);
 
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add("Authorization", jwtToken);
@@ -419,7 +415,7 @@ public class AircraftsControllerTest {
             URI uri = new URI( "http://localhost:" + port + "/v1/aircrafts/1/assign_refueling");
             UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder
                     .fromUri(uri)
-                    .queryParam("engineerId", DefaultCredentialsProvider.ENGINEERS_DEFAULT_ID);
+                    .queryParam("engineerId", TestCredentialsProvider.ENGINEERS_DEFAULT_ID);
 
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add("Authorization", jwtToken);
@@ -454,7 +450,7 @@ public class AircraftsControllerTest {
             URI uri = new URI( "http://localhost:" + port + "/v1/aircrafts/1/assign_refueling");
             UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder
                     .fromUri(uri)
-                    .queryParam("engineerId", DefaultCredentialsProvider.ENGINEERS_DEFAULT_ID);
+                    .queryParam("engineerId", TestCredentialsProvider.ENGINEERS_DEFAULT_ID);
 
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add("Authorization", jwtToken);
@@ -485,7 +481,7 @@ public class AircraftsControllerTest {
             ApplicationUsersEntity engineer = AuthenticationMockingUtils.buildDefaultEngineersEntity();
             Mockito
                     .when(this.applicationUserService.getEngineerEntityById(
-                            DefaultCredentialsProvider.ENGINEERS_DEFAULT_ID
+                            TestCredentialsProvider.ENGINEERS_DEFAULT_ID
                     ))
                     .thenReturn(engineer);
 
@@ -508,7 +504,7 @@ public class AircraftsControllerTest {
             URI uri = new URI( "http://localhost:" + port + "/v1/aircrafts/1/assign-repairs");
             UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder
                     .fromUri(uri)
-                    .queryParam("engineersId", DefaultCredentialsProvider.ENGINEERS_DEFAULT_ID);
+                    .queryParam("engineersId", TestCredentialsProvider.ENGINEERS_DEFAULT_ID);
 
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add("Authorization", jwtToken);
@@ -547,7 +543,7 @@ public class AircraftsControllerTest {
             URI uri = new URI( "http://localhost:" + port + "/v1/aircrafts/1/assign-repairs");
             UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder
                     .fromUri(uri)
-                    .queryParam("engineersId", DefaultCredentialsProvider.ENGINEERS_DEFAULT_ID);
+                    .queryParam("engineersId", TestCredentialsProvider.ENGINEERS_DEFAULT_ID);
 
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add("Authorization", jwtToken);
@@ -584,7 +580,7 @@ public class AircraftsControllerTest {
             URI uri = new URI( "http://localhost:" + port + "/v1/aircrafts/1/assign-aircraft-inspection");
             UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder
                     .fromUri(uri)
-                    .queryParam("engineersId", DefaultCredentialsProvider.ENGINEERS_DEFAULT_ID);
+                    .queryParam("engineersId", TestCredentialsProvider.ENGINEERS_DEFAULT_ID);
 
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add("Authorization", jwtToken);
@@ -610,11 +606,11 @@ public class AircraftsControllerTest {
             aircraft.setStatus(AircraftStatus.ON_INSPECTION);
 
             ((InMemoryUserDetailsManagerAdapter) this.userDetailsService).updateUsersServicedAircraftByUsername(
-                    DefaultCredentialsProvider.DEFAULT_ENGINEERS_USERNAME,
+                    TestCredentialsProvider.DEFAULT_ENGINEERS_USERNAME,
                     aircraft
             );
             ApplicationUsersEntity engineer = (ApplicationUsersEntity) this.userDetailsService.loadUserByUsername(
-                    DefaultCredentialsProvider.DEFAULT_ENGINEERS_USERNAME
+                    TestCredentialsProvider.DEFAULT_ENGINEERS_USERNAME
             );
             aircraft.setServicedBy(engineer);
 
@@ -724,11 +720,11 @@ public class AircraftsControllerTest {
         aircraft.setStatus(AircraftStatus.SERVICEABLE);
 
         ((InMemoryUserDetailsManagerAdapter) this.userDetailsService).updateUsersServicedAircraftByUsername(
-                DefaultCredentialsProvider.DEFAULT_ENGINEERS_USERNAME,
+                TestCredentialsProvider.DEFAULT_ENGINEERS_USERNAME,
                 aircraft
         );
         ApplicationUsersEntity engineer = (ApplicationUsersEntity) this.userDetailsService.loadUserByUsername(
-                DefaultCredentialsProvider.DEFAULT_ENGINEERS_USERNAME
+                TestCredentialsProvider.DEFAULT_ENGINEERS_USERNAME
         );
         aircraft.setServicedBy(engineer);
 
@@ -774,11 +770,11 @@ public class AircraftsControllerTest {
             aircraft.setStatus(AircraftStatus.ON_REFUELING);
 
             ((InMemoryUserDetailsManagerAdapter) this.userDetailsService).updateUsersServicedAircraftByUsername(
-                    DefaultCredentialsProvider.DEFAULT_ENGINEERS_USERNAME,
+                    TestCredentialsProvider.DEFAULT_ENGINEERS_USERNAME,
                     aircraft
             );
             ApplicationUsersEntity engineer = (ApplicationUsersEntity) this.userDetailsService.loadUserByUsername(
-                    DefaultCredentialsProvider.DEFAULT_ENGINEERS_USERNAME
+                    TestCredentialsProvider.DEFAULT_ENGINEERS_USERNAME
             );
             aircraft.setServicedBy(engineer);
 

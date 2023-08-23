@@ -1,7 +1,7 @@
 package kg.airport.airportproject.controller.v1;
 
 import com.querydsl.core.types.Predicate;
-import kg.airport.airportproject.configuration.UserDetailsConfigurationTest;
+import kg.airport.airportproject.configuration.SecurityConfigurationTest;
 import kg.airport.airportproject.dto.PartInspectionsResponseDto;
 import kg.airport.airportproject.dto.PartStatesResponseDto;
 import kg.airport.airportproject.entity.*;
@@ -32,7 +32,7 @@ import java.util.List;
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = "spring.main.allow-bean-definition-overriding=true"
 )
-@ContextConfiguration(classes = UserDetailsConfigurationTest.class)
+@ContextConfiguration(classes = SecurityConfigurationTest.class)
 @TestPropertySource(value = "classpath:test.properties")
 public class InspectionsControllerTest {
     private static final Long AIRCRAFT_ID = 1L;

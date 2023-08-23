@@ -328,6 +328,29 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
         return applicationUsersEntityOptional.get();
     }
 
+    @Override
+    public ApplicationUsersEntity getApplicationUserById(Long userId)
+            throws InvalidIdException,
+            ApplicationUserNotFoundException
+    {
+        if(Objects.isNull(userId)) {
+            throw new IllegalArgumentException("ID пользователя не может быть null!");
+        }
+        if(userId < 1L) {
+            throw new InvalidIdException("ID пользователя не может быть меньше 1!");
+        }
+
+        Optional<ApplicationUsersEntity> applicationUserOptional
+                = this.applicationUsersEntityRepository.getApplicationUsersEntityById(userId);
+
+        if(applicationUserOptional.isEmpty()) {
+            throw new ApplicationUserNotFoundException(
+                    String.format("Пользователь с ID[%d] не найден в системе", userId)
+            );
+        }
+        return applicationUserOptional.get();
+    }
+
     private Predicate buildUsersCommonSearchPredicate(
             LocalDateTime registeredBefore,
             LocalDateTime registeredAfter,

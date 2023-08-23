@@ -3,6 +3,7 @@ package kg.airport.airportproject.entity;
 import org.springframework.security.core.GrantedAuthority;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -18,10 +19,11 @@ public class UserRolesEntity implements GrantedAuthority {
     @ManyToOne
     @JoinColumn(name = "position_id", referencedColumnName = "id")
     private UserPositionsEntity userPositions;
-    @ManyToMany(mappedBy = "userRolesEntityList")
+    @ManyToMany(mappedBy = "userRolesEntityList", cascade = CascadeType.MERGE)
     private List<ApplicationUsersEntity> applicationUsersEntityList;
 
     public UserRolesEntity() {
+        this.applicationUsersEntityList = new ArrayList<>();
     }
 
     @Override
