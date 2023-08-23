@@ -37,11 +37,6 @@ public class FlightsEntity {
         this.clientFeedbacksEntities = new ArrayList<>();
     }
 
-    @PrePersist
-    private void prePersist() {
-        this.registeredAt = LocalDateTime.now();
-    }
-
     public Long getId() {
         return id;
     }

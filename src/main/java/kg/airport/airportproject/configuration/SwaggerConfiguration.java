@@ -34,10 +34,4 @@ public class SwaggerConfiguration {
                 .bearerFormat("JWT")
                 .scheme("bearer");
     }
-
-//    private SecurityScheme createBasicAuthSecurityScheme() {
-//        return new SecurityScheme().type(SecurityScheme.Type.HTTP)
-//                .scheme("basic")
-//                .in(SecurityScheme.In.HEADER);
-//    }
 }

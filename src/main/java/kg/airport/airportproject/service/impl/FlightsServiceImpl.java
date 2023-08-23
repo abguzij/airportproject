@@ -65,6 +65,8 @@ public class FlightsServiceImpl implements FlightsService {
         flightsEntity.setStatus(FlightStatus.REGISTERED);
         flightsEntity.setTicketsLeft(aircraftSeatsNumber);
 
+        flightsEntity.setRegisteredAt(LocalDateTime.now());
+
         flightsEntity = this.flightsEntityRepository.save(flightsEntity);
         return FlightsMapper.mapToFlightResponseDto(flightsEntity);
     }

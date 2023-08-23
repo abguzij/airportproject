@@ -9,12 +9,9 @@ import kg.airport.airportproject.entity.PartsEntity;
 import kg.airport.airportproject.entity.PartsTestEntityProvider;
 import kg.airport.airportproject.entity.attributes.PartType;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class PartsMapperTest {
     @Test
@@ -30,7 +27,7 @@ public class PartsMapperTest {
     @Test
     public void testMapToPartResponseDto_OK() {
         PartsEntity partsEntity = PartsTestEntityProvider.getTestPartsEntity();
-        partsEntity.setRegisteredAt(RegistrationDateTestFiltersProvider.TEST_REGISTRATION_DATE);
+        partsEntity.setRegisteredAt(RegistrationDateTestFiltersProvider.TEST_VALID_REGISTRATION_DATE);
 
         PartResponseDto result = PartsMapper.mapToPartResponseDto(partsEntity);
 

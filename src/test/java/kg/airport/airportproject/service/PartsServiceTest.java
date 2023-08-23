@@ -8,7 +8,6 @@ import kg.airport.airportproject.dto.PartResponseDto;
 import kg.airport.airportproject.dto.PartsTestDtoProvider;
 import kg.airport.airportproject.entity.*;
 import kg.airport.airportproject.exception.InvalidIdException;
-import kg.airport.airportproject.exception.InvalidPartTitleException;
 import kg.airport.airportproject.exception.PartsNotFoundException;
 import kg.airport.airportproject.repository.PartsEntityRepository;
 import kg.airport.airportproject.service.impl.PartsServiceImpl;
@@ -23,9 +22,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(value = MockitoExtension.class)
 public class PartsServiceTest {
@@ -104,7 +100,7 @@ public class PartsServiceTest {
             booleanBuilder.and(root.registeredAt.loe(RegistrationDateTestFiltersProvider.TEST_END_DATE_FILTER));
 
             PartsEntity foundPartsEntity = PartsTestEntityProvider.getTestPartsEntity();
-            foundPartsEntity.setRegisteredAt(RegistrationDateTestFiltersProvider.TEST_REGISTRATION_DATE);
+            foundPartsEntity.setRegisteredAt(RegistrationDateTestFiltersProvider.TEST_VALID_REGISTRATION_DATE);
             Mockito
                     .when(this.partsEntityRepository.findAll(Mockito.eq(booleanBuilder.getValue())))
                     .thenAnswer(invocationOnMock -> List.of(foundPartsEntity));
