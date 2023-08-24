@@ -8,6 +8,7 @@ import kg.airport.airportproject.entity.attributes.AircraftStatus;
 import kg.airport.airportproject.entity.attributes.AircraftType;
 import kg.airport.airportproject.entity.attributes.PartState;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -26,6 +27,11 @@ public class PartInspectionsEntityRepositoryTest {
     private AircraftsEntityRepository aircraftsEntityRepository;
     @Autowired
     private PartInspectionsEntityRepository partInspectionsEntityRepository;
+
+    @BeforeEach
+    public void beforeEach() {
+        this.partInspectionsEntityRepository.flush();
+    }
 
     @Test
     public void testGetCurrentMaxInspectionCode_OK() {
@@ -85,23 +91,27 @@ public class PartInspectionsEntityRepositoryTest {
 
     @Test
     public void testGetDistinctServicedAircraftsTitles_OK() {
-        AircraftsEntity aircraft1 = AircraftsTestEntityProvider.getAircraftsTestEntity(1L, "first");
-        AircraftsEntity aircraft2 = AircraftsTestEntityProvider.getAircraftsTestEntity(2L, "second");
-        AircraftsEntity aircraft3 = AircraftsTestEntityProvider.getAircraftsTestEntity(3L, "third");
+        AircraftsEntity aircraft1 = AircraftsTestEntityProvider.getAircraftsTestEntity(null, "first");
+        AircraftsEntity aircraft2 = AircraftsTestEntityProvider.getAircraftsTestEntity(null, "second");
+        AircraftsEntity aircraft3 = AircraftsTestEntityProvider.getAircraftsTestEntity(null, "third");
+
+        aircraft1 = this.aircraftsEntityRepository.save(aircraft1);
+        aircraft2 = this.aircraftsEntityRepository.save(aircraft2);
+        aircraft3 = this.aircraftsEntityRepository.save(aircraft3);
 
         PartInspectionsEntity partInspection1 = PartInspectionsTestEntityProvider
-                .getTestPartInspectionEntity(1L, aircraft1, 1L, PartState.NEEDS_FIXING);
+                .getTestPartInspectionEntity(null, aircraft1, 1L, PartState.NEEDS_FIXING);
         aircraft1.getPartInspectionsEntities().add(partInspection1);
         PartInspectionsEntity partInspection2 = PartInspectionsTestEntityProvider
-                .getTestPartInspectionEntity(2L, aircraft1, 2L, PartState.NEEDS_FIXING);
+                .getTestPartInspectionEntity(null, aircraft1, 2L, PartState.NEEDS_FIXING);
         aircraft1.getPartInspectionsEntities().add(partInspection2);
 
         PartInspectionsEntity partInspection3 = PartInspectionsTestEntityProvider
-                .getTestPartInspectionEntity(3L, aircraft2, 3L, PartState.NEEDS_FIXING);
+                .getTestPartInspectionEntity(null, aircraft2, 3L, PartState.NEEDS_FIXING);
         aircraft2.getPartInspectionsEntities().add(partInspection3);
 
         PartInspectionsEntity partInspection4 = PartInspectionsTestEntityProvider
-                .getTestPartInspectionEntity(4L, aircraft3, 4L, PartState.CORRECT);
+                .getTestPartInspectionEntity(null, aircraft3, 4L, PartState.CORRECT);
         aircraft3.getPartInspectionsEntities().add(partInspection4);
 
         this.partInspectionsEntityRepository.saveAll(List.of(partInspection1, partInspection2, partInspection3));
@@ -114,23 +124,45 @@ public class PartInspectionsEntityRepositoryTest {
 
     @Test
     public void testGetNumbersOfRepairedParts_OK() {
-        AircraftsEntity aircraft1 = AircraftsTestEntityProvider.getAircraftsTestEntity(1L, "first");
-        AircraftsEntity aircraft2 = AircraftsTestEntityProvider.getAircraftsTestEntity(2L, "second");
-        AircraftsEntity aircraft3 = AircraftsTestEntityProvider.getAircraftsTestEntity(3L, "third");
+//        AircraftsEntity aircraft1 = AircraftsTestEntityProvider.getAircraftsTestEntity(1L, "first");
+//        AircraftsEntity aircraft2 = AircraftsTestEntityProvider.getAircraftsTestEntity(2L, "second");
+//        AircraftsEntity aircraft3 = AircraftsTestEntityProvider.getAircraftsTestEntity(3L, "third");
+//
+//        PartInspectionsEntity partInspection1 = PartInspectionsTestEntityProvider
+//                .getTestPartInspectionEntity(1L, aircraft1, 1L, PartState.NEEDS_FIXING);
+//        aircraft1.getPartInspectionsEntities().add(partInspection1);
+//        PartInspectionsEntity partInspection2 = PartInspectionsTestEntityProvider
+//                .getTestPartInspectionEntity(2L, aircraft1, 2L, PartState.NEEDS_FIXING);
+//        aircraft1.getPartInspectionsEntities().add(partInspection2);
+//
+//        PartInspectionsEntity partInspection3 = PartInspectionsTestEntityProvider
+//                .getTestPartInspectionEntity(3L, aircraft2, 3L, PartState.NEEDS_FIXING);
+//        aircraft2.getPartInspectionsEntities().add(partInspection2);
+//
+//        PartInspectionsEntity partInspection4 = PartInspectionsTestEntityProvider
+//                .getTestPartInspectionEntity(4L, aircraft3, 4L, PartState.CORRECT);
+//        aircraft3.getPartInspectionsEntities().add(partInspection4);
+        AircraftsEntity aircraft1 = AircraftsTestEntityProvider.getAircraftsTestEntity(null, "first");
+        AircraftsEntity aircraft2 = AircraftsTestEntityProvider.getAircraftsTestEntity(null, "second");
+        AircraftsEntity aircraft3 = AircraftsTestEntityProvider.getAircraftsTestEntity(null, "third");
+
+        aircraft1 = this.aircraftsEntityRepository.save(aircraft1);
+        aircraft2 = this.aircraftsEntityRepository.save(aircraft2);
+        aircraft3 = this.aircraftsEntityRepository.save(aircraft3);
 
         PartInspectionsEntity partInspection1 = PartInspectionsTestEntityProvider
-                .getTestPartInspectionEntity(1L, aircraft1, 1L, PartState.NEEDS_FIXING);
+                .getTestPartInspectionEntity(null, aircraft1, 1L, PartState.NEEDS_FIXING);
         aircraft1.getPartInspectionsEntities().add(partInspection1);
         PartInspectionsEntity partInspection2 = PartInspectionsTestEntityProvider
-                .getTestPartInspectionEntity(2L, aircraft1, 2L, PartState.NEEDS_FIXING);
+                .getTestPartInspectionEntity(null, aircraft1, 2L, PartState.NEEDS_FIXING);
         aircraft1.getPartInspectionsEntities().add(partInspection2);
 
         PartInspectionsEntity partInspection3 = PartInspectionsTestEntityProvider
-                .getTestPartInspectionEntity(3L, aircraft2, 3L, PartState.NEEDS_FIXING);
-        aircraft2.getPartInspectionsEntities().add(partInspection2);
+                .getTestPartInspectionEntity(null, aircraft2, 3L, PartState.NEEDS_FIXING);
+        aircraft2.getPartInspectionsEntities().add(partInspection3);
 
         PartInspectionsEntity partInspection4 = PartInspectionsTestEntityProvider
-                .getTestPartInspectionEntity(4L, aircraft3, 4L, PartState.CORRECT);
+                .getTestPartInspectionEntity(null, aircraft3, 4L, PartState.CORRECT);
         aircraft3.getPartInspectionsEntities().add(partInspection4);
 
         this.partInspectionsEntityRepository.saveAll(List.of(partInspection1, partInspection2, partInspection3));

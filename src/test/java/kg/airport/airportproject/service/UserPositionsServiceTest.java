@@ -21,12 +21,14 @@ import static org.junit.jupiter.api.Assertions.*;
 public class UserPositionsServiceTest {
     @Mock
     private UserPositionsEntityRepository userPositionsEntityRepository;
+
     private UserPositionsService userPositionsService;
 
     @BeforeEach
     public void beforeEach() {
         this.userPositionsService = new UserPositionsServiceImpl(this.userPositionsEntityRepository);
     }
+
     @Test
     public void testGetAllEmployeePositions_OK() {
         List<UserPositionsEntity> userPositionsEntities =
