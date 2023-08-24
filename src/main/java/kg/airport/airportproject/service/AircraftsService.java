@@ -81,7 +81,7 @@ public interface AircraftsService {
             AircraftIsNotOnServiceException,
             PartsNotFoundException,
             WrongAircraftException,
-            IncompatiblePartException;
+            IncompatiblePartException, InvalidPartStateException;
 
     List<AircraftResponseDto> getAllAircrafts(
             AircraftType aircraftType,

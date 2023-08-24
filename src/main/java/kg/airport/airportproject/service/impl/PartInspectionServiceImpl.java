@@ -62,7 +62,12 @@ public class PartInspectionServiceImpl implements PartInspectionService {
             List<PartInspectionsRequestDto> requestDtoList
     )
             throws PartsNotFoundException,
-            InvalidIdException, IncompatiblePartException, AircraftIsNotOnServiceException, WrongAircraftException {
+            InvalidIdException,
+            IncompatiblePartException,
+            AircraftIsNotOnServiceException,
+            WrongAircraftException,
+            InvalidPartStateException
+    {
         if(Objects.isNull(requestDtoList)) {
             throw new IllegalArgumentException("Список создаваемых осмотров деталей не может быть null!");
         }
@@ -72,6 +77,7 @@ public class PartInspectionServiceImpl implements PartInspectionService {
         Long aircraftId = requestDtoList.get(0).getAircraftId();
 
         for (PartInspectionsRequestDto requestDto : requestDtoList) {
+            this.partInspectionsValidator.validatePartInspectionRequestDto(requestDto);
             Long requestDtoAircraftId = requestDto.getAircraftId();
             if(requestDtoAircraftId < 1L) {
                 throw new InvalidIdException("ID самолета не может быть меньше 1!");

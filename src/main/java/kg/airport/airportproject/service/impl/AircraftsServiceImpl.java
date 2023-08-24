@@ -373,8 +373,7 @@ public class AircraftsServiceImpl implements AircraftsService {
             AircraftIsNotOnServiceException,
             PartsNotFoundException,
             WrongAircraftException,
-            IncompatiblePartException
-    {
+            IncompatiblePartException, InvalidPartStateException {
         if(partInspectionsRequestDtoList.isEmpty()) {
             throw new IllegalArgumentException("Список осмотров деталей не может быть null!");
         }
