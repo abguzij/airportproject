@@ -14,6 +14,7 @@ import kg.airport.airportproject.mapper.InspectionsMapper;
 import kg.airport.airportproject.repository.PartInspectionsEntityRepository;
 import kg.airport.airportproject.service.PartInspectionService;
 import kg.airport.airportproject.service.PartsService;
+import kg.airport.airportproject.validator.PartInspectionsValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,16 +33,19 @@ public class PartInspectionServiceImpl implements PartInspectionService {
 
     private final PartInspectionsEntityRepository partInspectionsEntityRepository;
     private final PartsService partsService;
+    private final PartInspectionsValidator partInspectionsValidator;
 
     private Long currentMaxInspectionCode;
 
     @Autowired
     public PartInspectionServiceImpl(
             PartInspectionsEntityRepository partInspectionsEntityRepository,
-            PartsService partsService
+            PartsService partsService,
+            PartInspectionsValidator partInspectionsValidator
     ) {
         this.partInspectionsEntityRepository = partInspectionsEntityRepository;
         this.partsService = partsService;
+        this.partInspectionsValidator = partInspectionsValidator;
     }
 
     @PostConstruct

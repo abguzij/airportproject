@@ -7,25 +7,19 @@ import kg.airport.airportproject.exception.InvalidIdException;
 import kg.airport.airportproject.exception.PartInspectionsNotFoundException;
 import kg.airport.airportproject.repository.PartInspectionsEntityRepository;
 import kg.airport.airportproject.service.impl.PartInspectionServiceImpl;
+import kg.airport.airportproject.validator.PartInspectionsValidator;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(value = MockitoExtension.class)
 class PartInspectionServiceTest {
@@ -33,14 +27,21 @@ class PartInspectionServiceTest {
 
     @Mock
     private PartInspectionsEntityRepository partInspectionsEntityRepository;
+    @Mock
+    private PartInspectionsValidator partInspectionsValidator;
+
     @Spy
     private PartsService partsService;
+
     private PartInspectionService partInspectionService;
 
     @BeforeEach
     public void beforeEach() {
-        this.partInspectionService =
-                new PartInspectionServiceImpl(this.partInspectionsEntityRepository, this.partsService);
+        this.partInspectionService = new PartInspectionServiceImpl(
+                this.partInspectionsEntityRepository,
+                this.partsService,
+                this.partInspectionsValidator
+        );
     }
     @Test
     public void testGetPartInspectionsHistory_OK() {
