@@ -67,8 +67,7 @@ public class AircraftsController {
             IncompatiblePartException,
             StatusChangeException,
             WrongEngineerException,
-            InvalidIdException
-    {
+            InvalidIdException, InvalidPartStateException {
         return this.aircraftsService.inspectAircraft(aircraftId, partInspectionsRequestDtoList);
     }
 

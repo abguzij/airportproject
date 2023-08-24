@@ -203,7 +203,8 @@ public class FlightsController {
     )
             throws AircraftNotFoundException,
             UnavailableAircraftException,
-            InvalidIdException
+            InvalidIdException,
+            InvalidDestinationException
     {
         return this.flightsService.registerNewFlight(flightRequestDto);
     }

@@ -21,7 +21,7 @@ public interface PartInspectionService {
             InvalidIdException,
             AircraftNotFoundException,
             IncompatiblePartException,
-            AircraftIsNotOnServiceException, WrongAircraftException;
+            AircraftIsNotOnServiceException, WrongAircraftException, InvalidPartStateException;
 
     List<PartInspectionsResponseDto> getPartInspectionsHistory(
             Long aircraftId,

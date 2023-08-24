@@ -14,6 +14,7 @@ import kg.airport.airportproject.service.ApplicationUserService;
 import kg.airport.airportproject.service.FlightsService;
 import kg.airport.airportproject.service.UserFlightsService;
 import kg.airport.airportproject.utils.UserRolesUtils;
+import kg.airport.airportproject.validator.UserFlightsValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -31,34 +32,22 @@ public class UserFlightsServiceImpl implements UserFlightsService {
     private final AircraftSeatsService aircraftSeatsService;
     private final ApplicationUserService applicationUserService;
     private final FlightsService flightsService;
+    private final UserFlightsValidator userFlightsValidator;
 
     @Autowired
     public UserFlightsServiceImpl(
             UserFlightsEntityRepository userFlightsEntityRepository,
             AircraftSeatsService aircraftSeatsService,
             ApplicationUserService applicationUserService,
-            FlightsService flightsService
+            FlightsService flightsService,
+            UserFlightsValidator userFlightsValidator
     ) {
         this.userFlightsEntityRepository = userFlightsEntityRepository;
         this.aircraftSeatsService = aircraftSeatsService;
         this.applicationUserService = applicationUserService;
         this.flightsService = flightsService;
+        this.userFlightsValidator = userFlightsValidator;
     }
-
-//    @Override
-//    public List<UserFlightsEntity> registerEmployeesForFlight() {
-//        List<ApplicationUsersEntity> crewMembers =
-//                this.applicationUserService.getUserEntitiesByIdList(requestDto.getCrewMembersIdList());
-//
-//        List<UserFlightsEntity> userFlightsEntities = new ArrayList<>();
-//        for (ApplicationUsersEntity employee : employeesList) {
-//            UserFlightsEntity userFlightsEntity = new UserFlightsEntity();
-//            userFlightsEntity.setFlightsEntity(flightsEntity);
-//            userFlightsEntity.setApplicationUsersEntity(employee);
-//            userFlightsEntity.setUserStatus(UserFlightsStatus.CREW_MEMBER_REGISTERED_FOR_FLIGHT);
-//        }
-//        return this.userFlightsEntityRepository.saveAll(userFlightsEntities);
-//    }
 
     @Override
     public List<UserFlightRegistrationResponseDto> registerEmployeesForFlight(
@@ -67,7 +56,10 @@ public class UserFlightsServiceImpl implements UserFlightsService {
             throws InvalidIdException,
             FlightsNotFoundException,
             WrongFlightException,
-            ApplicationUserNotFoundException, NotEnoughRolesForCrewRegistrationException, InvalidUserRoleException {
+            ApplicationUserNotFoundException,
+            NotEnoughRolesForCrewRegistrationException,
+            InvalidUserRoleException
+    {
         if(Objects.isNull(requestDtoList) || requestDtoList.isEmpty()) {
             throw new IllegalArgumentException(
                     "Список регистрируемых на рейс сотрудников не может быть null или пустым!"
@@ -77,6 +69,7 @@ public class UserFlightsServiceImpl implements UserFlightsService {
         Long flightId = requestDtoList.get(0).getFlightId();
         List<Long> crewMembersIdList = new ArrayList<>();
         for (UserFlightRequestDto requestDto : requestDtoList) {
+            this.userFlightsValidator.validateUserFlightsRequestDto(requestDto);
             Long crewMemberId = requestDto.getUserId();
             Long comparativeFlightId = requestDto.getFlightId();
             if(Objects.isNull(comparativeFlightId) || Objects.isNull(crewMemberId)) {
@@ -149,20 +142,15 @@ public class UserFlightsServiceImpl implements UserFlightsService {
     }
 
     @Override
-    public UserFlightRegistrationResponseDto registerClientForFlight(UserFlightRequestDto requestDto) throws InvalidIdException, FlightsNotFoundException, WrongFlightException, AircraftSeatNotFoundException, SeatReservationException {
-        if(Objects.isNull(requestDto)) {
-            throw new IllegalArgumentException("Создаваемая регистрация клиента на рейс не может быть null!");
-        }
-        if(Objects.isNull(requestDto.getFlightId()) || Objects.isNull(requestDto.getAircraftSeatId())) {
-            throw new InvalidIdException(
-                    "ID рейса, на который регистрируется клиент, и ID бронируемого места не могут быть null"
-            );
-        }
-        if(requestDto.getFlightId() < 1L || requestDto.getAircraftSeatId() < 1L) {
-            throw new InvalidIdException(
-                    "ID рейса, на который регистрируется клиент, и ID бронируемого места не могут быть меньше 1!"
-            );
-        }
+    public UserFlightRegistrationResponseDto registerClientForFlight(UserFlightRequestDto requestDto)
+            throws InvalidIdException,
+            FlightsNotFoundException,
+            WrongFlightException,
+            AircraftSeatNotFoundException,
+            SeatReservationException
+    {
+        this.userFlightsValidator.validateUserFlightsRequestDto(requestDto);
+        this.userFlightsValidator.validateAircraftSeatId(requestDto.getAircraftSeatId());
 
         ApplicationUsersEntity client =
                 (ApplicationUsersEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();

@@ -14,6 +14,7 @@ import kg.airport.airportproject.mapper.InspectionsMapper;
 import kg.airport.airportproject.repository.PartInspectionsEntityRepository;
 import kg.airport.airportproject.service.PartInspectionService;
 import kg.airport.airportproject.service.PartsService;
+import kg.airport.airportproject.validator.PartInspectionsValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,16 +33,19 @@ public class PartInspectionServiceImpl implements PartInspectionService {
 
     private final PartInspectionsEntityRepository partInspectionsEntityRepository;
     private final PartsService partsService;
+    private final PartInspectionsValidator partInspectionsValidator;
 
     private Long currentMaxInspectionCode;
 
     @Autowired
     public PartInspectionServiceImpl(
             PartInspectionsEntityRepository partInspectionsEntityRepository,
-            PartsService partsService
+            PartsService partsService,
+            PartInspectionsValidator partInspectionsValidator
     ) {
         this.partInspectionsEntityRepository = partInspectionsEntityRepository;
         this.partsService = partsService;
+        this.partInspectionsValidator = partInspectionsValidator;
     }
 
     @PostConstruct
@@ -58,7 +62,12 @@ public class PartInspectionServiceImpl implements PartInspectionService {
             List<PartInspectionsRequestDto> requestDtoList
     )
             throws PartsNotFoundException,
-            InvalidIdException, IncompatiblePartException, AircraftIsNotOnServiceException, WrongAircraftException {
+            InvalidIdException,
+            IncompatiblePartException,
+            AircraftIsNotOnServiceException,
+            WrongAircraftException,
+            InvalidPartStateException
+    {
         if(Objects.isNull(requestDtoList)) {
             throw new IllegalArgumentException("Список создаваемых осмотров деталей не может быть null!");
         }
@@ -68,6 +77,7 @@ public class PartInspectionServiceImpl implements PartInspectionService {
         Long aircraftId = requestDtoList.get(0).getAircraftId();
 
         for (PartInspectionsRequestDto requestDto : requestDtoList) {
+            this.partInspectionsValidator.validatePartInspectionRequestDto(requestDto);
             Long requestDtoAircraftId = requestDto.getAircraftId();
             if(requestDtoAircraftId < 1L) {
                 throw new InvalidIdException("ID самолета не может быть меньше 1!");

@@ -11,16 +11,30 @@ import java.util.List;
 
 public interface UserFlightsService {
     @Transactional
-    List<UserFlightRegistrationResponseDto> registerEmployeesForFlight(List<UserFlightRequestDto> requestDtoList) throws InvalidIdException, FlightsNotFoundException, WrongFlightException, ApplicationUserNotFoundException, NotEnoughRolesForCrewRegistrationException, InvalidUserRoleException;
+    List<UserFlightRegistrationResponseDto> registerEmployeesForFlight(List<UserFlightRequestDto> requestDtoList)
+            throws InvalidIdException,
+            FlightsNotFoundException,
+            WrongFlightException,
+            ApplicationUserNotFoundException,
+            NotEnoughRolesForCrewRegistrationException,
+            InvalidUserRoleException;
 
     @Transactional
-    UserFlightRegistrationResponseDto registerClientForFlight(UserFlightRequestDto requestDto) throws InvalidIdException, FlightsNotFoundException, WrongFlightException, AircraftSeatNotFoundException, SeatReservationException;
+    UserFlightRegistrationResponseDto registerClientForFlight(UserFlightRequestDto requestDto)
+            throws InvalidIdException,
+            FlightsNotFoundException,
+            WrongFlightException,
+            AircraftSeatNotFoundException,
+            SeatReservationException;
 
     @Transactional
     UserFlightRegistrationResponseDto cancelClientRegistration(Long registrationId)
             throws InvalidIdException,
             UserFlightsNotFoundException,
-            TicketCancelingException, AircraftSeatNotFoundException, SeatReservationException, FlightsNotFoundException;
+            TicketCancelingException,
+            AircraftSeatNotFoundException,
+            SeatReservationException,
+            FlightsNotFoundException;
 
     @Transactional
     UserFlightRegistrationResponseDto checkClient(Long clientRegistrationId)
@@ -39,7 +53,10 @@ public interface UserFlightsService {
             StatusChangeException;
 
     @Transactional
-    UserFlightRegistrationResponseDto confirmReadinessForFlight() throws UserFlightsNotFoundException, InvalidIdException, StatusChangeException;
+    UserFlightRegistrationResponseDto confirmReadinessForFlight()
+            throws UserFlightsNotFoundException,
+            InvalidIdException,
+            StatusChangeException;
 
     List<UserFlightRegistrationResponseDto> getAllUserRegistrations(
             Long flightId,
@@ -48,15 +65,25 @@ public interface UserFlightsService {
             Boolean isClient
     ) throws UserFlightsNotFoundException, InvalidIdException;
 
-    List<UserFlightRegistrationResponseDto> getAllClientRegistrations(Long flightId, UserFlightsStatus status) throws UserFlightsNotFoundException, InvalidIdException;
+    List<UserFlightRegistrationResponseDto> getAllClientRegistrations(Long flightId, UserFlightsStatus status)
+            throws UserFlightsNotFoundException,
+            InvalidIdException;
 
-    List<UserFlightRegistrationResponseDto> getAllEmployeesRegistrations(Long flightId, UserFlightsStatus status) throws UserFlightsNotFoundException, InvalidIdException;
+    List<UserFlightRegistrationResponseDto> getAllEmployeesRegistrations(Long flightId, UserFlightsStatus status)
+            throws UserFlightsNotFoundException,
+            InvalidIdException;
 
-    List<UserFlightRegistrationResponseDto> getAllClientRegistrationsForCurrentFLight(UserFlightsStatus status) throws UserFlightsNotFoundException, InvalidIdException;
+    List<UserFlightRegistrationResponseDto> getAllClientRegistrationsForCurrentFLight(UserFlightsStatus status)
+            throws UserFlightsNotFoundException,
+            InvalidIdException;
 
-    List<UserFlightRegistrationResponseDto> getClientsFlightRegistrationHistory(UserFlightsStatus status) throws UserFlightsNotFoundException, InvalidIdException;
+    List<UserFlightRegistrationResponseDto> getClientsFlightRegistrationHistory(UserFlightsStatus status)
+            throws UserFlightsNotFoundException,
+            InvalidIdException;
 
-    UserFlightRegistrationResponseDto getCurrentFlight() throws UserFlightsNotFoundException, InvalidIdException;
+    UserFlightRegistrationResponseDto getCurrentFlight()
+            throws UserFlightsNotFoundException,
+            InvalidIdException;
 
     UserFlightsEntity getClientFlightRegistrationByClientIdAndUserFlightId(Long registrationId, Long userId)
             throws InvalidIdException,
@@ -66,7 +93,9 @@ public interface UserFlightsService {
             throws InvalidIdException,
             UserFlightsNotFoundException;
 
-    UserFlightsEntity getUserFlightRegistrationByUserId(Long userId) throws InvalidIdException, UserFlightsNotFoundException;
+    UserFlightsEntity getUserFlightRegistrationByUserId(Long userId)
+            throws InvalidIdException,
+            UserFlightsNotFoundException;
 
     boolean checkIfAllPassengersOfFlightHaveStatus(Long flightId, UserFlightsStatus status) throws InvalidIdException;
 

@@ -13,6 +13,7 @@ import kg.airport.airportproject.mapper.FlightsMapper;
 import kg.airport.airportproject.repository.FlightsEntityRepository;
 import kg.airport.airportproject.response.StatusChangedResponse;
 import kg.airport.airportproject.service.*;
+import kg.airport.airportproject.validator.FlightsValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -29,27 +30,29 @@ public class FlightsServiceImpl implements FlightsService {
     private final FlightsEntityRepository flightsEntityRepository;
     private final AircraftsService aircraftsService;
     private final AircraftSeatsService aircraftSeatsService;
+    private final FlightsValidator flightsValidator;
 
     @Autowired
     public FlightsServiceImpl(
             FlightsEntityRepository flightsEntityRepository,
             AircraftsService aircraftsService,
-            AircraftSeatsService aircraftSeatsService
+            AircraftSeatsService aircraftSeatsService,
+            FlightsValidator flightsValidator
     ) {
         this.flightsEntityRepository = flightsEntityRepository;
         this.aircraftsService = aircraftsService;
         this.aircraftSeatsService = aircraftSeatsService;
+        this.flightsValidator = flightsValidator;
     }
 
     @Override
     public FlightResponseDto registerNewFlight(FlightRequestDto requestDto)
             throws AircraftNotFoundException,
             InvalidIdException,
-            UnavailableAircraftException
+            UnavailableAircraftException,
+            InvalidDestinationException
     {
-        if(Objects.isNull(requestDto)) {
-            throw new IllegalArgumentException("Создаваемый рейс не может быть null!");
-        }
+        this.flightsValidator.validateFlightRequestDto(requestDto);
 
         FlightsEntity flightsEntity = FlightsMapper.mapFlightRequestDtoToEntity(requestDto);
         AircraftsEntity aircraft = this.aircraftsService.findAircraftsEntityById(requestDto.getAircraftId());
@@ -60,12 +63,11 @@ public class FlightsServiceImpl implements FlightsService {
             );
         }
         flightsEntity.setAircraftsEntity(aircraft);
+        flightsEntity.setStatus(FlightStatus.REGISTERED);
+        flightsEntity.setRegisteredAt(LocalDateTime.now());
 
         Integer aircraftSeatsNumber = this.aircraftSeatsService.getNumberOfFreeSeatsByAircraftId(aircraft.getId());
-        flightsEntity.setStatus(FlightStatus.REGISTERED);
         flightsEntity.setTicketsLeft(aircraftSeatsNumber);
-
-        flightsEntity.setRegisteredAt(LocalDateTime.now());
 
         flightsEntity = this.flightsEntityRepository.save(flightsEntity);
         return FlightsMapper.mapToFlightResponseDto(flightsEntity);

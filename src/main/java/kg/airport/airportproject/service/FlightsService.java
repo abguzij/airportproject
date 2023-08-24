@@ -17,13 +17,18 @@ public interface FlightsService {
     FlightResponseDto registerNewFlight(FlightRequestDto requestDto)
             throws AircraftNotFoundException,
             InvalidIdException,
-            UnavailableAircraftException;
+            UnavailableAircraftException, InvalidDestinationException;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    FlightsEntity updateNumberOfRemainingTickets(Long flightId) throws InvalidIdException, FlightsNotFoundException;
+    FlightsEntity updateNumberOfRemainingTickets(Long flightId)
+            throws InvalidIdException,
+            FlightsNotFoundException;
 
     @Transactional
-    void informThatAllCrewMembersIsReadyForFlight(Long flightId) throws InvalidIdException, FlightsNotFoundException, StatusChangeException;
+    void informThatAllCrewMembersIsReadyForFlight(Long flightId)
+            throws InvalidIdException,
+            FlightsNotFoundException,
+            StatusChangeException;
 
     @Transactional
     void informThatAllClientsAreChecked(Long flightId)
