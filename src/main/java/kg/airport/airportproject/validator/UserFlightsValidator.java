@@ -7,4 +7,6 @@ public interface UserFlightsValidator {
     void validateUserFlightsRequestDto(UserFlightRequestDto requestDto) throws InvalidIdException;
 
     void validateAircraftSeatId(Long aircraftSeatId) throws InvalidIdException;
+
+    void validateCrewMemberId(Long userId) throws InvalidIdException;
 }

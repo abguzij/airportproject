@@ -21,7 +21,8 @@ public class FlightsMapper {
                 .setDestination(source.getDestination())
                 .setRegisteredAt(source.getRegisteredAt())
                 .setStatus(source.getStatus())
-                .setTicketsLeft(source.getTicketsLeft());
+                .setTicketsLeft(source.getTicketsLeft())
+                .setAircraftId(source.getAircraftsEntity().getId());
     }
 
     public static List<FlightResponseDto> mapToFlightResponseDtoList(List<FlightsEntity> sourceList) {

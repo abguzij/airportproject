@@ -60,8 +60,7 @@ public class ClientFeedbacksServiceImpl implements ClientFeedbacksService {
 
         UserFlightsEntity registration =
                 this.userFlightsService.getClientFlightRegistrationById(requestDto.getFlightRegistrationId());
-//        UserFlightsEntity lastClientRegistration =
-//                this.userFlightsService.getClientFlightRegistrationById(currentUser.getId());
+
         FlightsEntity flight =
                 this.flightsService.getFlightEntityByFlightId(registration.getFlightsEntity().getId());
 
@@ -79,7 +78,9 @@ public class ClientFeedbacksServiceImpl implements ClientFeedbacksService {
             Long flightId
     )
             throws InvalidIdException,
-            IncorrectDateFiltersException, CLientFeedbacksNotFoundException {
+            IncorrectDateFiltersException,
+            CLientFeedbacksNotFoundException
+    {
         BooleanBuilder booleanBuilder = new BooleanBuilder();
         QClientFeedbacksEntity root = QClientFeedbacksEntity.clientFeedbacksEntity;
 
@@ -102,8 +103,13 @@ public class ClientFeedbacksServiceImpl implements ClientFeedbacksService {
             booleanBuilder.and(root.registeredAt.goe(registeredAfter));
         }
 
-        Iterable<ClientFeedbacksEntity> clientFeedbacksEntityIterable =
-                this.clientFeedbacksEntityRepository.findAll(booleanBuilder.getValue());
+        Iterable<ClientFeedbacksEntity> clientFeedbacksEntityIterable;
+        if(Objects.isNull(booleanBuilder.getValue())) {
+            clientFeedbacksEntityIterable = this.clientFeedbacksEntityRepository.findAll();
+        } else {
+            clientFeedbacksEntityIterable = this.clientFeedbacksEntityRepository.findAll(booleanBuilder.getValue());
+        }
+
         List<ClientFeedbackResponseDto> clientFeedbackResponseDtoList =
                 StreamSupport
                         .stream(clientFeedbacksEntityIterable.spliterator(), false)

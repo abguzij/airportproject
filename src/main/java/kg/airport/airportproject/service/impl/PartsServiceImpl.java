@@ -108,7 +108,12 @@ public class PartsServiceImpl implements PartsService {
             booleanBuilder.and(root.registeredAt.loe(registeredBefore));
         }
 
-        Iterable<PartsEntity> partsEntityIterable = this.partsEntityRepository.findAll(booleanBuilder.getValue());
+        Iterable<PartsEntity> partsEntityIterable;
+        if(Objects.isNull(booleanBuilder.getValue())) {
+            partsEntityIterable = this.partsEntityRepository.findAll();
+        } else {
+            partsEntityIterable = this.partsEntityRepository.findAll(booleanBuilder.getValue());
+        }
         List<PartResponseDto> partResponseDtoList =
                 StreamSupport
                         .stream(partsEntityIterable.spliterator(), false)

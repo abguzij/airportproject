@@ -10,6 +10,7 @@ public class FlightResponseDto {
     private FlightStatus status;
     private Integer ticketsLeft;
     private LocalDateTime registeredAt;
+    private Long aircraftId;
 
     public FlightResponseDto() {
     }
@@ -56,6 +57,15 @@ public class FlightResponseDto {
 
     public FlightResponseDto setRegisteredAt(LocalDateTime registeredAt) {
         this.registeredAt = registeredAt;
+        return this;
+    }
+
+    public Long getAircraftId() {
+        return aircraftId;
+    }
+
+    public FlightResponseDto setAircraftId(Long aircraftId) {
+        this.aircraftId = aircraftId;
         return this;
     }
 }

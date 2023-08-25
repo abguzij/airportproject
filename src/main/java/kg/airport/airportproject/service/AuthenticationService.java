@@ -24,7 +24,7 @@ public interface AuthenticationService {
             UsernameAlreadyExistsException,
             InvalidUserInfoException,
             InvalidCredentialsException,
-            InvalidIdException;
+            InvalidIdException, InvalidUserPositionException;
 
     JwtTokenResponseDto login(ApplicationUserCredentialsRequestDto requestDto);
 }

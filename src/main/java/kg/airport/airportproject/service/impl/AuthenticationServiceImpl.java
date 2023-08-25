@@ -102,9 +102,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             UsernameAlreadyExistsException,
             InvalidUserInfoException,
             InvalidCredentialsException,
-            InvalidIdException
+            InvalidIdException,
+            InvalidUserPositionException
     {
         this.applicationUserValidator.validateUserRequestDto(requestDto);
+        this.applicationUserValidator.validateEmployeesPositionId(requestDto.getPositionId());
         ApplicationUsersEntity applicationUsersEntity =
                 ApplicationUsersMapper.mapApplicationUserRequestDtoToEntity(requestDto);
 

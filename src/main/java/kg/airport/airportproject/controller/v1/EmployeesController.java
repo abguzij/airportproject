@@ -67,7 +67,13 @@ public class EmployeesController {
             @RequestBody ApplicationUserRequestDto applicationUserRequestDto
     )
             throws UserPositionNotExistsException,
-            UserRolesNotAssignedException, UsernameAlreadyExistsException, InvalidUserInfoException, InvalidCredentialsException, InvalidIdException {
+            UserRolesNotAssignedException,
+            UsernameAlreadyExistsException,
+            InvalidUserInfoException,
+            InvalidCredentialsException,
+            InvalidIdException,
+            InvalidUserPositionException
+    {
         return this.authenticationService.registerNewEmployee(applicationUserRequestDto);
     }
 
@@ -76,12 +82,12 @@ public class EmployeesController {
     public List<ApplicationUserResponseDto> getAllEmployees(
             @RequestParam(required = false) LocalDateTime registeredAfter,
             @RequestParam(required = false) LocalDateTime registeredBefore,
-            @RequestParam(required = false) Boolean isFired,
+            @RequestParam(required = false) Boolean isEnabled,
             @RequestParam(required = false) List<String> userPositions
     )
             throws ApplicationUserNotFoundException
     {
-        return this.applicationUserService.getAllEmployees(registeredBefore, registeredAfter, isFired, userPositions);
+        return this.applicationUserService.getAllEmployees(registeredBefore, registeredAfter, isEnabled, userPositions);
     }
 
     @PreAuthorize(value = "hasAnyRole('MANAGER', 'DISPATCHER')")

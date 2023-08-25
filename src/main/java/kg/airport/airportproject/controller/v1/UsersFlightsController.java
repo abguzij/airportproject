@@ -186,9 +186,12 @@ public class UsersFlightsController {
         return this.userFlightsService.getAllClientRegistrationsForCurrentFLight(clientStatus);
     }
 
-    @PreAuthorize(value = "hasRole('CLIENT')")
+    @PreAuthorize(value = "hasAnyRole('CLIENT', 'STEWARD', 'CHIEF_STEWARD', 'PILOT')")
     @GetMapping(value = "/clients/client-current-flight")
-    public UserFlightRegistrationResponseDto getClientsCurrentFlight() throws UserFlightsNotFoundException, InvalidIdException {
+    public UserFlightRegistrationResponseDto getClientsCurrentFlight()
+            throws UserFlightsNotFoundException,
+            InvalidIdException
+    {
         return this.userFlightsService.getCurrentFlight();
     }
 

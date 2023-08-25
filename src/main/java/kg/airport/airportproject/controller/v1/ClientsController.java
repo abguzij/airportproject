@@ -45,7 +45,7 @@ public class ClientsController {
             description = "Обновляет данные аккаунта клиента. Принимает... "
     )
     @PreAuthorize(value = "hasAnyRole('CLIENT')")
-    @DeleteMapping(value = "/update")
+    @PutMapping(value = "/update")
     public ApplicationUserResponseDto updateInfo(
             @RequestBody ApplicationUserRequestDto clientRequestDto
     ) {
