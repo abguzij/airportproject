@@ -69,7 +69,10 @@ public class UserFlightsServiceImpl implements UserFlightsService {
         Long flightId = requestDtoList.get(0).getFlightId();
         List<Long> crewMembersIdList = new ArrayList<>();
         for (UserFlightRequestDto requestDto : requestDtoList) {
+
             this.userFlightsValidator.validateUserFlightsRequestDto(requestDto);
+            this.userFlightsValidator.validateCrewMemberId(requestDto.getUserId());
+
             Long crewMemberId = requestDto.getUserId();
             Long comparativeFlightId = requestDto.getFlightId();
             if(Objects.isNull(comparativeFlightId) || Objects.isNull(crewMemberId)) {

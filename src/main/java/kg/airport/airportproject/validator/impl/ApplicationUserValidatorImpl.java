@@ -20,6 +20,8 @@ import java.util.stream.StreamSupport;
 
 @Component
 public class ApplicationUserValidatorImpl implements ApplicationUserValidator {
+    public static final Long CLIENT_POSITION_ID = 10L;
+
     private final ApplicationUsersEntityRepository applicationUsersEntityRepository;
 
     @Autowired
@@ -49,12 +51,6 @@ public class ApplicationUserValidatorImpl implements ApplicationUserValidator {
         if(Objects.isNull(requestDto.getFullName()) || requestDto.getFullName().isEmpty()) {
             throw new InvalidUserInfoException("ФИО пользователя не может быть null или пустым!");
         }
-        if(Objects.isNull(requestDto.getPositionId())) {
-            throw new InvalidUserInfoException("ID позиции пользователя не может быть null!");
-        }
-        if(requestDto.getPositionId() < 1L) {
-            throw new InvalidIdException("ID позиции пользователя не может быть меньше 1!");
-        }
     }
 
     @Override
@@ -65,6 +61,23 @@ public class ApplicationUserValidatorImpl implements ApplicationUserValidator {
                 this.applicationUsersEntityRepository.getApplicationUsersEntityByUsernameAndIsEnabledTrue(username);
         if(possibleDuplicate.isPresent()) {
             throw new UsernameAlreadyExistsException("Пользователь с таким именем уже существует в системе!");
+        }
+    }
+
+    @Override
+    public void validateEmployeesPositionId(Long positionId)
+            throws InvalidUserInfoException,
+            InvalidIdException,
+            InvalidUserPositionException
+    {
+        if(Objects.isNull(positionId)) {
+            throw new InvalidUserInfoException("ID позиции пользователя не может быть null!");
+        }
+        if(positionId < 1L) {
+            throw new InvalidIdException("ID позиции пользователя не может быть меньше 1!");
+        }
+        if(positionId.equals(CLIENT_POSITION_ID)) {
+            throw new InvalidUserPositionException("Введен неверный ID позиции пользователя!");
         }
     }
 }

@@ -10,6 +10,7 @@ import kg.airport.airportproject.response.StatusChangedResponse;
 import kg.airport.airportproject.service.AircraftSeatsService;
 import kg.airport.airportproject.service.FlightsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -209,17 +210,24 @@ public class FlightsController {
         return this.flightsService.registerNewFlight(flightRequestDto);
     }
 
-    @PreAuthorize(value = "hasAnyRole('MANAGER', 'CHIEF_DISPATCHER', 'DISPATCHER', 'PILOT')")
+    @PreAuthorize(value = "hasAnyRole(" +
+            "'MANAGER', 'CHIEF_DISPATCHER', 'DISPATCHER', 'PILOT', 'CHIEF_STEWARD', 'CHIEF_ENGINEER'" +
+            ")"
+    )
     @GetMapping(value = "/all")
     public List<FlightResponseDto> getAllFlights(
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
             @RequestParam(required = false) LocalDateTime createdAfter,
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
             @RequestParam(required = false) LocalDateTime createdBefore,
-            @RequestParam(required = false) FlightStatus flightStatus
+            @RequestParam(required = false) FlightStatus flightStatus,
+            @RequestParam(required = false) Long flightId,
+            @RequestParam(required = false) Long aircraftId
     )
             throws IncorrectDateFiltersException,
             FlightsNotFoundException
     {
-        return this.flightsService.getAllFLights(createdAfter, createdBefore, flightStatus);
+        return this.flightsService.getAllFLights(createdAfter, createdBefore, flightStatus, flightId, aircraftId);
     }
 
     @PreAuthorize(value = "hasAnyRole('MANAGER', 'CLIENT')")

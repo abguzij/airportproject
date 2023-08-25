@@ -136,7 +136,9 @@ public interface FlightsService {
     List<FlightResponseDto> getAllFLights(
             LocalDateTime registeredAfter,
             LocalDateTime registeredBefore,
-            FlightStatus flightStatus
+            FlightStatus flightStatus,
+            Long flightId,
+            Long aircraftId
     )
             throws IncorrectDateFiltersException,
             FlightsNotFoundException;

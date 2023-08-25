@@ -12,4 +12,5 @@ public interface ApplicationUserValidator {
 
     void checkUsernameForDuplicates(String username) throws UsernameAlreadyExistsException;
 
+    void validateEmployeesPositionId(Long positionId) throws InvalidUserInfoException, InvalidIdException, InvalidUserPositionException;
 }

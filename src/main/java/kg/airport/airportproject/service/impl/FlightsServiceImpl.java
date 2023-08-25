@@ -525,15 +525,31 @@ public class FlightsServiceImpl implements FlightsService {
     public List<FlightResponseDto> getAllFLights(
             LocalDateTime registeredAfter,
             LocalDateTime registeredBefore,
-            FlightStatus flightStatus
+            FlightStatus flightStatus,
+            Long flightId,
+            Long aircraftId
     )
             throws IncorrectDateFiltersException, FlightsNotFoundException {
+        QFlightsEntity root = QFlightsEntity.flightsEntity;
         BooleanBuilder booleanBuilder = new BooleanBuilder(
                 this.createCommonFlightsSearchPredicate(registeredAfter, registeredBefore, flightStatus)
         );
 
-        Iterable<FlightsEntity> flightsEntityIterable =
-                this.flightsEntityRepository.findAll(booleanBuilder.getValue());
+        if(Objects.nonNull(flightId) && flightId > 0L) {
+            booleanBuilder.and(root.id.eq(flightId));
+        }
+        if(Objects.nonNull(aircraftId) && aircraftId > 0L) {
+            booleanBuilder.and(root.aircraftsEntity.id.eq(aircraftId));
+        }
+
+        Iterable<FlightsEntity> flightsEntityIterable;
+        if(Objects.isNull(booleanBuilder.getValue())) {
+            flightsEntityIterable = this.flightsEntityRepository.findAll();
+        } else {
+            flightsEntityIterable =
+                    this.flightsEntityRepository.findAll(booleanBuilder.getValue());
+        }
+
         List<FlightResponseDto> flightResponseDtoList =
                 StreamSupport
                         .stream(flightsEntityIterable.spliterator(), false)
@@ -559,11 +575,19 @@ public class FlightsServiceImpl implements FlightsService {
         );
         QFlightsEntity root = QFlightsEntity.flightsEntity;
 
-        booleanBuilder.and(root.destination.eq(flightDestination));
+        if(Objects.nonNull(flightDestination) && !flightDestination.isEmpty()) {
+            booleanBuilder.and(root.destination.eq(flightDestination));
+        }
         booleanBuilder.and(root.ticketsLeft.gt(0));
 
-        Iterable<FlightsEntity> flightsEntityIterable =
-                this.flightsEntityRepository.findAll(booleanBuilder.getValue());
+        Iterable<FlightsEntity> flightsEntityIterable;
+        if(Objects.isNull(booleanBuilder.getValue())) {
+            flightsEntityIterable = this.flightsEntityRepository.findAll();
+        } else {
+            flightsEntityIterable =
+                    this.flightsEntityRepository.findAll(booleanBuilder.getValue());
+        }
+
         List<FlightResponseDto> flightResponseDtoList =
                 StreamSupport
                         .stream(flightsEntityIterable.spliterator(), false)
@@ -592,7 +616,7 @@ public class FlightsServiceImpl implements FlightsService {
         Optional<FlightsEntity> flightsEntityOptional = this.flightsEntityRepository.getFlightsEntityById(flightId);
         if(flightsEntityOptional.isEmpty()) {
             throw new FlightsNotFoundException(
-                    String.format("Рейса с ID[%d] не найдено!")
+                    String.format("Рейса с ID[%d] не найдено!", flightId)
             );
         }
         return flightsEntityOptional.get();

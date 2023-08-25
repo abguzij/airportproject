@@ -56,8 +56,8 @@ public class StatisticsServiceImpl implements StatisticsService {
             );
         }
 
-        List<Integer> flightsNumbers = this.flightsEntityRepository
-                .getDestinationsFlightsNumbersByDateFiltersAndDestinationIn(distinctDestinations, startDate, endDate);
+        List<Integer> flightsNumbers =
+                this.flightsEntityRepository.getDestinationsFlightsNumbersByDestinationIn(distinctDestinations);
 
         List<DestinationStatisticsResponseDto> responseDtoList = new ArrayList<>();
         for (int i = 0; i < distinctDestinations.size(); i++) {

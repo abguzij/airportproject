@@ -565,8 +565,13 @@ public class AircraftsServiceImpl implements AircraftsService {
     private List<AircraftResponseDto> findAircraftsByBuiltPredicate(BooleanBuilder booleanBuilder)
             throws AircraftNotFoundException
     {
-        Iterable<AircraftsEntity> aircraftsEntityIterable =
-                this.aircraftsEntityRepository.findAll(booleanBuilder.getValue());
+        Iterable<AircraftsEntity> aircraftsEntityIterable;
+        if(Objects.nonNull(booleanBuilder.getValue())) {
+            aircraftsEntityIterable = this.aircraftsEntityRepository.findAll(booleanBuilder.getValue());
+        } else {
+            aircraftsEntityIterable = this.aircraftsEntityRepository.findAll();
+        }
+
         List<AircraftResponseDto> aircraftResponseDtoList =
                 StreamSupport
                         .stream(aircraftsEntityIterable.spliterator(), false)

@@ -19,11 +19,6 @@ public class UserFlightsValidatorImpl implements UserFlightsValidator {
                     "ID рейса, на который регистрируется пользователь не может быть null или меньше 1!"
             );
         }
-        if(Objects.isNull(requestDto.getUserId()) || requestDto.getUserId() < 1L) {
-            throw new InvalidIdException(
-                    "ID пользователя регистрируемого на рейс не может быть null или меньше 1!"
-            );
-        }
     }
 
     @Override
@@ -31,6 +26,15 @@ public class UserFlightsValidatorImpl implements UserFlightsValidator {
         if(Objects.isNull(aircraftSeatId) || aircraftSeatId < 1L) {
             throw new InvalidIdException(
                     "ID места в самолете забронированного клиентом не может быть null или меньше 1!"
+            );
+        }
+    }
+
+    @Override
+    public void validateCrewMemberId(Long userId) throws InvalidIdException {
+        if(Objects.isNull(userId) || userId < 1L) {
+            throw new InvalidIdException(
+                    "ID пользователя регистрируемого на рейс не может быть null или меньше 1!"
             );
         }
     }
