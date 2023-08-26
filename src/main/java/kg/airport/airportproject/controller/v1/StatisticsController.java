@@ -1,5 +1,7 @@
 package kg.airport.airportproject.controller.v1;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import kg.airport.airportproject.dto.AircraftsRepairsStatisticsResponseDto;
 import kg.airport.airportproject.dto.DestinationStatisticsResponseDto;
 import kg.airport.airportproject.exception.FlightsNotFoundException;
@@ -20,6 +22,10 @@ import java.util.List;
 @RestController
 @PreAuthorize(value = "hasAnyRole('ADMIN', 'MANAGER')")
 @RequestMapping(value = "/v1/statistics")
+@Tag(
+        name = "Statistics Controller",
+        description = "Endpoint'ы для формирования отчетов и статистики. "
+)
 public class StatisticsController {
     private final StatisticsService statisticsService;
 
@@ -28,6 +34,11 @@ public class StatisticsController {
         this.statisticsService = statisticsService;
     }
 
+    @Operation(
+            summary = "Получение статистики по количеству рейсов по каждому направлению. ",
+            description = "Получение статистики по количеству рейсов по каждому направлению. " +
+                    "Необходимые роли: [DISPATCHER, ADMIN]"
+    )
     @GetMapping(value = "/destinations")
     public List<DestinationStatisticsResponseDto> getDestinationsStatistics()
             throws FlightsNotFoundException
@@ -35,6 +46,11 @@ public class StatisticsController {
         return this.statisticsService.getDestinationStatistics();
     }
 
+    @Operation(
+            summary = "Получение статистики по количеству ремонтированных деталей для каждого самолета. ",
+            description = "Получение статистики по количеству ремонтированных деталей для каждого самолета. " +
+                    "Необходимые роли: [DISPATCHER, ADMIN]"
+    )
     @GetMapping(value = "/repaired-aircrafts")
     public List<AircraftsRepairsStatisticsResponseDto> getNumberOfRepairedPartsPerAircraft()
             throws PartInspectionsNotFoundException

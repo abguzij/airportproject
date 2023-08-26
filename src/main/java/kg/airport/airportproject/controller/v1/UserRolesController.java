@@ -1,5 +1,7 @@
 package kg.airport.airportproject.controller.v1;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import kg.airport.airportproject.dto.UserRoleResponseDto;
 import kg.airport.airportproject.exception.ApplicationUserNotFoundException;
 import kg.airport.airportproject.exception.InvalidIdException;
@@ -16,6 +18,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping(value = "/v1/roles")
+@PreAuthorize(value = "hasRole('ADMIN')")
+@Tag(
+        name = "User Roles Controller",
+        description = "Endpoint'ы для управления ролями пользователей системы. "
+)
 public class UserRolesController {
 
     private final UserRolesService userRolesService;
@@ -26,7 +33,11 @@ public class UserRolesController {
     }
 
 
-    @PreAuthorize(value = "hasRole('ADMIN')")
+    @Operation(
+            summary = "Добавление ролей пользователя конкретному пользователю. ",
+            description = "Добавление ролей пользователя конкретному пользователю. " +
+                    "Необходимые роли: [ADMIN]"
+    )
     @PutMapping(value = "/update")
     public List<UserRoleResponseDto> updateUserRoles(
             @RequestParam Long userId,
@@ -38,7 +49,11 @@ public class UserRolesController {
         return this.userRolesService.updateUsersRoles(roleIdList, userId);
     }
 
-    @PreAuthorize(value = "hasRole('ADMIN')")
+    @Operation(
+            summary = "Просмотр всех доступных ролей пользователя в системе. ",
+            description = "Просмотр всех доступных ролей пользователя в системе. " +
+                    "Необходимые роли: [ADMIN]"
+    )
     @GetMapping(value = "/all")
     public List<UserRoleResponseDto> getAllUserRoles()
             throws UserRolesNotFoundException
@@ -46,7 +61,11 @@ public class UserRolesController {
         return this.userRolesService.getAllUserRoles();
     }
 
-    @PreAuthorize(value = "hasRole('ADMIN')")
+    @Operation(
+            summary = "Просмотр ролей определенного пользователя. ",
+            description = "Просмотр ролей определенного пользователя. " +
+                    "Необходимые роли: [ADMIN]"
+    )
     @GetMapping(value = "/of-user")
     public List<UserRoleResponseDto> getUsersRoles(
             @RequestParam Long userId

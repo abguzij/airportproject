@@ -1,5 +1,7 @@
 package kg.airport.airportproject.controller.v1;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import kg.airport.airportproject.dto.PartRequestDto;
 import kg.airport.airportproject.dto.PartResponseDto;
 import kg.airport.airportproject.dto.PartTypesResponseDto;
@@ -17,6 +19,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping(value = "/v1/parts")
+@Tag(
+        name = "Parts Controller",
+        description = "Endpoint'ы для создания и просмотра деталей. "
+)
 public class PartsController {
     private final PartsService partsService;
 
@@ -27,6 +33,11 @@ public class PartsController {
         this.partsService = partsService;
     }
 
+    @Operation(
+            summary = "Регистрация детали самолета в системе. ",
+            description = "Регистрация детали самолета в системе. " +
+                    "Необходимые роли: [DISPATCHER]"
+    )
     @PreAuthorize(value = "hasRole('DISPATCHER')")
     @PostMapping(value = "/register")
     public PartResponseDto registerNewPart(
@@ -39,6 +50,11 @@ public class PartsController {
         return this.partsService.registerNewPart(requestDto);
     }
 
+    @Operation(
+            summary = "Регистрация нескольких деталей самолета в системе. ",
+            description = "Регистрация нескольких деталей самолета в системе. " +
+                    "Необходимые роли: [DISPATCHER]"
+    )
     @PreAuthorize(value = "hasRole('DISPATCHER')")
     @PostMapping(value = "/register-all")
     public List<PartResponseDto> registerNewParts(
@@ -51,6 +67,11 @@ public class PartsController {
         return this.partsService.registerNewParts(requestDto);
     }
 
+    @Operation(
+            summary = "Просмотр всех зарегистрированных деталей самолета в системе. ",
+            description = "Просмотр всех зарегистрированных деталей самолета в системе. " +
+                    "Необходимые роли: [DISPATCHER, MANAGER]"
+    )
     @PreAuthorize(value = "hasAnyRole('DISPATCHER', 'MANAGER')")
     @GetMapping(value = "/all")
     public List<PartResponseDto> getAllParts(
@@ -76,6 +97,11 @@ public class PartsController {
         );
     }
 
+    @Operation(
+            summary = "Просмотр всех доступных типов деталей самолета в системе. ",
+            description = "Просмотр всех доступных типов деталей самолета в системе. " +
+                    "Необходимые роли: [DISPATCHER, MANAGER, ENGINEER, ENGINEER, CHIEF_DISPATCHER]"
+    )
     @PreAuthorize(value = "hasAnyRole('DISPATCHER', 'MANAGER', 'ENGINEER', 'CHIEF_ENGINEER', 'CHIEF_DISPATCHER')")
     @GetMapping(value = "/part-types")
     public PartTypesResponseDto getPartTypes() {

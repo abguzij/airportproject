@@ -1,5 +1,6 @@
 package kg.airport.airportproject.controller.v1;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kg.airport.airportproject.dto.UserPositionResponseDto;
 import kg.airport.airportproject.dto.ApplicationUserRequestDto;
@@ -37,6 +38,11 @@ public class EmployeesController {
         this.applicationUserService = applicationUserService;
     }
 
+    @Operation(
+            summary = "Увольнение сотрудника. ",
+            description = "Увольнение сотрудника. Принимает id пользователя. " +
+                    "Необходимые роли: [MANAGER]"
+    )
     @PreAuthorize(value = "hasRole('MANAGER')")
     @DeleteMapping(value = "/fire")
     public ApplicationUserResponseDto fireEmployee(
@@ -48,6 +54,11 @@ public class EmployeesController {
         return this.applicationUserService.deleteAccountById(employeeId);
     }
 
+    @Operation(
+            summary = "Изменение сотрудника. ",
+            description = "Изменение информации о сотруднике. Принимает id пользователя и dto для изменения информации. " +
+                    "Необходимые роли: [MANAGER]"
+    )
     @PreAuthorize(value = "hasRole('MANAGER')")
     @PutMapping(value = "/update")
     public ApplicationUserResponseDto updateEmployee(
@@ -61,6 +72,12 @@ public class EmployeesController {
         return this.applicationUserService.updateUsersInformation(applicationUserRequestDto, userId);
     }
 
+    @Operation(
+            summary = "Добавление сотрудника. ",
+            description = "Регистрация сотрудника в системе. " +
+                    "Принимает dto для регистрации сущности пользователя в системе. " +
+                    "Необходимые роли: [MANAGER, ADMIN]"
+    )
     @PreAuthorize(value = "hasAnyRole('MANAGER', 'ADMIN')")
     @PostMapping(value = "/register")
     public ApplicationUserResponseDto registerNewEmployee(
@@ -77,6 +94,11 @@ public class EmployeesController {
         return this.authenticationService.registerNewEmployee(applicationUserRequestDto);
     }
 
+    @Operation(
+            summary = "Просмотр всех сотрудников в системе. ",
+            description = "Просмотр всех сотрудников в системе. " +
+                    "Необходимые роли: [MANAGER, ADMIN]"
+    )
     @PreAuthorize(value = "hasAnyRole('ADMIN', 'MANAGER')")
     @GetMapping(value = "/all")
     public List<ApplicationUserResponseDto> getAllEmployees(
@@ -90,6 +112,11 @@ public class EmployeesController {
         return this.applicationUserService.getAllEmployees(registeredBefore, registeredAfter, isEnabled, userPositions);
     }
 
+    @Operation(
+            summary = "Просмотр всех свободных членов экипажа. ",
+            description = "Просмотр всех свободных членов экипажа. " +
+                    "Необходимые роли: [MANAGER, DISPATCHER]"
+    )
     @PreAuthorize(value = "hasAnyRole('MANAGER', 'DISPATCHER')")
     @GetMapping(value = "/crew-members/free")
     public List<ApplicationUserResponseDto> getAllFreeCrewMembers()
@@ -98,6 +125,11 @@ public class EmployeesController {
         return this.applicationUserService.getAllFreeCrewMembers();
     }
 
+    @Operation(
+            summary = "Просмотр всех свободных инженеров. ",
+            description = "Просмотр всех свободных инженеров. " +
+                    "Необходимые роли: [MANAGER, CHIEF_ENGINEER]"
+    )
     @PreAuthorize(value = "hasAnyRole('MANAGER', 'CHIEF_ENGINEER')")
     @GetMapping(value = "/engineers/free")
     public List<ApplicationUserResponseDto> getAllFreeEngineers()
@@ -106,6 +138,11 @@ public class EmployeesController {
         return this.applicationUserService.getAllFreeEngineers();
     }
 
+    @Operation(
+            summary = "Просмотр всех позиций работников в системе. ",
+            description = "Просмотр всех позиций работников в системе. " +
+                    "Необходимые роли: [MANAGER, ADMIN]"
+    )
     @PreAuthorize(value = "hasAnyRole('MANAGER', 'ADMIN')")
     @GetMapping(value = "/positions")
     public List<UserPositionResponseDto> getAllEmployeePositions() {

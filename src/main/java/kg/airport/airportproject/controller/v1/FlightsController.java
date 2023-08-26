@@ -1,5 +1,7 @@
 package kg.airport.airportproject.controller.v1;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import kg.airport.airportproject.dto.AircraftSeatResponseDto;
 import kg.airport.airportproject.dto.FlightRequestDto;
 import kg.airport.airportproject.dto.FlightResponseDto;
@@ -19,6 +21,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping(value = "/v1/flights")
+@Tag(
+        name = "Flights Controller",
+        description = "Endpoint'ы для управления статусами, создания и просмотра рейсов," +
+                " а также необходимы для регистрации на рейс. "
+)
 public class FlightsController {
     private final FlightsService flightsService;
     private final AircraftSeatsService aircraftSeatsService;
@@ -32,6 +39,11 @@ public class FlightsController {
         this.aircraftSeatsService = aircraftSeatsService;
     }
 
+    @Operation(
+            summary = "Назначение раздачи еды. ",
+            description = "Назначение раздачи еды. " +
+                    "Необходимые роли: [CHIEF_STEWARD]"
+    )
     @PreAuthorize(value = "hasRole('CHIEF_STEWARD')")
     @PutMapping(value = "/assign-food-distribution")
     public StatusChangedResponse assignFoodDistributionDuringFlight(
@@ -44,6 +56,11 @@ public class FlightsController {
         return this.flightsService.assignFoodDistribution(flightId);
     }
 
+    @Operation(
+            summary = "Начало рейса. ",
+            description = "Начало рейса. " +
+                    "Необходимые роли: [PILOT]"
+    )
     @PreAuthorize(value = "hasRole('PILOT')")
     @PutMapping(value = "/start-flight")
     public StatusChangedResponse startFlight(
@@ -56,6 +73,11 @@ public class FlightsController {
         return this.flightsService.startFlight(flightId);
     }
 
+    @Operation(
+            summary = "Подтверждение отправки рейса. ",
+            description = "Подтверждение отправки рейса. " +
+                    "Необходимые роли: [CHIEF_DISPATCHER]"
+    )
     @PreAuthorize(value = "hasRole('CHIEF_DISPATCHER')")
     @PutMapping(value = "/confirm-departure")
     public StatusChangedResponse confirmFlightDeparture(
@@ -68,6 +90,11 @@ public class FlightsController {
         return this.flightsService.confirmDeparture(flightId);
     }
 
+    @Operation(
+            summary = "Инициация старта рейса. ",
+            description = "Инициация старта рейса после подготовки. " +
+                    "Необходимые роли: [DISPATCHER]"
+    )
     @PreAuthorize(value = "hasRole('DISPATCHER')")
     @PutMapping(value = "/init-departure")
     public StatusChangedResponse initiateFlightDeparture(
@@ -80,6 +107,11 @@ public class FlightsController {
         return this.flightsService.initiateDeparture(flightId);
     }
 
+    @Operation(
+            summary = "Подтверждение готовности клиентов к рейсу. ",
+            description = "Подтверждение готовности клиентов к рейсу. " +
+                    "Необходимые роли: [CHIEF_STEWARD]"
+    )
     @PreAuthorize(value = "hasRole('CHIEF_STEWARD')")
     @PutMapping(value = "/confirm-client-readiness")
     public StatusChangedResponse confirmClientReadinessForFlight(
@@ -92,6 +124,11 @@ public class FlightsController {
         return this.flightsService.confirmClientReadiness(flightId);
     }
 
+    @Operation(
+            summary = "Назначение инструктажа. ",
+            description = "Назначение инструктажа. " +
+                    "Необходимые роли: [CHIEF_STEWARD]"
+    )
     @PreAuthorize(value = "hasRole('CHIEF_STEWARD')")
     @PutMapping(value = "/assign-briefing")
     public StatusChangedResponse assignBriefingForFlight(
@@ -104,6 +141,11 @@ public class FlightsController {
         return this.flightsService.assignBriefing(flightId);
     }
 
+    @Operation(
+            summary = "Назначение проверки готовности клиентов и проведения инструктажа экипажем. ",
+            description = "Назначение проверки готовности клиентов и проведения инструктажа экипажем. " +
+                    "Необходимые роли: [DISPATCHER]"
+    )
     @PreAuthorize(value = "hasRole('DISPATCHER')")
     @PutMapping(value = "/init-crew-preparations")
     public StatusChangedResponse initiateCrewPreparationsForFlight(
@@ -116,6 +158,11 @@ public class FlightsController {
         return this.flightsService.initiateCrewPreparation(flightId);
     }
 
+    @Operation(
+            summary = "Подтверждение заправки самолета. ",
+            description = "Главный инженер передает Диспетчеру готовность старта нового рейса. " +
+                    "Необходимые роли: [CHIEF_ENGINEER]"
+    )
     @PreAuthorize(value = "hasRole('CHIEF_ENGINEER')")
     @PutMapping(value = "/confirm-refueling")
     public StatusChangedResponse confirmRefueling(
@@ -129,6 +176,11 @@ public class FlightsController {
         return this.flightsService.confirmAircraftRefueling(flightId);
     }
 
+    @Operation(
+            summary = "Инициация отправки рейса. ",
+            description = "Инициация отправки рейса.. " +
+                    "Необходимые роли: [DISPATCHER]"
+    )
     @PreAuthorize(value = "hasRole('DISPATCHER')")
     @PutMapping(value = "/init-departure-preparations")
     public StatusChangedResponse initiateFlightDeparturePreparations(
@@ -141,6 +193,11 @@ public class FlightsController {
         return this.flightsService.initiateFlightDeparturePreparations(flightId);
     }
 
+    @Operation(
+            summary = "Подтверждение регистрации рейса. ",
+            description = "Подтверждение регистрации рейса. Старт продажи билетов. " +
+                    "Необходимые роли: [CHIEF_DISPATCHER]"
+    )
     @PreAuthorize(value = "hasRole('CHIEF_DISPATCHER')")
     @PutMapping(value = "/confirm-registration")
     public StatusChangedResponse confirmFlightRegistration(
@@ -153,6 +210,11 @@ public class FlightsController {
         return this.flightsService.confirmFlightRegistration(flightId);
     }
 
+    @Operation(
+            summary = "Запрос посадки. ",
+            description = "Запрос посадки. " +
+                    "Необходимые роли: [PILOT]"
+    )
     @PreAuthorize(value = "hasRole('PILOT')")
     @PutMapping(value = "/request-landing")
     public StatusChangedResponse requestLanding(
@@ -165,6 +227,11 @@ public class FlightsController {
         return this.flightsService.requestLanding(flightId);
     }
 
+    @Operation(
+            summary = "Назначение посадки. ",
+            description = "Назначение посадки. " +
+                    "Необходимые роли: [DISPATCHER]"
+    )
     @PreAuthorize(value = "hasRole('DISPATCHER')")
     @PutMapping(value = "/assign-landing")
     public StatusChangedResponse assignLanding(
@@ -177,6 +244,11 @@ public class FlightsController {
         return this.flightsService.assignLanding(flightId);
     }
 
+    @Operation(
+            summary = "Разрешение посадки. ",
+            description = "Разрешение посадки. " +
+                    "Необходимые роли: [CHIEF_DISPATCHER]"
+    )
     @PreAuthorize(value = "hasRole('CHIEF_DISPATCHER')")
     @PutMapping(value = "/confirm-landing")
     public StatusChangedResponse confirmLanding(
@@ -189,6 +261,11 @@ public class FlightsController {
         return this.flightsService.confirmLanding(flightId);
     }
 
+    @Operation(
+            summary = "Посадка самолета. ",
+            description = "Посадка самолета. Завершение рейса. " +
+                    "Необходимые роли: [PILOT]"
+    )
     @PreAuthorize(value = "hasRole('PILOT')")
     @PutMapping(value = "/end-flight")
     public StatusChangedResponse endFlight(
@@ -201,6 +278,11 @@ public class FlightsController {
         return this.flightsService.endFlight(flightId);
     }
 
+    @Operation(
+            summary = "Регистрация нового рейса. ",
+            description = "Регистрация нового рейса. " +
+                    "Необходимые роли: [DISPATCHER]"
+    )
     @PreAuthorize(value = "hasRole('DISPATCHER')")
     @PostMapping(value = "/register")
     public FlightResponseDto registerNewFlight(
@@ -214,6 +296,11 @@ public class FlightsController {
         return this.flightsService.registerNewFlight(flightRequestDto);
     }
 
+    @Operation(
+            summary = "Просмотр всех рейсов в системе. ",
+            description = "Просмотр всех рейсов в системе. " +
+                    "Необходимые роли: [MANAGER, CHIEF_DISPATCHER, DISPATCHER, PILOT, CHIEF_STEWARD, CHIEF_ENGINEER]"
+    )
     @PreAuthorize(value = "hasAnyRole(" +
             "'MANAGER', 'CHIEF_DISPATCHER', 'DISPATCHER', 'PILOT', 'CHIEF_STEWARD', 'CHIEF_ENGINEER'" +
             ")"
@@ -234,6 +321,11 @@ public class FlightsController {
         return this.flightsService.getAllFLights(createdAfter, createdBefore, flightStatus, flightId, aircraftId);
     }
 
+    @Operation(
+            summary = "Просмотр рейсов для бронирования билета. ",
+            description = "Просмотр рейсов для бронирования билета. " +
+                    "Необходимые роли: [MANAGER, CLIENT]"
+    )
     @PreAuthorize(value = "hasAnyRole('MANAGER', 'CLIENT')")
     @GetMapping(value = "/selling-tickets")
     public List<FlightResponseDto> getFlightsForTicketReservation(
@@ -247,6 +339,11 @@ public class FlightsController {
         return this.flightsService.getFlightsForTicketReservation(createdAfter, createdBefore, flightDestination);
     }
 
+    @Operation(
+            summary = "Просмотр мест в самолете для регситрации на рейс. ",
+            description = "Просмотр мест в самолете для регситрации на рейс. " +
+                    "Необходимые роли: [MANAGER, CLIENT]"
+    )
     @PreAuthorize(value = "hasRole('CLIENT')")
     @GetMapping(value = "/{flightId}/aircraft-seats")
     public List<AircraftSeatResponseDto> getAllAircraftSeats(
