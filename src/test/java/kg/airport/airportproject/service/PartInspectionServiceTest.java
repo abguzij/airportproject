@@ -1,7 +1,9 @@
 package kg.airport.airportproject.service;
 
 import com.querydsl.core.types.Predicate;
+import kg.airport.airportproject.dto.PartInspectionsRequestDto;
 import kg.airport.airportproject.dto.PartInspectionsResponseDto;
+import kg.airport.airportproject.dto.PartInspectionsTestDtoProvider;
 import kg.airport.airportproject.entity.*;
 import kg.airport.airportproject.exception.InvalidIdException;
 import kg.airport.airportproject.exception.PartInspectionsNotFoundException;

@@ -44,7 +44,7 @@ public class ClientFeedbacksController {
             @RequestParam(required = false) LocalDateTime registeredBefore,
             @RequestParam(required = false) Long flightId
     )
-            throws CLientFeedbacksNotFoundException,
+            throws ClientFeedbacksNotFoundException,
             IncorrectDateFiltersException,
             InvalidIdException
     {

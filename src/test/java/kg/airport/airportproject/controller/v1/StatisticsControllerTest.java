@@ -62,10 +62,8 @@ public class StatisticsControllerTest {
 
         List<Integer> flightsNumbers = List.of(2, 4);
         Mockito
-                .when(this.flightsEntityRepository.getDestinationsFlightsNumbersByDateFiltersAndDestinationIn(
-                        Mockito.eq(distinctDestinations),
-                        Mockito.eq(RegistrationDateTestFiltersProvider.TEST_START_DATE_FILTER),
-                        Mockito.eq(RegistrationDateTestFiltersProvider.TEST_END_DATE_FILTER)
+                .when(this.flightsEntityRepository.getDestinationsFlightsNumbersByDestinationIn(
+                        Mockito.eq(distinctDestinations)
                 ))
                 .thenReturn(flightsNumbers);
         try {
@@ -74,17 +72,13 @@ public class StatisticsControllerTest {
             );
 
             URI uri = new URI( "http://localhost:" + port + "/v1/statistics/destinations");
-            UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder
-                    .fromUri(uri)
-                    .queryParam("startDate", RegistrationDateTestFiltersProvider.TEST_START_DATE_FILTER)
-                    .queryParam("endDate", RegistrationDateTestFiltersProvider.TEST_END_DATE_FILTER);
 
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add(HttpHeaders.AUTHORIZATION, jwtToken);
 
             ResponseEntity<List<DestinationStatisticsResponseDto>> response =
                     this.testRestTemplate.exchange(
-                            uriComponentsBuilder.build().encode().toUri(),
+                            uri,
                             HttpMethod.GET,
                             new HttpEntity<>(httpHeaders),
                             new ParameterizedTypeReference<List<DestinationStatisticsResponseDto>>() {}
@@ -103,44 +97,6 @@ public class StatisticsControllerTest {
     }
 
     @Test
-    public void testGetDestinationsStatistics_IncorrectDateFilters() {
-        try {
-            List<String> distinctDestinations = List.of("first", "second");
-            Mockito
-                    .when(this.flightsEntityRepository.getDistinctDestinationValues())
-                    .thenReturn(distinctDestinations);
-
-            String jwtToken = this.jwtTokenAuthenticationFactory.getJwtTokenForDefaultUserWithSpecifiedRoleTitle(
-                    "ADMIN"
-            );
-
-            URI uri = new URI( "http://localhost:" + port + "/v1/statistics/destinations");
-            UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder
-                    .fromUri(uri)
-                    .queryParam("startDate", RegistrationDateTestFiltersProvider.TEST_END_DATE_FILTER)
-                    .queryParam("endDate", RegistrationDateTestFiltersProvider.TEST_START_DATE_FILTER);
-
-            HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.add(HttpHeaders.AUTHORIZATION, jwtToken);
-
-            ResponseEntity<ErrorResponse> response =
-                    this.testRestTemplate.exchange(
-                            uriComponentsBuilder.build().encode().toUri(),
-                            HttpMethod.GET,
-                            new HttpEntity<>(httpHeaders),
-                            ErrorResponse.class
-                    );
-
-            Assertions.assertEquals(
-                    "Дата начального фильтра не может быть позже даты конечного фильра!",
-                    response.getBody().getMessage()
-            );
-        } catch (Exception e) {
-            Assertions.fail(e.getMessage());
-        }
-    }
-
-    @Test
     public void testGetDestinationsStatistics_FlightsNotFound() {
         try {
             Mockito
@@ -152,17 +108,13 @@ public class StatisticsControllerTest {
             );
 
             URI uri = new URI( "http://localhost:" + port + "/v1/statistics/destinations");
-            UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder
-                    .fromUri(uri)
-                    .queryParam("startDate", RegistrationDateTestFiltersProvider.TEST_START_DATE_FILTER)
-                    .queryParam("endDate", RegistrationDateTestFiltersProvider.TEST_END_DATE_FILTER);
 
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add(HttpHeaders.AUTHORIZATION, jwtToken);
 
             ResponseEntity<ErrorResponse> response =
                     this.testRestTemplate.exchange(
-                            uriComponentsBuilder.build().encode().toUri(),
+                            uri,
                             HttpMethod.GET,
                             new HttpEntity<>(httpHeaders),
                             ErrorResponse.class

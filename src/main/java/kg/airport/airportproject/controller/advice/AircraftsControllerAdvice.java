@@ -78,9 +78,4 @@ public class AircraftsControllerAdvice {
     public ErrorResponse handleFlightsNotAssignedException(FlightsNotAssignedException e) {
         return new ErrorResponse().setHttpStatus(HttpStatus.BAD_REQUEST).setMessage(e.getMessage());
     }
-
-    @ExceptionHandler(value = Exception.class)
-    public ErrorResponse handleException(Exception e) {
-        return new ErrorResponse().setMessage(e.getLocalizedMessage());
-    }
 }

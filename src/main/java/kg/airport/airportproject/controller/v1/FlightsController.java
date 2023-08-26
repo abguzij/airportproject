@@ -133,7 +133,11 @@ public class FlightsController {
     @PutMapping(value = "/init-departure-preparations")
     public StatusChangedResponse initiateFlightDeparturePreparations(
             @RequestParam Long flightId
-    ) throws StatusChangeException, FlightsNotFoundException, InvalidIdException {
+    )
+            throws StatusChangeException,
+            FlightsNotFoundException,
+            InvalidIdException
+    {
         return this.flightsService.initiateFlightDeparturePreparations(flightId);
     }
 

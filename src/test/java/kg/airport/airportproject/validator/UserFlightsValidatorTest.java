@@ -44,21 +44,6 @@ public class UserFlightsValidatorTest {
     }
 
     @Test
-    public void testValidateUserFlightsRequestDto_InvalidUserId() {
-        UserFlightRequestDto requestDto = UserFlightsTestDtoProvider.getTestUserFlightRequestDto(1L);
-        requestDto.setUserId(null);
-
-        Exception exception = Assertions.assertThrows(
-                InvalidIdException.class,
-                () -> this.userFlightsValidator.validateUserFlightsRequestDto(requestDto)
-        );
-        Assertions.assertEquals(
-                "ID пользователя регистрируемого на рейс не может быть null или меньше 1!",
-                exception.getMessage()
-        );
-    }
-
-    @Test
     public void testValidateAircraftSeatId_OK() {
         try {
             UserFlightRequestDto requestDto = UserFlightsTestDtoProvider.getTestUserFlightRequestDto(1L);
@@ -77,6 +62,31 @@ public class UserFlightsValidatorTest {
         );
         Assertions.assertEquals(
                 "ID места в самолете забронированного клиентом не может быть null или меньше 1!",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    public void testValidateCrewMemberId_OK() {
+        UserFlightRequestDto requestDto = UserFlightsTestDtoProvider.getTestUserFlightRequestDto(1L);
+        try {
+            this.userFlightsValidator.validateCrewMemberId(requestDto.getUserId());
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testValidateCrewMemberId_InvalidUserId() {
+        UserFlightRequestDto requestDto = UserFlightsTestDtoProvider.getTestUserFlightRequestDto(1L);
+        requestDto.setUserId(null);
+
+        Exception exception = Assertions.assertThrows(
+                InvalidIdException.class,
+                () -> this.userFlightsValidator.validateCrewMemberId(requestDto.getUserId())
+        );
+        Assertions.assertEquals(
+                "ID пользователя регистрируемого на рейс не может быть null или меньше 1!",
                 exception.getMessage()
         );
     }

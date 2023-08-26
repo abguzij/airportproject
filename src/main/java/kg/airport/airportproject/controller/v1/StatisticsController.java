@@ -29,16 +29,10 @@ public class StatisticsController {
     }
 
     @GetMapping(value = "/destinations")
-    public List<DestinationStatisticsResponseDto> getDestinationsStatistics(
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-            @RequestParam(required = false) LocalDateTime startDate,
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-            @RequestParam(required = false) LocalDateTime endDate
-    )
-            throws IncorrectDateFiltersException,
-            FlightsNotFoundException
+    public List<DestinationStatisticsResponseDto> getDestinationsStatistics()
+            throws FlightsNotFoundException
     {
-        return this.statisticsService.getDestinationStatistics(startDate, endDate);
+        return this.statisticsService.getDestinationStatistics();
     }
 
     @GetMapping(value = "/repaired-aircrafts")
