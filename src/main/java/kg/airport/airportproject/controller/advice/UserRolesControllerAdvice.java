@@ -22,7 +22,7 @@ public class UserRolesControllerAdvice {
 
     @ExceptionHandler(value = UserRolesNotFoundException.class)
     public ErrorResponse handleUserRolesNotFoundException(UserRolesNotFoundException e) {
-        return new ErrorResponse().setHttpStatus(HttpStatus.BAD_REQUEST).setMessage("HANDELED!");
+        return new ErrorResponse().setHttpStatus(HttpStatus.BAD_REQUEST).setMessage(e.getMessage());
     }
 
     @ExceptionHandler(value = ApplicationUserNotFoundException.class)
@@ -32,6 +32,11 @@ public class UserRolesControllerAdvice {
 
     @ExceptionHandler(value = InvalidIdException.class)
     public ErrorResponse handleInvalidIdException(InvalidIdException e) {
+        return new ErrorResponse().setHttpStatus(HttpStatus.BAD_REQUEST).setMessage(e.getMessage());
+    }
+
+    @ExceptionHandler(value = IllegalArgumentException.class)
+    public ErrorResponse handleIllegalArgumentException(IllegalArgumentException e) {
         return new ErrorResponse().setHttpStatus(HttpStatus.BAD_REQUEST).setMessage(e.getMessage());
     }
 }

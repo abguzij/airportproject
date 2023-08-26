@@ -16,5 +16,5 @@ public interface ClientFeedbacksService {
             LocalDateTime registeredAfter,
             LocalDateTime registeredBefore,
             Long flightId
-    ) throws InvalidIdException, IncorrectDateFiltersException, CLientFeedbacksNotFoundException;
+    ) throws InvalidIdException, IncorrectDateFiltersException, ClientFeedbacksNotFoundException;
 }

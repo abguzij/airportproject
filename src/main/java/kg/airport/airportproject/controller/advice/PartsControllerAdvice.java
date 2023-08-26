@@ -1,9 +1,7 @@
 package kg.airport.airportproject.controller.advice;
 
 import kg.airport.airportproject.controller.v1.PartsController;
-import kg.airport.airportproject.exception.InvalidAircraftTypeException;
-import kg.airport.airportproject.exception.InvalidPartTitleException;
-import kg.airport.airportproject.exception.InvalidPartTypeException;
+import kg.airport.airportproject.exception.*;
 import kg.airport.airportproject.response.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -23,6 +21,16 @@ public class PartsControllerAdvice {
 
     @ExceptionHandler(value = InvalidPartTitleException.class)
     public ErrorResponse handleInvalidPartTitleException(InvalidPartTitleException e) {
+        return new ErrorResponse().setHttpStatus(HttpStatus.BAD_REQUEST).setMessage(e.getMessage());
+    }
+
+    @ExceptionHandler(value = PartsNotFoundException.class)
+    public ErrorResponse handlePartsNotFoundException(PartsNotFoundException e) {
+        return new ErrorResponse().setHttpStatus(HttpStatus.BAD_REQUEST).setMessage(e.getMessage());
+    }
+
+    @ExceptionHandler(value = InvalidIdException.class)
+    public ErrorResponse handleInvalidIdException(InvalidIdException e) {
         return new ErrorResponse().setHttpStatus(HttpStatus.BAD_REQUEST).setMessage(e.getMessage());
     }
 

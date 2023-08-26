@@ -46,17 +46,13 @@ public class StatisticsServiceTest {
 
         List<Integer> flightsNumbers = List.of(2, 4);
         Mockito
-                .when(this.flightsEntityRepository.getDestinationsFlightsNumbersByDateFiltersAndDestinationIn(
-                        Mockito.eq(distinctDestinations),
-                        Mockito.eq(RegistrationDateTestFiltersProvider.TEST_START_DATE_FILTER),
-                        Mockito.eq(RegistrationDateTestFiltersProvider.TEST_END_DATE_FILTER)
+                .when(this.flightsEntityRepository.getDestinationsFlightsNumbersByDestinationIn(
+                        Mockito.eq(distinctDestinations)
                 ))
                 .thenReturn(flightsNumbers);
         try {
             List<DestinationStatisticsResponseDto> resultList =
                     this.statisticsService.getDestinationStatistics(
-                            RegistrationDateTestFiltersProvider.TEST_START_DATE_FILTER,
-                            RegistrationDateTestFiltersProvider.TEST_END_DATE_FILTER
                     );
 
             Assertions.assertEquals(2, resultList.size());
@@ -72,26 +68,6 @@ public class StatisticsServiceTest {
     }
 
     @Test
-    public void testGetDestinationStatistics_IncorrectDateFilters() {
-        List<String> distinctDestinations = List.of("first", "second");
-        Mockito
-                .when(this.flightsEntityRepository.getDistinctDestinationValues())
-                .thenReturn(distinctDestinations);
-
-        Exception exception = Assertions.assertThrows(
-                IncorrectDateFiltersException.class,
-                () -> this.statisticsService.getDestinationStatistics(
-                        RegistrationDateTestFiltersProvider.TEST_END_DATE_FILTER,
-                        RegistrationDateTestFiltersProvider.TEST_START_DATE_FILTER
-                )
-        );
-        Assertions.assertEquals(
-                "Дата начального фильтра не может быть позже даты конечного фильра!",
-                exception.getMessage()
-        );
-    }
-
-    @Test
     public void testGetDestinationStatistics_FlightsNotFound() {
         Mockito
                 .when(this.flightsEntityRepository.getDistinctDestinationValues())
@@ -100,8 +76,6 @@ public class StatisticsServiceTest {
         Exception exception = Assertions.assertThrows(
                 FlightsNotFoundException.class,
                 () -> this.statisticsService.getDestinationStatistics(
-                        RegistrationDateTestFiltersProvider.TEST_START_DATE_FILTER,
-                        RegistrationDateTestFiltersProvider.TEST_END_DATE_FILTER
                 )
         );
         Assertions.assertEquals(

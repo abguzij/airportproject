@@ -79,7 +79,7 @@ public class ClientFeedbacksServiceImpl implements ClientFeedbacksService {
     )
             throws InvalidIdException,
             IncorrectDateFiltersException,
-            CLientFeedbacksNotFoundException
+            ClientFeedbacksNotFoundException
     {
         BooleanBuilder booleanBuilder = new BooleanBuilder();
         QClientFeedbacksEntity root = QClientFeedbacksEntity.clientFeedbacksEntity;
@@ -116,7 +116,7 @@ public class ClientFeedbacksServiceImpl implements ClientFeedbacksService {
                         .map(FeedbacksMapper::mapToClientFeedbackResponseDto)
                         .collect(Collectors.toList());
         if(clientFeedbackResponseDtoList.isEmpty()) {
-            throw new CLientFeedbacksNotFoundException("Отзывов пользователей по заданным параметрам не найдено!");
+            throw new ClientFeedbacksNotFoundException("Отзывов пользователей по заданным параметрам не найдено!");
         }
         return clientFeedbackResponseDtoList;
     }
